@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Profile - SASE UH</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    body {
+      background-color: #0b0c10;
+      font-family: "Trebuchet MS", sans-serif;
+      color: #f5f5f5;
+      margin: 0;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #70c041;
+      margin-bottom: 20px;
+    }
+
+    .profile-container {
+      background-color: #0f1722;
+      border: 2px solid #70c041;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 30px;
+      box-shadow: 0 0 20px rgba(112, 192, 65, 0.3);
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #66b3ff;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 2px solid #66b3ff;
+      border-radius: 6px;
+      background-color: #0b0c10;
+      color: #f5f5f5;
+      font-size: 1em;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background-color: #70c041;
+      font-weight: bold;
+      color: #0b0c10;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #66b3ff;
+      color: #fff;
+    }
+
+    .saved-section {
+      margin-top: 30px;
+    }
+
+    .saved-section h2 {
+      color: #70c041;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #66b3ff;
+      padding-bottom: 5px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      background-color: #132235;
+      border: 1px solid #66b3ff;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 6px;
+    }
+
+    .back-btn {
+      margin-top: 25px;
+      display: block;
+      text-align: center;
+      background-color: #66b3ff;
+      color: white;
+      font-weight: bold;
+      text-decoration: none;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    .back-btn:hover {
+      background-color: #70c041;
+      color: #0b0c10;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Your Profile</h1>
+
+  <div class="profile-container">
+    <label for="firstName">First Name</label>
+    <input type="text" id="firstName" placeholder="Enter your first name" />
+
+    <label for="lastName">Last Name</label>
+    <input type="text" id="lastName" placeholder="Enter your last name" />
+
+    <label for="email">Email</label>
+    <input type="email" id="email" placeholder="Enter your email" />
+
+    <label for="linkedin">LinkedIn</label>
+    <input type="url" id="linkedin" placeholder="Enter your LinkedIn profile URL" />
+
+    <button onclick="saveProfile()">Save Changes</button>
+
+    <div class="saved-section">
+      <h2>Saved Professors</h2>
+      <ul id="savedProfessors">
+        <li>No saved professors yet</li>
+      </ul>
+    </div>
+
+    <div class="saved-section">
+      <h2>Saved Internships</h2>
+      <ul id="savedInternships">
+        <li>No saved internships yet</li>
+      </ul>
+    </div>
+
+    <a href="index.html" class="back-btn">← Back to Dashboard</a>
+  </div>
+
+  <script>
+    // -----------------------
+    // LOGIN CHECK
+    // -----------------------
+    const uh_id = localStorage.getItem("uh_id");
+    if (!localStorage.getItem("loggedIn") || !uh_id) {
+      window.location.href = "login.html";
+    }
+
+    // -----------------------
+    // LOAD USER PROFILE
+    // -----------------------
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const res = await fetch(`/get-profile?uh_id=${uh_id}`);
+
+        if (!res.ok) {
+          console.error("Profile fetch failed:", res.status);
+          return;
+        }
+
+        const data = await res.json();
+
+        if (data.user) {
+          document.getElementById("firstName").value = data.user.first_name || "";
+          document.getElementById("lastName").value = data.user.last_name || "";
+          document.getElementById("email").value = data.user.email || "";
+          document.getElementById("linkedin").value = data.user.linkedin || "";
+        }
+
+      } catch (err) {
+        console.error("❌ Error loading profile:", err);
+      }
+    });
+
+    // -----------------------
+    // SAVE PROFILE
+    // -----------------------
+    async function saveProfile() {
+      const profileData = {
+        uh_id,
+        first_name: document.getElementById("firstName").value.trim(),
+        last_name: document.getElementById("lastName").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        linkedin: document.getElementById("linkedin").value.trim()
+      };
+
+      try {
+        const res = await fetch("/update-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(profileData)
+        });
+
+        const data = await res.json();
+        alert(data.message || "Profile updated successfully!");
+      } catch (err) {
+        console.error("❌ Error saving profile:", err);
+        alert("Error updating profile. Please try again.");
+      }
+    }
+  </script>
+</body>
+</html>

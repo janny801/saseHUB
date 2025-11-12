@@ -74,6 +74,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <div class="login-container">
@@ -104,11 +105,12 @@
         alert(data.message);
 
         if (data.message === "Login successful") {
-          // ✅ Save login flag + current time
+          // Save login flag + timestamp + UH ID
           localStorage.setItem("loggedIn", "true");
           localStorage.setItem("loginTime", Date.now().toString());
+          localStorage.setItem("uh_id", uh_id);   // <-- REQUIRED FIX
 
-          // ✅ Redirect to main hub
+          // Redirect to main hub
           window.location.href = "/index.html";
         }
       } catch (err) {
@@ -117,5 +119,6 @@
       }
     }
   </script>
+
 </body>
 </html>

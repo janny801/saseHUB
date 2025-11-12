@@ -1,7 +1,7 @@
 async function handleLogin(event) {
     event.preventDefault();
 
-    const uh_id = document.getElementById("login-uhid").value;
+    const uh_id = document.getElementById("login-uhid").value.trim();
 
     try {
         const res = await fetch("/login", {
@@ -14,10 +14,15 @@ async function handleLogin(event) {
         alert(data.message);
 
         if (data.message === "Login successful") {
+            // ✅ Store login session info
+            localStorage.setItem("loggedIn", "true");
+            localStorage.setItem("uh_id", uh_id);
+
+            // ✅ Redirect to dashboard
             window.location.href = "index.html";
         }
     } catch (err) {
-        console.error(err);
+        console.error("❌ Error during login:", err);
         alert("Login failed. Please try again.");
     }
 }
