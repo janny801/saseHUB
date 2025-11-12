@@ -32,23 +32,23 @@ body {
 }
 
 /* ===== Login Button ===== */
-.login-btn {
+.logout-btn {
   position: absolute;
   top: 20px;
-  right: 25px;
-  background-color: transparent;
-  color: #e0f8ff;
-  border: 2px solid #70c041;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s, color 0.3s;
-}
-
-.login-btn:hover {
+  right: 20px;
   background-color: #70c041;
   color: #0b0c10;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.logout-btn:hover {
+  background-color: #66b3ff;
+  color: #fff;
 }
 
 /* ===== Intro Section ===== */
