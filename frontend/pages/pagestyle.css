@@ -1,0 +1,110 @@
+/* ====== Shared SASE Subpage Styles ====== */
+
+body {
+  background-color: #0b0c10;
+  font-family: "Trebuchet MS", sans-serif;
+  color: #f5f5f5;
+  margin: 0;
+  padding-bottom: 50px;
+}
+
+/* HEADER */
+.simple-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-bottom: 2px solid #70c041;
+}
+
+.sase-logo {
+  width: 140px;
+  margin-right: 15px;
+}
+
+/* HAMBURGER */
+.menu-container {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+}
+
+.hamburger {
+  background-color: #70c041;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 14px;
+  cursor: pointer;
+  color: #0b0c10;
+  font-size: 18px;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.hamburger:hover {
+  background-color: #66b3ff;
+  color: white;
+}
+
+.dropdown {
+  display: none;
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background-color: #0f1722;
+  border: 1px solid #70c041;
+  border-radius: 6px;
+  min-width: 160px;
+  z-index: 5;
+  box-shadow: 0 0 10px rgba(112, 192, 65, 0.3);
+}
+
+.dropdown a {
+  color: #f5f5f5;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown a:hover {
+  background-color: #66b3ff;
+}
+
+.show {
+  display: block;
+}
+
+/* PAGE CONTENT LAYOUT */
+.page-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 25px;
+  background-color: #0f1722;
+  border: 2px solid #70c041;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(112, 192, 65, 0.25);
+}
+
+.page-container h2 {
+  margin-top: 0;
+  color: #70c041;
+}
+
+/* BACK BUTTON */
+.back-btn {
+  display: inline-block;
+  margin-top: 25px;
+  background-color: #66b3ff;
+  color: white;
+  padding: 10px 15px;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.back-btn:hover {
+  background-color: #70c041;
+  color: #0b0c10;
+}
