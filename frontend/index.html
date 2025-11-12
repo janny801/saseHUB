@@ -5,12 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SASE UH Member Hub</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Check login status -->
+  <script>
+    if (!localStorage.getItem("loggedIn")) {
+      window.location.href = "/login.html";
+    }
+  </script>
 </head>
 <body>
   <header class="simple-header">
     <img src="images/saselogo.webp" alt="SASE Logo" class="sase-logo" />
     <h1>SASE UH Member Hub</h1>
-    <button class="login-btn">Login / Signup</button>
+    <button class="logout-btn" onclick="logout()">Logout</button>
   </header>
 
   <main>
@@ -23,16 +30,16 @@
     <section class="calendar-section">
       <h2>Event Calendar</h2>
       <p>Stay updated with all our upcoming events and chapter meetings.</p>
-        <div class="calendar-wrapper">
+      <div class="calendar-wrapper">
         <iframe 
-            src="https://calendar.google.com/calendar/embed?src=pj0bbgntupi45kudqqfclr25tk%40group.calendar.google.com&ctz=America%2FChicago"
-            style="border:0"
-            width="100%"
-            height="600"
-            frameborder="0"
-            scrolling="no">
+          src="https://calendar.google.com/calendar/embed?src=pj0bbgntupi45kudqqfclr25tk%40group.calendar.google.com&ctz=America%2FChicago"
+          style="border:0"
+          width="100%"
+          height="600"
+          frameborder="0"
+          scrolling="no">
         </iframe>
-        </div>
+      </div>
     </section>
 
     <!-- Clickable Navigation Boxes -->
@@ -62,5 +69,14 @@
   <footer>
     <p>© 2025 SASE University of Houston</p>
   </footer>
+
+  <script>
+    function logout() {
+      localStorage.removeItem("loggedIn");
+      window.location.href = "/login.html";
+    }
+  </script>
+
+  <script src="script.js"></script>
 </body>
 </html>
