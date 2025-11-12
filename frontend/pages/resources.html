@@ -14,12 +14,6 @@
       padding: 15px;
       border-radius: 8px;
       margin-bottom: 15px;
-      cursor: pointer;
-      transition: background 0.25s;
-    }
-
-    .dropdown-item:hover {
-      background-color: #1e3350;
     }
 
     .dropdown-title {
@@ -31,20 +25,22 @@
       align-items: center;
     }
 
+    /* CLEAN INLINE CONTENT – NO MORE BLACK BOX */
     .dropdown-content {
       margin-top: 10px;
-      padding: 10px 15px;
-      background-color: #0b0c10;
-      border-left: 3px solid #70c041;
-      border-radius: 6px;
+      padding: 0px 5px 5px 5px;
+      background: none;
+      border: none;
       display: none;
       color: #d9e6ff;
-      line-height: 1.6em;
+      line-height: 1.65em;
       white-space: pre-line;
     }
 
     .arrow {
+      cursor: pointer;
       transition: transform 0.3s;
+      display: inline-block;
     }
 
     .arrow.open {
@@ -52,6 +48,7 @@
     }
   </style>
 
+  
   <script>
     const loggedIn = localStorage.getItem("loggedIn");
     const loginTime = localStorage.getItem("loginTime");
@@ -81,10 +78,10 @@
   <h2>Workshops, Guides & Mentorship</h2>
 
   <!-- RESUME BUILDING GUIDE -->
-  <div class="dropdown-item" onclick="toggleSection(1)">
+  <div class="dropdown-item">
     <div class="dropdown-title">
       Resume Building Guide
-      <span class="arrow" id="arrow1">▶</span>
+      <span class="arrow" id="arrow1" onclick="toggleSection(1)">▶</span>
     </div>
     <div class="dropdown-content" id="content1">
 Rules
@@ -123,10 +120,10 @@ General Resume Template
   </div>
 
   <!-- COFFEE CHAT 101 -->
-  <div class="dropdown-item" onclick="toggleSection(2)">
+  <div class="dropdown-item">
     <div class="dropdown-title">
       Coffee Chat 101
-      <span class="arrow" id="arrow2">▶</span>
+      <span class="arrow" id="arrow2" onclick="toggleSection(2)">▶</span>
     </div>
     <div class="dropdown-content" id="content2">
 A coffee chat is an informal networking meeting between professionals.
@@ -153,10 +150,10 @@ Questions to Ask
   </div>
 
   <!-- CONFERENCE PREPARATION -->
-  <div class="dropdown-item" onclick="toggleSection(3)">
+  <div class="dropdown-item">
     <div class="dropdown-title">
       Conference Preparation
-      <span class="arrow" id="arrow3">▶</span>
+      <span class="arrow" id="arrow3" onclick="toggleSection(3)">▶</span>
     </div>
     <div class="dropdown-content" id="content3">
 Upcoming content for conference preparation:
@@ -171,10 +168,10 @@ Upcoming content for conference preparation:
   </div>
 
   <!-- SETTING AND ACHIEVING GOALS -->
-  <div class="dropdown-item" onclick="toggleSection(4)">
+  <div class="dropdown-item">
     <div class="dropdown-title">
       Setting & Achieving Goals
-      <span class="arrow" id="arrow4">▶</span>
+      <span class="arrow" id="arrow4" onclick="toggleSection(4)">▶</span>
     </div>
     <div class="dropdown-content" id="content4">
 Short-Term vs Long-Term Goals
@@ -198,10 +195,10 @@ Tips
   </div>
 
   <!-- TECHNICAL INTERVIEWS -->
-  <div class="dropdown-item" onclick="toggleSection(5)">
+  <div class="dropdown-item">
     <div class="dropdown-title">
       Technical Interviews
-      <span class="arrow" id="arrow5">▶</span>
+      <span class="arrow" id="arrow5" onclick="toggleSection(5)">▶</span>
     </div>
     <div class="dropdown-content" id="content5">
 Preparation Steps
@@ -219,10 +216,10 @@ Resources
   </div>
 
   <!-- CREATING A LINKEDIN -->
-  <div class="dropdown-item" onclick="toggleSection(6)">
+  <div class="dropdown-item">
     <div class="dropdown-title">
       Creating a LinkedIn
-      <span class="arrow" id="arrow6">▶</span>
+      <span class="arrow" id="arrow6" onclick="toggleSection(6)">▶</span>
     </div>
     <div class="dropdown-content" id="content6">
 LinkedIn Best Practices
@@ -257,10 +254,10 @@ Accomplishments
   </div>
 
   <!-- BEHAVIORAL INTERVIEWS -->
-  <div class="dropdown-item" onclick="toggleSection(7)">
+  <div class="dropdown-item">
     <div class="dropdown-title">
       Behavioral Interviews
-      <span class="arrow" id="arrow7">▶</span>
+      <span class="arrow" id="arrow7" onclick="toggleSection(7)">▶</span>
     </div>
     <div class="dropdown-content" id="content7">
 Preparation
@@ -276,10 +273,10 @@ Day-of Tips
   </div>
 
   <!-- COVER LETTERS -->
-  <div class="dropdown-item" onclick="toggleSection(8)">
+  <div class="dropdown-item">
     <div class="dropdown-title">
       Writing Cover Letters & Emails
-      <span class="arrow" id="arrow8">▶</span>
+      <span class="arrow" id="arrow8" onclick="toggleSection(8)">▶</span>
     </div>
     <div class="dropdown-content" id="content8">
 Purpose of a Cover Letter
@@ -299,10 +296,10 @@ Emails
   </div>
 
   <!-- TIPS & TRICKS -->
-  <div class="dropdown-item" onclick="toggleSection(9)">
+  <div class="dropdown-item">
     <div class="dropdown-title">
       Tips & Tricks
-      <span class="arrow" id="arrow9">▶</span>
+      <span class="arrow" id="arrow9" onclick="toggleSection(9)">▶</span>
     </div>
     <div class="dropdown-content" id="content9">
 Networking Tips
