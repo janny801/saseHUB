@@ -1,0 +1,112 @@
+/* Reset + Base */
+body {
+  margin: 0;
+  font-family: "Trebuchet MS", sans-serif;
+  background-color: #0a0f0d; /* dark panda black */
+  color: #f5f5f5; /* white text */
+}
+
+/* Navbar */
+.navbar {
+  background-color: #004d26; /* deep green */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.logo {
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 0 0 5px #00ff80;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 25px;
+  margin: 0;
+}
+
+.nav-links li a {
+  color: #e0ffe8;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease, border-bottom 0.3s ease;
+}
+
+.nav-links li a:hover,
+.nav-links li a.active {
+  color: #00ff80;
+  border-bottom: 2px solid #00ff80;
+}
+
+/* Login Button */
+.login-btn {
+  background-color: transparent;
+  color: #e0ffe8;
+  border: 2px solid #00ff80;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+
+.login-btn:hover {
+  background-color: #00ff80;
+  color: #0a0f0d;
+}
+
+/* Main Content */
+main {
+  text-align: center;
+  padding: 50px 20px;
+}
+
+.intro h1 {
+  font-size: 2.5em;
+  color: #00ff80;
+  margin-bottom: 10px;
+}
+
+.intro p {
+  color: #d9fdd3;
+  max-width: 600px;
+  margin: 10px auto;
+}
+
+/* Card Grid */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+  margin-top: 50px;
+  padding: 0 20px;
+}
+
+.card {
+  background-color: #0e1b14;
+  border: 2px solid #00ff80;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 255, 128, 0.2);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 20px rgba(0, 255, 128, 0.4);
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 20px;
+  background-color: #004d26;
+  color: #e0ffe8;
+  margin-top: 60px;
+  font-size: 0.9em;
+}
