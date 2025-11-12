@@ -7,6 +7,51 @@
 
   <link rel="stylesheet" href="../pages/pagestyle.css" />
 
+  <style>
+    .dropdown-item {
+      background-color: #132235;
+      border: 1px solid #66b3ff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      transition: background 0.25s;
+    }
+
+    .dropdown-item:hover {
+      background-color: #1e3350;
+    }
+
+    .dropdown-title {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #70c041;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dropdown-content {
+      margin-top: 10px;
+      padding: 10px 15px;
+      background-color: #0b0c10;
+      border-left: 3px solid #70c041;
+      border-radius: 6px;
+      display: none;
+      color: #d9e6ff;
+      line-height: 1.6em;
+      white-space: pre-line;
+    }
+
+    .arrow {
+      transition: transform 0.3s;
+    }
+
+    .arrow.open {
+      transform: rotate(90deg);
+    }
+  </style>
+
   <script>
     const loggedIn = localStorage.getItem("loggedIn");
     const loginTime = localStorage.getItem("loginTime");
@@ -34,15 +79,275 @@
 
 <div class="page-container">
   <h2>Workshops, Guides & Mentorship</h2>
-  <p>Upload guides, resumes, workshops, and mentorship resources here.</p>
+
+  <!-- RESUME BUILDING GUIDE -->
+  <div class="dropdown-item" onclick="toggleSection(1)">
+    <div class="dropdown-title">
+      Resume Building Guide
+      <span class="arrow" id="arrow1">▶</span>
+    </div>
+    <div class="dropdown-content" id="content1">
+Rules
+- LENGTH: 1 page
+- FORMATTING: Simple, clean, easy to edit
+- ORDER: Sections sorted by relevance, items in reverse chronological order
+- PROJECTS: Reverse chronological or relevance-based
+- WORK IN PROGRESS: Resume evolves over time
+- SAVING: Save as PDF with clear file name
+
+Recommended Resume Sections
+1. Education
+2. Skills & Certifications
+3. Experience
+4. Projects
+5. Activities / Leadership
+
+Google XYZ Formula
+“Accomplished X by implementing Y which led to Z”
+
+Outline Your Accomplishments
+- Put strongest bullets first
+- Show impact (how many, how much, how long)
+- Quantify results
+- Keep bullet points short (1–2 lines)
+
+Describing Experience
+Project/Product – What it is and the problem it solves  
+Role – What you did, challenges you solved  
+Achievements – Use XYZ formula  
+Tech stack – (Java, Python, Git, Jenkins, etc.)
+
+General Resume Template
+(Linked PDF in original content)
+    </div>
+  </div>
+
+  <!-- COFFEE CHAT 101 -->
+  <div class="dropdown-item" onclick="toggleSection(2)">
+    <div class="dropdown-title">
+      Coffee Chat 101
+      <span class="arrow" id="arrow2">▶</span>
+    </div>
+    <div class="dropdown-content" id="content2">
+A coffee chat is an informal networking meeting between professionals.
+
+Benefits
+- Strengthen current connections
+- Reestablish old connections
+- Make new connections
+- Learn about opportunities
+
+Tips
+- Take initiative
+- Prepare beforehand
+- Arrive early
+- Follow up
+
+Questions to Ask
+- How did you get started?
+- What do you enjoy most?
+- What challenges do you face?
+- What skills are most important?
+- What advice do you have for beginners?
+    </div>
+  </div>
+
+  <!-- CONFERENCE PREPARATION -->
+  <div class="dropdown-item" onclick="toggleSection(3)">
+    <div class="dropdown-title">
+      Conference Preparation
+      <span class="arrow" id="arrow3">▶</span>
+    </div>
+    <div class="dropdown-content" id="content3">
+Upcoming content for conference preparation:
+
+- Hospitality Suites prep  
+  - Earn potential interviews  
+  - 20–30 companies present  
+- Networking at workshops
+- Approaching high-level managers and executives
+- Interview experience at SASE National
+    </div>
+  </div>
+
+  <!-- SETTING AND ACHIEVING GOALS -->
+  <div class="dropdown-item" onclick="toggleSection(4)">
+    <div class="dropdown-title">
+      Setting & Achieving Goals
+      <span class="arrow" id="arrow4">▶</span>
+    </div>
+    <div class="dropdown-content" id="content4">
+Short-Term vs Long-Term Goals
+- Short-term: Achievable soon, supports long-term goals  
+- Long-term: Multi-year achievements
+
+Benefits
+- Guides your career path
+- Helps maintain focus
+- Makes large projects manageable
+- Supports advancement
+
+SMART Goals
+Specific, Measurable, Achievable, Relevant, Time-based
+
+Tips
+- Be realistic
+- Share goals with others
+- Acknowledge your efforts
+    </div>
+  </div>
+
+  <!-- TECHNICAL INTERVIEWS -->
+  <div class="dropdown-item" onclick="toggleSection(5)">
+    <div class="dropdown-title">
+      Technical Interviews
+      <span class="arrow" id="arrow5">▶</span>
+    </div>
+    <div class="dropdown-content" id="content5">
+Preparation Steps
+- Review job posting & required skills
+- Practice algorithms and data structures
+- Solve coding problems
+- Review your resume projects
+- Research the company
+- Mock interviews
+
+Resources
+- HackerRank, LeetCode, CodeForces
+- Books: DDIA, CTCI, EPI
+    </div>
+  </div>
+
+  <!-- CREATING A LINKEDIN -->
+  <div class="dropdown-item" onclick="toggleSection(6)">
+    <div class="dropdown-title">
+      Creating a LinkedIn
+      <span class="arrow" id="arrow6">▶</span>
+    </div>
+    <div class="dropdown-content" id="content6">
+LinkedIn Best Practices
+Profile
+- Use a recent, well-lit photo
+- Add a curated header photo
+- Featured section: GitHub, portfolio, projects
+
+Experience
+- Copy your resume bullets
+- Add relevant media
+- Projects/volunteering can go under experience
+
+Education
+- Degrees + activities + relevant training
+
+Certifications
+- List key certificates (including CodePath)
+
+Volunteer Experience
+- Unpaid but relevant work
+
+Skills
+- Prioritize top 3 technical skills
+
+Recommendations
+- Ask mentors or supervisors
+
+Accomplishments
+- Courses, awards, orgs, projects (only most relevant)
+    </div>
+  </div>
+
+  <!-- BEHAVIORAL INTERVIEWS -->
+  <div class="dropdown-item" onclick="toggleSection(7)">
+    <div class="dropdown-title">
+      Behavioral Interviews
+      <span class="arrow" id="arrow7">▶</span>
+    </div>
+    <div class="dropdown-content" id="content7">
+Preparation
+- Prepare months ahead
+- Use STAR method
+- Practice regularly (at least 1 hr/week)
+
+Day-of Tips
+- Do energizing activities
+- Eat beforehand
+- Join meeting early
+    </div>
+  </div>
+
+  <!-- COVER LETTERS -->
+  <div class="dropdown-item" onclick="toggleSection(8)">
+    <div class="dropdown-title">
+      Writing Cover Letters & Emails
+      <span class="arrow" id="arrow8">▶</span>
+    </div>
+    <div class="dropdown-content" id="content8">
+Purpose of a Cover Letter
+- Explain your fit, value, and motivation
+
+Steps
+1. Research company values  
+2. Match job posting skills  
+3. Select which skills to highlight (strongest stories)
+
+Emails
+- Use meaningful subject lines
+- Be clear and concise
+- Clarify assumptions
+- Keep communication professional
+    </div>
+  </div>
+
+  <!-- TIPS & TRICKS -->
+  <div class="dropdown-item" onclick="toggleSection(9)">
+    <div class="dropdown-title">
+      Tips & Tricks
+      <span class="arrow" id="arrow9">▶</span>
+    </div>
+    <div class="dropdown-content" id="content9">
+Networking Tips
+- Ask politely  
+- Follow up within 48 hours  
+- Mention your referrer  
+
+Online Communication Tips
+- Use meaningful subject lines
+- Be clear and concise
+- Verify assumptions
+- Communicate about communication
+    </div>
+  </div>
 
   <a href="../index.html" class="back-btn">← Back to Dashboard</a>
 </div>
 
 <script>
-  function toggleMenu(){document.getElementById("dropdownMenu").classList.toggle("show")}
-  window.onclick=function(e){if(!e.target.matches('.hamburger'))document.getElementById("dropdownMenu").classList.remove("show")}
-  function logout(){localStorage.clear();window.location.href="/login.html";}
+function toggleSection(num){
+  const content=document.getElementById("content"+num);
+  const arrow=document.getElementById("arrow"+num);
+  if(content.style.display==="block"){
+    content.style.display="none";
+    arrow.classList.remove("open");
+  } else {
+    content.style.display="block";
+    arrow.classList.add("open");
+  }
+}
+
+function toggleMenu(){
+  document.getElementById("dropdownMenu").classList.toggle("show");
+}
+
+window.onclick=function(e){
+  if(!e.target.matches('.hamburger')){
+    document.getElementById("dropdownMenu").classList.remove("show");
+  }
+}
+
+function logout(){
+  localStorage.clear();
+  window.location.href="/login.html";
+}
 </script>
 
 </body>
