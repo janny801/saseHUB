@@ -76,15 +76,22 @@ body {
   margin-bottom: 10px;
 }
 
-.calendar-placeholder {
-  border: 2px dashed #70c041;
-  border-radius: 10px;
-  padding: 25px;
-  margin: 20px auto;
-  max-width: 700px;
-  background-color: #0f1722;
-  color: #a9ffcb;
-  font-size: 0.95em;
+.calendar-wrapper {
+  max-width: 900px;
+  margin: 30px auto;
+  border: 2px solid #70c041;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 25px rgba(112, 192, 65, 0.25);
+  background-color: #0e141a; /* matches dark theme background */
+}
+
+.calendar-wrapper iframe {
+  display: block;
+  width: 100%;
+  height: 600px;
+  border: none;
+  filter: brightness(0.95) contrast(1.05);
 }
 
 /* ===== Cards Section ===== */
