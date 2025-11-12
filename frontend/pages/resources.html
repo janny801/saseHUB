@@ -25,16 +25,27 @@
       align-items: center;
     }
 
-    /* CLEAN INLINE CONTENT – NO MORE BLACK BOX */
     .dropdown-content {
       margin-top: 10px;
-      padding: 0px 5px 5px 5px;
+      padding: 5px 0px 0px 0px;
       background: none;
       border: none;
       display: none;
       color: #d9e6ff;
-      line-height: 1.65em;
-      white-space: pre-line;
+      line-height: 1.75em;
+    }
+
+    .dropdown-content h3 {
+      color: #70c041;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      font-size: 1.1em;
+    }
+
+    .dropdown-content ul, .dropdown-content ol {
+      margin-left: 18px;
+      margin-top: 5px;
+      margin-bottom: 10px;
     }
 
     .arrow {
@@ -48,7 +59,6 @@
     }
   </style>
 
-  
   <script>
     const loggedIn = localStorage.getItem("loggedIn");
     const loginTime = localStorage.getItem("loginTime");
@@ -84,40 +94,49 @@
       <span class="arrow" id="arrow1" onclick="toggleSection(1)">▶</span>
     </div>
     <div class="dropdown-content" id="content1">
-Rules
-- LENGTH: 1 page
-- FORMATTING: Simple, clean, easy to edit
-- ORDER: Sections sorted by relevance, items in reverse chronological order
-- PROJECTS: Reverse chronological or relevance-based
-- WORK IN PROGRESS: Resume evolves over time
-- SAVING: Save as PDF with clear file name
 
-Recommended Resume Sections
-1. Education
-2. Skills & Certifications
-3. Experience
-4. Projects
-5. Activities / Leadership
+      <h3>Rules</h3>
+      <ul>
+        <li>1 page maximum</li>
+        <li>Simple, clean, easy formatting</li>
+        <li>Sections ordered by relevance</li>
+        <li>Items listed reverse chronologically</li>
+        <li>Your resume evolves — keep improving it</li>
+        <li>Save as PDF with a clean filename</li>
+      </ul>
 
-Google XYZ Formula
-“Accomplished X by implementing Y which led to Z”
+      <h3>Recommended Resume Sections</h3>
+      <ol>
+        <li>Education</li>
+        <li>Skills & Certifications</li>
+        <li>Experience</li>
+        <li>Projects</li>
+        <li>Activities / Leadership</li>
+      </ol>
 
-Outline Your Accomplishments
-- Put strongest bullets first
-- Show impact (how many, how much, how long)
-- Quantify results
-- Keep bullet points short (1–2 lines)
+      <h3>Google XYZ Formula</h3>
+      <p><strong>“Accomplished X by implementing Y which led to Z.”</strong></p>
 
-Describing Experience
-Project/Product – What it is and the problem it solves  
-Role – What you did, challenges you solved  
-Achievements – Use XYZ formula  
-Tech stack – (Java, Python, Git, Jenkins, etc.)
+      <h3>Outlining Achievements</h3>
+      <ul>
+        <li>Put strongest bullets first</li>
+        <li>Show concrete impact</li>
+        <li>Quantify results when possible</li>
+        <li>Use concise 1–2 line bullets</li>
+      </ul>
 
-General Resume Template
-(Linked PDF in original content)
+      <h3>Describing Experience</h3>
+      <ul>
+        <li><strong>Project/Product:</strong> What it is + the problem it solves</li>
+        <li><strong>Role:</strong> What you contributed / challenges solved</li>
+        <li><strong>Achievements:</strong> Use XYZ formula</li>
+        <li><strong>Tech stack:</strong> e.g., Java, Python, Git, Jenkins</li>
+      </ul>
+
+      <p>General resume template originally included as a PDF.</p>
     </div>
   </div>
+
 
   <!-- COFFEE CHAT 101 -->
   <div class="dropdown-item">
@@ -126,28 +145,38 @@ General Resume Template
       <span class="arrow" id="arrow2" onclick="toggleSection(2)">▶</span>
     </div>
     <div class="dropdown-content" id="content2">
-A coffee chat is an informal networking meeting between professionals.
 
-Benefits
-- Strengthen current connections
-- Reestablish old connections
-- Make new connections
-- Learn about opportunities
+      <h3>What is a Coffee Chat?</h3>
+      <p>An informal networking meeting between students and professionals.</p>
 
-Tips
-- Take initiative
-- Prepare beforehand
-- Arrive early
-- Follow up
+      <h3>Benefits</h3>
+      <ul>
+        <li>Strengthen current connections</li>
+        <li>Reestablish old connections</li>
+        <li>Make new connections</li>
+        <li>Learn about opportunities</li>
+      </ul>
 
-Questions to Ask
-- How did you get started?
-- What do you enjoy most?
-- What challenges do you face?
-- What skills are most important?
-- What advice do you have for beginners?
+      <h3>Tips</h3>
+      <ul>
+        <li>Take initiative</li>
+        <li>Prepare questions ahead of time</li>
+        <li>Arrive early</li>
+        <li>Follow up afterward</li>
+      </ul>
+
+      <h3>Good Questions to Ask</h3>
+      <ul>
+        <li>How did you get started?</li>
+        <li>What do you enjoy about your role?</li>
+        <li>What challenges do you face?</li>
+        <li>What skills matter most in your field?</li>
+        <li>What advice do you have for beginners?</li>
+      </ul>
+
     </div>
   </div>
+
 
   <!-- CONFERENCE PREPARATION -->
   <div class="dropdown-item">
@@ -156,43 +185,62 @@ Questions to Ask
       <span class="arrow" id="arrow3" onclick="toggleSection(3)">▶</span>
     </div>
     <div class="dropdown-content" id="content3">
-Upcoming content for conference preparation:
 
-- Hospitality Suites prep  
-  - Earn potential interviews  
-  - 20–30 companies present  
-- Networking at workshops
-- Approaching high-level managers and executives
-- Interview experience at SASE National
+      <h3>Hospitality Suites</h3>
+      <ul>
+        <li>Great chance to earn interviews</li>
+        <li>20–30 companies typically present</li>
+        <li>Bring multiple resumes</li>
+      </ul>
+
+      <h3>Networking</h3>
+      <ul>
+        <li>Talk to presenters after workshops</li>
+        <li>Approach high-level managers confidently</li>
+      </ul>
+
+      <h3>Interview Experience</h3>
+      <p>Preparation helps reduce stress and increase success at SASE National.</p>
+
     </div>
   </div>
 
-  <!-- SETTING AND ACHIEVING GOALS -->
+
+  <!-- SETTING & ACHIEVING GOALS -->
   <div class="dropdown-item">
     <div class="dropdown-title">
       Setting & Achieving Goals
       <span class="arrow" id="arrow4" onclick="toggleSection(4)">▶</span>
     </div>
     <div class="dropdown-content" id="content4">
-Short-Term vs Long-Term Goals
-- Short-term: Achievable soon, supports long-term goals  
-- Long-term: Multi-year achievements
 
-Benefits
-- Guides your career path
-- Helps maintain focus
-- Makes large projects manageable
-- Supports advancement
+      <h3>Short-Term vs Long-Term</h3>
+      <ul>
+        <li><strong>Short-term:</strong> Achievable soon, support bigger goals</li>
+        <li><strong>Long-term:</strong> Multi-year achievements</li>
+      </ul>
 
-SMART Goals
-Specific, Measurable, Achievable, Relevant, Time-based
+      <h3>Benefits</h3>
+      <ul>
+        <li>Guides your career direction</li>
+        <li>Helps maintain focus</li>
+        <li>Makes large goals manageable</li>
+        <li>Encourages advancement</li>
+      </ul>
 
-Tips
-- Be realistic
-- Share goals with others
-- Acknowledge your efforts
+      <h3>SMART Goals</h3>
+      <p><strong>S</strong>pecific, <strong>M</strong>easurable, <strong>A</strong>chievable, <strong>R</strong>elevant, <strong>T</strong>ime-Based</p>
+
+      <h3>Tips</h3>
+      <ul>
+        <li>Be realistic</li>
+        <li>Share goals with others</li>
+        <li>Acknowledge progress</li>
+      </ul>
+
     </div>
   </div>
+
 
   <!-- TECHNICAL INTERVIEWS -->
   <div class="dropdown-item">
@@ -201,19 +249,25 @@ Tips
       <span class="arrow" id="arrow5" onclick="toggleSection(5)">▶</span>
     </div>
     <div class="dropdown-content" id="content5">
-Preparation Steps
-- Review job posting & required skills
-- Practice algorithms and data structures
-- Solve coding problems
-- Review your resume projects
-- Research the company
-- Mock interviews
 
-Resources
-- HackerRank, LeetCode, CodeForces
-- Books: DDIA, CTCI, EPI
+      <h3>Preparation Steps</h3>
+      <ul>
+        <li>Study job posting & required skills</li>
+        <li>Practice algorithms / data structures</li>
+        <li>Review your resume projects</li>
+        <li>Research the company</li>
+        <li>Do mock interviews</li>
+      </ul>
+
+      <h3>Helpful Resources</h3>
+      <ul>
+        <li>LeetCode, HackerRank, CodeForces</li>
+        <li>Books: CTCI, EPI, DDIA</li>
+      </ul>
+
     </div>
   </div>
+
 
   <!-- CREATING A LINKEDIN -->
   <div class="dropdown-item">
@@ -222,36 +276,44 @@ Resources
       <span class="arrow" id="arrow6" onclick="toggleSection(6)">▶</span>
     </div>
     <div class="dropdown-content" id="content6">
-LinkedIn Best Practices
-Profile
-- Use a recent, well-lit photo
-- Add a curated header photo
-- Featured section: GitHub, portfolio, projects
 
-Experience
-- Copy your resume bullets
-- Add relevant media
-- Projects/volunteering can go under experience
+      <h3>Profile</h3>
+      <ul>
+        <li>Use a recent, well-lit photo</li>
+        <li>Choose a professional header image</li>
+        <li>Add GitHub / portfolio to Featured</li>
+      </ul>
 
-Education
-- Degrees + activities + relevant training
+      <h3>Experience</h3>
+      <ul>
+        <li>Re-use resume bullets</li>
+        <li>Attach relevant media</li>
+      </ul>
 
-Certifications
-- List key certificates (including CodePath)
+      <h3>Education</h3>
+      <ul>
+        <li>Include activities and relevant training</li>
+      </ul>
 
-Volunteer Experience
-- Unpaid but relevant work
+      <h3>Certifications</h3>
+      <ul>
+        <li>Add key certificates (e.g., CodePath)</li>
+      </ul>
 
-Skills
-- Prioritize top 3 technical skills
+      <h3>Skills</h3>
+      <ul>
+        <li>Pin top 3 relevant skills</li>
+      </ul>
 
-Recommendations
-- Ask mentors or supervisors
+      <h3>Volunteer Experience</h3>
+      <p>Great for demonstrating impact even without paid work.</p>
 
-Accomplishments
-- Courses, awards, orgs, projects (only most relevant)
+      <h3>Recommendations</h3>
+      <p>Ask mentors or supervisors for one strong recommendation.</p>
+
     </div>
   </div>
+
 
   <!-- BEHAVIORAL INTERVIEWS -->
   <div class="dropdown-item">
@@ -260,17 +322,24 @@ Accomplishments
       <span class="arrow" id="arrow7" onclick="toggleSection(7)">▶</span>
     </div>
     <div class="dropdown-content" id="content7">
-Preparation
-- Prepare months ahead
-- Use STAR method
-- Practice regularly (at least 1 hr/week)
 
-Day-of Tips
-- Do energizing activities
-- Eat beforehand
-- Join meeting early
+      <h3>Preparation</h3>
+      <ul>
+        <li>Practice months ahead</li>
+        <li>Use the STAR method</li>
+        <li>Practice at least 1 hour per week</li>
+      </ul>
+
+      <h3>Day-of Tips</h3>
+      <ul>
+        <li>Do energizing activities</li>
+        <li>Eat before your interview</li>
+        <li>Join a few minutes early</li>
+      </ul>
+
     </div>
   </div>
+
 
   <!-- COVER LETTERS -->
   <div class="dropdown-item">
@@ -279,21 +348,28 @@ Day-of Tips
       <span class="arrow" id="arrow8" onclick="toggleSection(8)">▶</span>
     </div>
     <div class="dropdown-content" id="content8">
-Purpose of a Cover Letter
-- Explain your fit, value, and motivation
 
-Steps
-1. Research company values  
-2. Match job posting skills  
-3. Select which skills to highlight (strongest stories)
+      <h3>Purpose</h3>
+      <p>Explain your fit, value, and motivation for the role.</p>
 
-Emails
-- Use meaningful subject lines
-- Be clear and concise
-- Clarify assumptions
-- Keep communication professional
+      <h3>Steps</h3>
+      <ol>
+        <li>Research company values</li>
+        <li>Match job posting skills</li>
+        <li>Select strongest stories to highlight</li>
+      </ol>
+
+      <h3>Email Tips</h3>
+      <ul>
+        <li>Use meaningful subject lines</li>
+        <li>Be clear and concise</li>
+        <li>Clarify assumptions</li>
+        <li>Keep communication professional</li>
+      </ul>
+
     </div>
   </div>
+
 
   <!-- TIPS & TRICKS -->
   <div class="dropdown-item">
@@ -302,31 +378,39 @@ Emails
       <span class="arrow" id="arrow9" onclick="toggleSection(9)">▶</span>
     </div>
     <div class="dropdown-content" id="content9">
-Networking Tips
-- Ask politely  
-- Follow up within 48 hours  
-- Mention your referrer  
 
-Online Communication Tips
-- Use meaningful subject lines
-- Be clear and concise
-- Verify assumptions
-- Communicate about communication
+      <h3>Networking Tips</h3>
+      <ul>
+        <li>Ask politely</li>
+        <li>Follow up within 48 hours</li>
+        <li>Mention your referrer</li>
+      </ul>
+
+      <h3>Online Communication Tips</h3>
+      <ul>
+        <li>Use meaningful subject lines</li>
+        <li>Be clear and concise</li>
+        <li>Verify assumptions</li>
+        <li>Communicate how you will communicate</li>
+      </ul>
+
     </div>
   </div>
 
   <a href="../index.html" class="back-btn">← Back to Dashboard</a>
+
 </div>
 
 <script>
 function toggleSection(num){
-  const content=document.getElementById("content"+num);
-  const arrow=document.getElementById("arrow"+num);
-  if(content.style.display==="block"){
-    content.style.display="none";
+  const content = document.getElementById("content"+num);
+  const arrow   = document.getElementById("arrow"+num);
+
+  if(content.style.display === "block"){
+    content.style.display = "none";
     arrow.classList.remove("open");
   } else {
-    content.style.display="block";
+    content.style.display = "block";
     arrow.classList.add("open");
   }
 }
