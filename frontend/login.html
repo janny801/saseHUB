@@ -104,8 +104,11 @@
         alert(data.message);
 
         if (data.message === "Login successful") {
-          // Save login flag in browser
+          // ✅ Save login flag + current time
           localStorage.setItem("loggedIn", "true");
+          localStorage.setItem("loginTime", Date.now().toString());
+
+          // ✅ Redirect to main hub
           window.location.href = "/index.html";
         }
       } catch (err) {

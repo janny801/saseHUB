@@ -6,9 +6,16 @@
   <title>SASE UH Member Hub</title>
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Check login status -->
+  <!-- Check login status and expiration -->
   <script>
-    if (!localStorage.getItem("loggedIn")) {
+    const loggedIn = localStorage.getItem("loggedIn");
+    const loginTime = localStorage.getItem("loginTime");
+    const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+
+    // Redirect if not logged in or login expired
+    if (!loggedIn || !loginTime || Date.now() - parseInt(loginTime) > oneHour) {
+      localStorage.removeItem("loggedIn");
+      localStorage.removeItem("loginTime");
       window.location.href = "/login.html";
     }
   </script>
@@ -73,6 +80,7 @@
   <script>
     function logout() {
       localStorage.removeItem("loggedIn");
+      localStorage.removeItem("loginTime");
       window.location.href = "/login.html";
     }
   </script>
