@@ -7,35 +7,35 @@ body {
 }
 
 /* ===== Header ===== */
-.page-header {
+.simple-header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  background-color: #003366;
-  padding: 15px 25px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px 30px 20px;
+  position: relative;
+  border-bottom: 2px solid #70c041;
 }
 
 .sase-logo {
-  height: 45px;
+  height: 60px;
   width: auto;
+  margin-bottom: 10px;
 }
 
-.page-header h1 {
+.simple-header h1 {
   color: #70c041;
-  font-size: 1.8em;
+  font-size: 2em;
   font-weight: 700;
   margin: 0;
 }
 
 /* ===== Login Button ===== */
 .login-btn {
+  position: absolute;
+  top: 20px;
+  right: 25px;
   background-color: transparent;
   color: #e0f8ff;
   border: 2px solid #70c041;
