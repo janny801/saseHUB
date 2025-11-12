@@ -3,55 +3,54 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SASE UH</title>
+  <title>SASE UH Member Hub</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <nav class="navbar">
-      <div class="logo">SASE UH</div>
-      <ul class="nav-links">
-        <li><a href="index.html" class="active">Home</a></li>
-        <li><a href="projects.html">Projects</a></li>
-        <li><a href="about.html">About Me</a></li>
-        <li><a href="contact.html">Contact Me</a></li>
-      </ul>
-      <button class="login-btn">Login / Signup</button>
-    </nav>
+  <header class="page-header">
+    <div class="header-left">
+      <img src="sase_logo.png" alt="SASE Logo" class="sase-logo" />
+      <h1>SASE UH Member Hub</h1>
+    </div>
+    <button class="login-btn">Login / Signup</button>
   </header>
 
   <main>
     <section class="intro">
-      <h1>Welcome to SASE UH</h1>
       <p>Society of Asian Scientists and Engineers at the University of Houston</p>
-      <p>Explore events, alumni connections, research opportunities, and resources all in one place.</p>
+      <p>Explore upcoming events, alumni connections, research opportunities, professional resources, and more—all in one place.</p>
     </section>
 
+    <!-- Event Calendar Section -->
+    <section class="calendar-section">
+      <h2>Event Calendar</h2>
+      <p>Stay updated with all our upcoming events and chapter meetings.</p>
+      <div class="calendar-placeholder">
+        <p><em>(Calendar coming soon — placeholder space for Google Calendar or custom event view.)</em></p>
+      </div>
+    </section>
+
+    <!-- Clickable Navigation Boxes -->
     <section class="cards">
-      <div class="card">
-        <h2>Event Calendar</h2>
-        <p>Stay updated with all our upcoming events and chapter meetings.</p>
-      </div>
-
-      <div class="card">
-        <h2>Alumni Network</h2>
+      <a href="alumni.html" class="card">
+        <h3>Alumni Network</h3>
         <p>Connect with SASE alumni across various industries.</p>
-      </div>
+      </a>
 
-      <div class="card">
-        <h2>Undergraduate Research</h2>
+      <a href="research.html" class="card">
+        <h3>Undergraduate Research</h3>
         <p>Find professors and labs supporting student research.</p>
-      </div>
+      </a>
 
-      <div class="card">
-        <h2>Professional Resources</h2>
+      <a href="resources.html" class="card">
+        <h3>Professional Resources</h3>
         <p>Access workshops, guides, and mentorship resources.</p>
-      </div>
+      </a>
 
-      <div class="card">
-        <h2>Internship Database</h2>
+      <a href="internships.html" class="card">
+        <h3>Internship Database</h3>
         <p>Explore internships and opportunities curated for SASE members.</p>
-      </div>
+      </a>
     </section>
   </main>
 
