@@ -12,8 +12,8 @@ body {
 .simple-header {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   padding: 20px;
   border-bottom: 2px solid #70c041;
 }
