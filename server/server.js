@@ -158,6 +158,39 @@ app.post("/update-profile", async (req, res) => {
   }
 });
 
+// -------------------------------------------------------------
+// GET ALL ALUMNI
+// -------------------------------------------------------------
+app.get("/alumni/all", async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      "SELECT id, full_name, company, role_title, email, linkedin, other_link, industries, profile_pic, company_img, created_at FROM alumni"
+    );
+
+    return res.json(rows);
+  } catch (err) {
+    console.error("❌ Error fetching alumni:", err);
+    return res.status(500).json({ message: "Server error fetching alumni" });
+  }
+});
+
+
+// -------------------------------------------------------------
+// GET ALL PROFESSORS
+// -------------------------------------------------------------
+app.get("/professors/all", async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      "SELECT id, professor_name, tags, bio, email, profile_pic, created_at FROM professors"
+    );
+
+    return res.json(rows);
+  } catch (err) {
+    console.error("❌ Error fetching professors:", err);
+    return res.status(500).json({ message: "Server error fetching professors" });
+  }
+});
+
 
 // -------------------------------------------------------------
 // START SERVER

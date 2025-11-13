@@ -16,14 +16,12 @@
       padding: 0;
     }
 
-    /* PAGE TITLE */
     .page-title {
       color: #70c041;
       font-size: 1.8em;
       margin: 0;
     }
 
-    /* MAIN WRAPPER CARD */
     .admin-wrapper {
       max-width: 900px;
       margin: 40px auto;
@@ -52,6 +50,32 @@
     .btn:hover {
       background: #66b3ff;
       color: white;
+    }
+
+    /* TABLE AREA */
+    #dataSection {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #0f1722;
+      border: 2px solid #70c041;
+    }
+
+    th, td {
+      border: 1px solid #70c041;
+      padding: 10px;
+      font-size: 0.9em;
+    }
+
+    th {
+      background: #122030;
+      color: #70c041;
     }
 
     /* MODALS */
@@ -88,12 +112,10 @@
       color: #f5f5f5;
     }
 
-    .modal h2 {
-      color: #70c041;
-      margin-bottom: 12px;
+    .close-btn {
+      background: #ff4f4f;
+      color: white;
     }
-
-    .close-btn { background: #ff4f4f; color: white; }
     .close-btn:hover { background: #ff3333; }
   </style>
 </head>
@@ -109,15 +131,13 @@
   }
 </script>
 
-<!-- FULL HEADER (MATCHING ALL OTHER PAGES) -->
+<!-- HEADER -->
 <header class="simple-header">
   <img src="../images/saselogo.webp" class="sase-logo" />
-
   <h1 class="page-title">SASE Admin Portal</h1>
 
   <div class="menu-container">
     <button class="hamburger" onclick="toggleMenu()">☰</button>
-
     <div id="dropdownMenu" class="dropdown">
       <a href="../profile.html">Edit Profile</a>
       <a href="#" onclick="logout()">Logout</a>
@@ -125,19 +145,29 @@
   </div>
 </header>
 
-<!-- MAIN CONTENT -->
+<!-- MAIN GREEN BOX -->
 <div class="admin-wrapper">
+
   <button class="btn" onclick="window.location.href='../index.html'">⬅ Back to Main Page</button>
 
-  <p style="margin-top:20px;">
-    Manage alumni, professors, and member data.
-  </p>
+  <p style="margin-top:20px;">Manage alumni, professors, and member data.</p>
 
   <div class="admin-buttons">
     <button class="btn" onclick="openModal('alumniModal')">➕ Add New Alumni</button>
     <button class="btn" onclick="openModal('profModal')">➕ Add New Professor</button>
   </div>
+
+  <hr style="margin-top:25px; border:1px solid #70c041;">
+
+  <div class="admin-buttons">
+    <button class="btn" onclick="loadAlumni()">📄 View All Alumni</button>
+    <button class="btn" onclick="loadProfessors()">📄 View All Professors</button>
+  </div>
+
 </div>
+
+<!-- DATA DISPLAY AREA -->
+<div id="dataSection"></div>
 
 <!-- MODAL: ALUMNI -->
 <div id="alumniModal" class="modal-bg">
@@ -168,20 +198,12 @@
   <div class="modal">
     <h2>Add New Professor</h2>
 
-    <!-- Profile Picture Upload -->
     <label style="color:#70c041">Profile Picture</label>
     <input type="file" accept="image/*" />
 
-    <!-- Name -->
     <input type="text" placeholder="Professor Name" />
-
-    <!-- Tags (Departments / Fields) -->
     <input type="text" placeholder="Tags (ex: Civil Engineering, Environmental Engineering)" />
-
-    <!-- Long Text / Bio -->
     <input type="text" placeholder="Bio / Description" />
-
-    <!-- Email -->
     <input type="email" placeholder="Email" />
 
     <button class="btn">Save Professor</button>
@@ -189,8 +211,7 @@
   </div>
 </div>
 
-
-<!-- MENU + MODAL LOGIC -->
+<!-- JS LOGIC -->
 <script>
   function toggleMenu() {
     document.getElementById("dropdownMenu").classList.toggle("show");
@@ -213,6 +234,92 @@
 
   function closeModal(id) {
     document.getElementById(id).style.display = "none";
+  }
+
+  /* ======================
+     LOAD ALUMNI TABLE
+  ======================= */
+  async function loadAlumni() {
+    const res = await fetch("/alumni/all");
+    const data = await res.json();
+
+    let html = `
+      <h2 style="color:#70c041; text-align:center;">All Alumni</h2>
+      <table>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Company</th>
+        <th>Role</th>
+        <th>Email</th>
+        <th>LinkedIn</th>
+        <th>Other Link</th>
+        <th>Industries</th>
+        <th>Profile Pic</th>
+        <th>Company Img</th>
+        <th>Created</th>
+      </tr>
+    `;
+
+    data.forEach(a => {
+      html += `
+        <tr>
+          <td>${a.id}</td>
+          <td>${a.full_name}</td>
+          <td>${a.company}</td>
+          <td>${a.role_title}</td>
+          <td>${a.email}</td>
+          <td>${a.linkedin}</td>
+          <td>${a.other_link}</td>
+          <td>${a.industries}</td>
+          <td>${a.profile_pic}</td>
+          <td>${a.company_img}</td>
+          <td>${a.created_at}</td>
+        </tr>
+      `;
+    });
+
+    html += "</table>";
+    document.getElementById("dataSection").innerHTML = html;
+  }
+
+  /* ======================
+     LOAD PROFESSORS TABLE
+  ======================= */
+  async function loadProfessors() {
+    const res = await fetch("/professors/all");
+    const data = await res.json();
+
+    let html = `
+      <h2 style="color:#70c041; text-align:center;">All Professors</h2>
+      <table>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Tags</th>
+        <th>Bio</th>
+        <th>Email</th>
+        <th>Profile Pic</th>
+        <th>Created</th>
+      </tr>
+    `;
+
+    data.forEach(p => {
+      html += `
+        <tr>
+          <td>${p.id}</td>
+          <td>${p.professor_name}</td>
+          <td>${p.tags}</td>
+          <td>${p.bio}</td>
+          <td>${p.email}</td>
+          <td>${p.profile_pic}</td>
+          <td>${p.created_at}</td>
+        </tr>
+      `;
+    });
+
+    html += "</table>";
+    document.getElementById("dataSection").innerHTML = html;
   }
 </script>
 
