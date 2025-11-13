@@ -89,36 +89,44 @@
 
   <footer>© 2025 SASE University of Houston</footer>
 
-  <script>
-    async function handleLogin(event) {
-      event.preventDefault();
-      const uh_id = document.getElementById("login-uhid").value.trim();
+<script>
+  async function handleLogin(event) {
+    event.preventDefault();
+    const uh_id = document.getElementById("login-uhid").value.trim();
 
-      try {
-        const res = await fetch("/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ uh_id })
-        });
+    try {
+      const res = await fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uh_id })
+      });
 
-        const data = await res.json();
-        alert(data.message);
+      const data = await res.json();
+      alert(data.message);
 
-        if (data.message === "Login successful") {
-          // Save login flag + timestamp + UH ID
-          localStorage.setItem("loggedIn", "true");
-          localStorage.setItem("loginTime", Date.now().toString());
-          localStorage.setItem("uh_id", uh_id);   // <-- REQUIRED FIX
+      if (data.message === "Login successful") {
 
-          // Redirect to main hub
-          window.location.href = "/index.html";
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Login failed. Please try again.");
+        const user = data.user;   // <-- IMPORTANT
+
+        // Save login state
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("loginTime", Date.now().toString());
+        localStorage.setItem("uh_id", user.uh_id);
+
+        // Save admin flag returned from backend
+        localStorage.setItem("admin", user.admin);  
+
+        console.log("Saved admin =", user.admin);
+
+        // Redirect
+        window.location.href = "/index.html";
       }
+    } catch (err) {
+      console.error("Login failed:", err);
+      alert("Login failed. Please try again.");
     }
-  </script>
+  }
+</script>
 
 </body>
 </html>

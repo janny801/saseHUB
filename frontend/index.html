@@ -10,7 +10,8 @@
   <script>
     const loggedIn = localStorage.getItem("loggedIn");
     const loginTime = localStorage.getItem("loginTime");
-    const oneHour = 60 * 60 * 1000; // 1 hour in ms
+    const oneHour = 60 * 60 * 1000;
+
     if (!loggedIn || !loginTime || Date.now() - parseInt(loginTime) > oneHour) {
       localStorage.removeItem("loggedIn");
       localStorage.removeItem("loginTime");
@@ -19,7 +20,6 @@
   </script>
 
   <style>
-    /* Position header elements */
     .simple-header {
       position: relative;
       display: flex;
@@ -29,13 +29,34 @@
       border-bottom: 2px solid #70c041;
     }
 
+    /* ADMIN BUTTON */
+    #adminBtn {
+      display: none;
+      position: absolute;
+      right: 85px;
+      top: 25px;
+      background: #70c041;
+      color: #0b0c10;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #adminBtn:hover {
+      background-color: #66b3ff;
+      color: white;
+    }
+
+    /* Hamburger */
     .menu-container {
       position: absolute;
       top: 25px;
       right: 25px;
     }
 
-    /* Hamburger styling */
     .hamburger {
       background-color: #70c041;
       border: none;
@@ -84,11 +105,16 @@
 </head>
 
 <body>
+
   <header class="simple-header">
     <img src="images/saselogo.webp" alt="SASE Logo" class="sase-logo" />
     <h1>SASE UH Member Hub</h1>
 
-    <!-- Hamburger Menu (Top Right Corner) -->
+    <!-- ⭐ ADMIN BUTTON (only appears for admin users) -->
+    <button id="adminBtn" onclick="window.location.href='pages/admin.html'">
+      Admin Portal
+    </button>
+
     <div class="menu-container">
       <button class="hamburger" onclick="toggleMenu()">☰</button>
       <div id="dropdownMenu" class="dropdown">
@@ -147,6 +173,19 @@
     <p>© 2025 SASE University of Houston</p>
   </footer>
 
+  <!-- ⭐ CORRECTED ADMIN BUTTON CHECK -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const isAdmin = localStorage.getItem("admin");
+      console.log("Admin status:", isAdmin);
+
+      const adminBtn = document.getElementById("adminBtn");
+      if (isAdmin === "1") {
+        adminBtn.style.display = "inline-block";
+      }
+    });
+  </script>
+
   <script>
     function toggleMenu() {
       document.getElementById("dropdownMenu").classList.toggle("show");
@@ -164,10 +203,13 @@
     function logout() {
       localStorage.removeItem("loggedIn");
       localStorage.removeItem("loginTime");
+      localStorage.removeItem("admin");
       window.location.href = "/login.html";
     }
   </script>
 
+  <!-- MAIN SCRIPT -->
   <script src="script.js"></script>
+
 </body>
 </html>

@@ -8,7 +8,6 @@ import { fileURLToPath } from "url";
 dotenv.config();
 const app = express();
 
-// Enable CORS and JSON parsing
 app.use(cors());
 app.use(express.json());
 
@@ -16,16 +15,16 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Serve static files from the frontend folder
+// Serve static frontend
 const frontendPath = path.join(__dirname, "../frontend");
 app.use(express.static(frontendPath));
 
-// ✅ Serve login.html as the default route
+// Default route → login
 app.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "login.html"));
 });
 
-// ✅ MySQL connection
+// MySQL connection
 let db;
 (async () => {
   try {
@@ -41,39 +40,81 @@ let db;
   }
 })();
 
-// ✅ UH ID login route
+
+// -------------------------------------------------------------
+// LOGIN (returns admin flag too)
+// -------------------------------------------------------------
 app.post("/login", async (req, res) => {
   const { uh_id } = req.body;
 
+  if (!uh_id) {
+    return res.status(400).json({ message: "Missing UH ID" });
+  }
+
   try {
-    if (uh_id !== "2190662") {
-      return res.status(403).json({ message: "Invalid UH ID" });
-    }
+    // Look for user
+    const [rows] = await db.execute(
+      "SELECT uh_id, first_name, last_name, email, linkedin, admin FROM users WHERE uh_id = ?",
+      [uh_id]
+    );
 
-    // Check if user exists
-    const [rows] = await db.execute("SELECT * FROM users WHERE uh_id = ?", [uh_id]);
+    // NEW DEBUG LOG
+    console.log("🔍 Login attempt UH ID:", uh_id);
 
-    // If not, insert new user
+    // If new user → create with admin = 0
     if (rows.length === 0) {
-      await db.execute("INSERT INTO users (uh_id) VALUES (?)", [uh_id]);
-      console.log(`🆕 Added UH ID ${uh_id} to database`);
+      console.log("➕ New user created (admin = 0)");
+
+      await db.execute(
+        "INSERT INTO users (uh_id, admin) VALUES (?, ?)",
+        [uh_id, 0]
+      );
+
+      console.log("Returned admin = 0 for:", uh_id);
+
+      return res.json({
+        message: "Login successful",
+        user: {
+          uh_id,
+          first_name: null,
+          last_name: null,
+          email: null,
+          linkedin: null,
+          admin: 0,
+        },
+      });
     }
 
-    res.json({ message: "Login successful", user: uh_id });
+    // Existing user
+    const user = rows[0];
+
+    // NEW DEBUG LOGS
+    console.log("✅ Existing user found:", user.uh_id);
+    console.log("   → first_name:", user.first_name);
+    console.log("   → last_name:", user.last_name);
+    console.log("   → email:", user.email);
+    console.log("   → admin:", user.admin);
+
+    return res.json({
+      message: "Login successful",
+      user: user,
+    });
+
   } catch (err) {
     console.error("❌ Error during login:", err);
-    res.status(500).json({ message: "Server error during login" });
+    return res.status(500).json({ message: "Server error during login" });
   }
 });
-
-// ✅ Get user profile info by UH ID
+// -------------------------------------------------------------
+// GET PROFILE
+// -------------------------------------------------------------
 app.get("/get-profile", async (req, res) => {
   const { uh_id } = req.query;
   if (!uh_id) return res.status(400).json({ message: "Missing UH ID" });
 
   try {
     const [rows] = await db.execute(
-      "SELECT first_name, last_name, email, linkedin FROM users WHERE uh_id = ?",
+      "SELECT first_name, last_name, email, linkedin, admin FROM users WHERE uh_id = ?",
       [uh_id]
     );
 
@@ -81,14 +122,17 @@ app.get("/get-profile", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json({ user: rows[0] });
+    return res.json({ user: rows[0] });
   } catch (err) {
     console.error("❌ Error fetching profile:", err);
-    res.status(500).json({ message: "Server error fetching profile" });
+    return res.status(500).json({ message: "Server error fetching profile" });
   }
 });
 
-// ✅ Update user profile info
+
+// -------------------------------------------------------------
+// UPDATE PROFILE
+// -------------------------------------------------------------
 app.post("/update-profile", async (req, res) => {
   const { uh_id, first_name, last_name, email, linkedin } = req.body;
 
@@ -107,23 +151,18 @@ app.post("/update-profile", async (req, res) => {
     }
 
     console.log(`✅ Updated profile for UH ID ${uh_id}`);
-    res.json({ message: "Profile updated successfully" });
+    return res.json({ message: "Profile updated successfully" });
   } catch (err) {
     console.error("❌ Error updating profile:", err);
-    res.status(500).json({ message: "Server error updating profile" });
+    return res.status(500).json({ message: "Server error updating profile" });
   }
 });
 
 
-
-/*
-// ✅ Fallback for unknown routes (must come AFTER all other routes)
-app.use((req, res) => {
-  res.status(404).sendFile(path.join(frontendPath, "login.html"));
-});
-
-*/
-
-// ✅ Start server
+// -------------------------------------------------------------
+// START SERVER
+// -------------------------------------------------------------
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+app.listen(PORT, () =>
+  console.log(`🚀 Server running at http://localhost:${PORT}`)
+);
