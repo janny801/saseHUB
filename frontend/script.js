@@ -44,7 +44,7 @@ async function handleLogin(event) {
 document.addEventListener("DOMContentLoaded", () => {
     const isAdmin = localStorage.getItem("admin");
 
-    console.log("Admin status:", isAdmin); // Debug helper
+    //console.log("Admin status:", isAdmin); // Debug helper
 
     // If admin == 1, show the admin button (on index.html)
     if (isAdmin === "1") {
