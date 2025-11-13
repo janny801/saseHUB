@@ -168,15 +168,27 @@
   <div class="modal">
     <h2>Add New Professor</h2>
 
+    <!-- Profile Picture Upload -->
+    <label style="color:#70c041">Profile Picture</label>
+    <input type="file" accept="image/*" />
+
+    <!-- Name -->
     <input type="text" placeholder="Professor Name" />
-    <input type="text" placeholder="Department" />
-    <input type="text" placeholder="Research Area" />
+
+    <!-- Tags (Departments / Fields) -->
+    <input type="text" placeholder="Tags (ex: Civil Engineering, Environmental Engineering)" />
+
+    <!-- Long Text / Bio -->
+    <input type="text" placeholder="Bio / Description" />
+
+    <!-- Email -->
     <input type="email" placeholder="Email" />
 
     <button class="btn">Save Professor</button>
     <button class="btn close-btn" onclick="closeModal('profModal')">Cancel</button>
   </div>
 </div>
+
 
 <!-- MENU + MODAL LOGIC -->
 <script>
