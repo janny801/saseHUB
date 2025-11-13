@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SASE Admin Portal</title>
-  <link rel="stylesheet" href="../style.css" />
+
+  <link rel="stylesheet" href="../pages/pagestyle.css" />
 
   <style>
     body {
@@ -15,33 +16,37 @@
       padding: 0;
     }
 
-    /* Main container */
-    .admin-container {
+    /* PAGE TITLE */
+    .page-title {
+      color: #70c041;
+      font-size: 1.8em;
+      margin: 0;
+    }
+
+    /* MAIN WRAPPER CARD */
+    .admin-wrapper {
       max-width: 900px;
       margin: 40px auto;
-      padding: 20px;
       background: #0f1722;
+      padding: 25px;
       border: 2px solid #70c041;
       border-radius: 12px;
       box-shadow: 0 0 15px rgba(112,192,65,0.3);
+      text-align: center;
     }
 
-    h1 {
-      color: #70c041;
-      text-align: center;
-      margin-bottom: 30px;
-    }
+    .admin-buttons { margin-top: 25px; }
 
     .btn {
       background: #70c041;
       color: #0b0c10;
-      padding: 10px 16px;
+      padding: 10px 18px;
       border: none;
       border-radius: 6px;
       font-weight: bold;
       cursor: pointer;
+      margin: 8px;
       transition: background 0.3s;
-      margin: 10px 0;
     }
 
     .btn:hover {
@@ -49,11 +54,7 @@
       color: white;
     }
 
-    .back-btn {
-      margin-bottom: 20px;
-    }
-
-    /* Modal background */
+    /* MODALS */
     .modal-bg {
       display: none;
       position: fixed;
@@ -64,15 +65,15 @@
       background: rgba(0,0,0,0.7);
       justify-content: center;
       align-items: center;
+      z-index: 2000;
     }
 
-    /* Modal window */
     .modal {
       background: #0f1722;
       border: 2px solid #70c041;
       border-radius: 10px;
       padding: 20px;
-      width: 350px;
+      width: 420px;
       text-align: center;
       box-shadow: 0 0 10px rgba(112,192,65,0.3);
     }
@@ -80,7 +81,7 @@
     .modal input {
       width: 90%;
       padding: 10px;
-      margin: 10px 0;
+      margin: 8px 0;
       border: 2px solid #66b3ff;
       border-radius: 6px;
       background: #0b0c10;
@@ -89,88 +90,119 @@
 
     .modal h2 {
       color: #70c041;
+      margin-bottom: 12px;
     }
 
-    .close-btn {
-      background: #ff4f4f;
-      color: white;
-      margin-top: 10px;
-    }
-
-    .close-btn:hover {
-      background: #ff3333;
-    }
+    .close-btn { background: #ff4f4f; color: white; }
+    .close-btn:hover { background: #ff3333; }
   </style>
 </head>
 
 <body>
 
-  <!-- Redirect if NOT admin -->
-  <script>
-    const isAdmin = localStorage.getItem("admin");
-    if (isAdmin !== "1") {
-      alert("Access denied. Admins only.");
-      window.location.href = "../index.html";
-    }
-  </script>
+<!-- ADMIN CHECK -->
+<script>
+  const isAdmin = localStorage.getItem("admin");
+  if (isAdmin !== "1") {
+    alert("Access denied. Admins only.");
+    window.location.href = "../index.html";
+  }
+</script>
 
-  <div class="admin-container">
+<!-- FULL HEADER (MATCHING ALL OTHER PAGES) -->
+<header class="simple-header">
+  <img src="../images/saselogo.webp" class="sase-logo" />
 
-    <button class="btn back-btn" onclick="window.location.href='../index.html'">
-      ⬅ Back to Main Page
-    </button>
+  <h1 class="page-title">SASE Admin Portal</h1>
 
-    <h1>SASE Admin Portal</h1>
+  <div class="menu-container">
+    <button class="hamburger" onclick="toggleMenu()">☰</button>
 
-    <p style="text-align:center; margin-bottom:30px;">
-      Manage alumni, professors, member data, and more.
-    </p>
+    <div id="dropdownMenu" class="dropdown">
+      <a href="../profile.html">Edit Profile</a>
+      <a href="#" onclick="logout()">Logout</a>
+    </div>
+  </div>
+</header>
 
-    <!-- Buttons to open popups -->
+<!-- MAIN CONTENT -->
+<div class="admin-wrapper">
+  <button class="btn" onclick="window.location.href='../index.html'">⬅ Back to Main Page</button>
+
+  <p style="margin-top:20px;">
+    Manage alumni, professors, and member data.
+  </p>
+
+  <div class="admin-buttons">
     <button class="btn" onclick="openModal('alumniModal')">➕ Add New Alumni</button>
     <button class="btn" onclick="openModal('profModal')">➕ Add New Professor</button>
-
   </div>
+</div>
 
-  <!-- MODAL: Add Alumni -->
-  <div id="alumniModal" class="modal-bg">
-    <div class="modal">
-      <h2>Add New Alumni</h2>
+<!-- MODAL: ALUMNI -->
+<div id="alumniModal" class="modal-bg">
+  <div class="modal">
+    <h2>Add New Alumni</h2>
 
-      <input type="text" placeholder="Full Name" />
-      <input type="text" placeholder="Graduation Year" />
-      <input type="text" placeholder="Industry / Company" />
-      <input type="text" placeholder="LinkedIn URL" />
+    <label style="color:#70c041">Company Image</label>
+    <input type="file" accept="image/*" />
 
-      <button class="btn">Save Alumni</button>
-      <button class="btn close-btn" onclick="closeModal('alumniModal')">Cancel</button>
-    </div>
+    <label style="color:#70c041">Profile Picture</label>
+    <input type="file" accept="image/*" />
+
+    <input type="text" placeholder="Full Name" />
+    <input type="text" placeholder="Company" />
+    <input type="text" placeholder="Current Role Type" />
+    <input type="email" placeholder="Email" />
+    <input type="text" placeholder="LinkedIn URL" />
+    <input type="text" placeholder="Other Link" />
+    <input type="text" placeholder="Industry Tags (ex: Tech, Aerospace)" />
+
+    <button class="btn">Save Alumni</button>
+    <button class="btn close-btn" onclick="closeModal('alumniModal')">Cancel</button>
   </div>
+</div>
 
-  <!-- MODAL: Add Professor -->
-  <div id="profModal" class="modal-bg">
-    <div class="modal">
-      <h2>Add New Professor</h2>
+<!-- MODAL: PROFESSOR -->
+<div id="profModal" class="modal-bg">
+  <div class="modal">
+    <h2>Add New Professor</h2>
 
-      <input type="text" placeholder="Professor Name" />
-      <input type="text" placeholder="Department" />
-      <input type="text" placeholder="Research Area" />
-      <input type="text" placeholder="Email" />
+    <input type="text" placeholder="Professor Name" />
+    <input type="text" placeholder="Department" />
+    <input type="text" placeholder="Research Area" />
+    <input type="email" placeholder="Email" />
 
-      <button class="btn">Save Professor</button>
-      <button class="btn close-btn" onclick="closeModal('profModal')">Cancel</button>
-    </div>
+    <button class="btn">Save Professor</button>
+    <button class="btn close-btn" onclick="closeModal('profModal')">Cancel</button>
   </div>
+</div>
 
-  <script>
-    function openModal(id) {
-      document.getElementById(id).style.display = "flex";
+<!-- MENU + MODAL LOGIC -->
+<script>
+  function toggleMenu() {
+    document.getElementById("dropdownMenu").classList.toggle("show");
+  }
+
+  window.onclick = function(event) {
+    if (!event.target.matches('.hamburger')) {
+      document.getElementById("dropdownMenu").classList.remove("show");
     }
+  };
 
-    function closeModal(id) {
-      document.getElementById(id).style.display = "none";
-    }
-  </script>
+  function logout() {
+    localStorage.clear();
+    window.location.href = "../login.html";
+  }
+
+  function openModal(id) {
+    document.getElementById(id).style.display = "flex";
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).style.display = "none";
+  }
+</script>
 
 </body>
 </html>
