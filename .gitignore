@@ -19,3 +19,5 @@ yarn-error.log*
 # Compiled files or builds (optional, if you build frontend later)
 dist/
 build/
+
+server/google-credentials.json
