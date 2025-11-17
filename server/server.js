@@ -5,6 +5,10 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
+//check membership status
+import { google } from "googleapis";
+import fs from "fs";
+
 dotenv.config();
 const app = express();
 
@@ -40,10 +44,66 @@ let db;
   }
 })();
 
+/* -------------------------------------------------------------
+   GOOGLE SHEETS SETUP
+------------------------------------------------------------- */
 
-// -------------------------------------------------------------
-// LOGIN (returns admin flag too)
-// -------------------------------------------------------------
+const GOOGLE_CREDENTIALS = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "google-credentials.json"))
+);
+
+const sheetsClient = new google.auth.GoogleAuth({
+  credentials: GOOGLE_CREDENTIALS,
+  scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+});
+
+const SHEET_ID = "12RRoG2vbwhmkEkcdeF4Fd8PiMx5k04Sj_suPOdIbZxM";
+const SHEET_RANGE = "Total Points Overview!A:F";
+
+async function getMemberFromSheet(uh_id) {
+  try {
+    const auth = await sheetsClient.getClient();
+    const sheets = google.sheets({ version: "v4", auth });
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: SHEET_RANGE,
+    });
+
+    const rows = response.data.values;
+    if (!rows || rows.length === 0) return null;
+
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+
+      const firstName = row[0];
+      const lastName = row[1];
+      const email = row[2];
+      const sheetUHID = row[3];
+      const paidStatus = row[4];
+
+      if (String(sheetUHID) === String(uh_id)) {
+        return {
+          uh_id: sheetUHID,
+          first_name: firstName || null,
+          last_name: lastName || null,
+          email: email || null,
+          paid: paidStatus && paidStatus.toLowerCase() === "paid"
+        };
+      }
+    }
+
+    return null;
+  } catch (err) {
+    console.error("❌ Error reading Google Sheet:", err);
+    return null;
+  }
+}
+
+/* -------------------------------------------------------------
+   LOGIN (NOW CHECKS GOOGLE SHEET)
+------------------------------------------------------------- */
+
 app.post("/login", async (req, res) => {
   const { uh_id } = req.body;
 
@@ -52,52 +112,69 @@ app.post("/login", async (req, res) => {
   }
 
   try {
-    // Look for user
+    console.log("🔍 Login attempt UH ID:", uh_id);
+
+    // -----------------------------------------------------
+    // 1️⃣ CHECK MYSQL FIRST — is this user already registered?
+    // -----------------------------------------------------
     const [rows] = await db.execute(
       "SELECT uh_id, first_name, last_name, email, linkedin, admin FROM users WHERE uh_id = ?",
       [uh_id]
     );
 
-    // NEW DEBUG LOG
-    console.log("🔍 Login attempt UH ID:", uh_id);
+    if (rows.length > 0) {
+      // ✔ Existing user → SKIP Google Sheet check completely
+      console.log("➡ Existing user detected — skipping Google Sheet check!");
 
-    // If new user → create with admin = 0
-    if (rows.length === 0) {
-      console.log("➕ New user created (admin = 0)");
-
-      await db.execute(
-        "INSERT INTO users (uh_id, admin) VALUES (?, ?)",
-        [uh_id, 0]
-      );
-
-      console.log("Returned admin = 0 for:", uh_id);
+      const existingUser = rows[0];
 
       return res.json({
         message: "Login successful",
-        user: {
-          uh_id,
-          first_name: null,
-          last_name: null,
-          email: null,
-          linkedin: null,
-          admin: 0,
-        },
+        user: existingUser
       });
     }
 
-    // Existing user
-    const user = rows[0];
+    // -----------------------------------------------------
+    // 2️⃣ NEW USER → CHECK GOOGLE SHEET
+    // -----------------------------------------------------
+    const sheetMember = await getMemberFromSheet(uh_id);
 
-    // NEW DEBUG LOGS
-    console.log("✅ Existing user found:", user.uh_id);
-    console.log("   → first_name:", user.first_name);
-    console.log("   → last_name:", user.last_name);
-    console.log("   → email:", user.email);
-    console.log("   → admin:", user.admin);
+    if (!sheetMember) {
+      console.log("❌ UH ID not found in Google Sheet");
+      return res.status(403).json({ message: "UH ID not found in membership records" });
+    }
+
+    if (!sheetMember.paid) {
+      console.log("❌ Member is UNPAID");
+      return res.status(403).json({ message: "Membership unpaid — access denied" });
+    }
+
+    console.log("✅ Paid NEW member found in sheet:", sheetMember.first_name, sheetMember.last_name);
+
+    // -----------------------------------------------------
+    // 3️⃣ INSERT NEW USER INTO MYSQL USING SHEET DATA
+    // -----------------------------------------------------
+    await db.execute(
+      "INSERT INTO users (uh_id, first_name, last_name, email, admin) VALUES (?, ?, ?, ?, ?)",
+      [
+        sheetMember.uh_id,
+        sheetMember.first_name,
+        sheetMember.last_name,
+        sheetMember.email,
+        0
+      ]
+    );
 
     return res.json({
       message: "Login successful",
-      user: user,
+      user: {
+        uh_id,
+        first_name: sheetMember.first_name,
+        last_name: sheetMember.last_name,
+        email: sheetMember.email,
+        linkedin: null,
+        admin: 0
+      }
     });
 
   } catch (err) {
@@ -105,9 +182,11 @@ app.post("/login", async (req, res) => {
     return res.status(500).json({ message: "Server error during login" });
   }
 });
-// -------------------------------------------------------------
-// GET PROFILE
-// -------------------------------------------------------------
+
+/* -------------------------------------------------------------
+   GET PROFILE
+------------------------------------------------------------- */
+
 app.get("/get-profile", async (req, res) => {
   const { uh_id } = req.query;
   if (!uh_id) return res.status(400).json({ message: "Missing UH ID" });
@@ -129,10 +208,10 @@ app.get("/get-profile", async (req, res) => {
   }
 });
 
+/* -------------------------------------------------------------
+   UPDATE PROFILE
+------------------------------------------------------------- */
 
-// -------------------------------------------------------------
-// UPDATE PROFILE
-// -------------------------------------------------------------
 app.post("/update-profile", async (req, res) => {
   const { uh_id, first_name, last_name, email, linkedin } = req.body;
 
@@ -158,9 +237,10 @@ app.post("/update-profile", async (req, res) => {
   }
 });
 
-// -------------------------------------------------------------
-// GET ALL ALUMNI
-// -------------------------------------------------------------
+/* -------------------------------------------------------------
+   GET ALL ALUMNI
+------------------------------------------------------------- */
+
 app.get("/alumni/all", async (req, res) => {
   try {
     const [rows] = await db.execute(
@@ -174,10 +254,10 @@ app.get("/alumni/all", async (req, res) => {
   }
 });
 
+/* -------------------------------------------------------------
+   GET ALL PROFESSORS
+------------------------------------------------------------- */
 
-// -------------------------------------------------------------
-// GET ALL PROFESSORS
-// -------------------------------------------------------------
 app.get("/professors/all", async (req, res) => {
   try {
     const [rows] = await db.execute(
@@ -191,10 +271,10 @@ app.get("/professors/all", async (req, res) => {
   }
 });
 
+/* -------------------------------------------------------------
+   START SERVER
+------------------------------------------------------------- */
 
-// -------------------------------------------------------------
-// START SERVER
-// -------------------------------------------------------------
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () =>
   console.log(`🚀 Server running at http://localhost:${PORT}`)
