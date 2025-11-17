@@ -193,7 +193,7 @@ app.get("/get-profile", async (req, res) => {
 
   try {
     const [rows] = await db.execute(
-      "SELECT first_name, last_name, email, linkedin, admin FROM users WHERE uh_id = ?",
+      "SELECT first_name, last_name, email, linkedin, admin, memberPoints FROM users WHERE uh_id = ?",
       [uh_id]
     );
 

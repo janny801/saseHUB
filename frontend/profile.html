@@ -49,6 +49,17 @@
       font-size: 1em;
     }
 
+    .points-box {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 6px;
+      background-color: #132235;
+      border: 1px solid #70c041;
+      color: #70c041;
+      font-weight: bold;
+      text-align: center;
+    }
+
     button {
       width: 100%;
       margin-top: 20px;
@@ -115,6 +126,12 @@
   <h1>Your Profile</h1>
 
   <div class="profile-container">
+
+    <!-- NEW POINTS DISPLAY -->
+    <div id="pointsDisplay" class="points-box">
+      Loading points...
+    </div>
+
     <label for="firstName">First Name</label>
     <input type="text" id="firstName" placeholder="Enter your first name" />
 
@@ -147,26 +164,14 @@
   </div>
 
   <script>
-    // -----------------------
-    // LOGIN CHECK
-    // -----------------------
     const uh_id = localStorage.getItem("uh_id");
     if (!localStorage.getItem("loggedIn") || !uh_id) {
       window.location.href = "login.html";
     }
 
-    // -----------------------
-    // LOAD USER PROFILE
-    // -----------------------
     document.addEventListener("DOMContentLoaded", async () => {
       try {
         const res = await fetch(`/get-profile?uh_id=${uh_id}`);
-
-        if (!res.ok) {
-          console.error("Profile fetch failed:", res.status);
-          return;
-        }
-
         const data = await res.json();
 
         if (data.user) {
@@ -174,16 +179,16 @@
           document.getElementById("lastName").value = data.user.last_name || "";
           document.getElementById("email").value = data.user.email || "";
           document.getElementById("linkedin").value = data.user.linkedin || "";
-        }
 
+          const points = data.user.memberPoints ?? 0;
+          document.getElementById("pointsDisplay").textContent =
+            `Points: ${points}`;
+        }
       } catch (err) {
         console.error("❌ Error loading profile:", err);
       }
     });
 
-    // -----------------------
-    // SAVE PROFILE
-    // -----------------------
     async function saveProfile() {
       const profileData = {
         uh_id,
