@@ -81,6 +81,7 @@ async function getMemberFromSheet(uh_id) {
       const email = row[2];
       const sheetUHID = row[3];
       const paidStatus = row[4];
+      const totalPoints = row[5];   // ← COLUMN F
 
       if (String(sheetUHID) === String(uh_id)) {
         return {
@@ -88,6 +89,7 @@ async function getMemberFromSheet(uh_id) {
           first_name: firstName || null,
           last_name: lastName || null,
           email: email || null,
+          totalPoints: totalPoints || 0,   // ← return points
           paid: paidStatus && paidStatus.toLowerCase() === "paid"
         };
       }
@@ -183,8 +185,9 @@ app.post("/login", async (req, res) => {
   }
 });
 
+
 /* -------------------------------------------------------------
-   GET PROFILE
+   GET PROFILE (MySQL info + Google Sheets points)
 ------------------------------------------------------------- */
 
 app.get("/get-profile", async (req, res) => {
@@ -192,16 +195,33 @@ app.get("/get-profile", async (req, res) => {
   if (!uh_id) return res.status(400).json({ message: "Missing UH ID" });
 
   try {
+    // 1️⃣ Get editable MySQL fields
     const [rows] = await db.execute(
-      "SELECT first_name, last_name, email, linkedin, admin, memberPoints FROM users WHERE uh_id = ?",
+      "SELECT first_name, last_name, email, linkedin, admin FROM users WHERE uh_id = ?",
       [uh_id]
     );
 
     if (rows.length === 0) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found in database" });
     }
 
-    return res.json({ user: rows[0] });
+    const userData = rows[0];
+
+    // 2️⃣ Get points from Google Sheet (using helper)
+    const sheetMember = await getMemberFromSheet(uh_id);
+
+    const points = sheetMember
+      ? Number(sheetMember.totalPoints) || 0
+      : 0;
+
+    // 3️⃣ Return merged result
+    return res.json({
+      user: {
+        ...userData,
+        memberPoints: points
+      }
+    });
+
   } catch (err) {
     console.error("❌ Error fetching profile:", err);
     return res.status(500).json({ message: "Server error fetching profile" });
