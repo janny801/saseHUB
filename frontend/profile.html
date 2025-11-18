@@ -248,15 +248,33 @@ async function loadSavedProfessors() {
     list.innerHTML = professors
       .map(
         p => `
-          <li style="display:flex; align-items:center; gap:12px;">
-            <img 
-              src="${p.profile_pic_url || 'images/default_professor.png'}"
-              style="width:60px;height:60px;border-radius:8px;border:1px solid #70c041;object-fit:cover;"
-            />
-            <div>
-              <strong>${p.professor_name}</strong><br>
-              <span>Majors: ${p.majors || "None"}</span>
+          <li style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
+            
+            <div style="display:flex; align-items:center; gap:12px;">
+              <img 
+                src="${p.profile_pic_url || 'images/default_professor.png'}"
+                style="width:60px;height:60px;border-radius:8px;border:1px solid #70c041;object-fit:cover;"
+              />
+              <div>
+                <strong>${p.professor_name}</strong><br>
+                <span>Majors: ${p.majors || "None"}</span>
+              </div>
             </div>
+
+            <button 
+              onclick="unsaveProfessor(${p.id})"
+              style="
+                padding:6px 10px;
+                background:#ff4d4d;
+                color:white;
+                border:none;
+                border-radius:6px;
+                cursor:pointer;
+              "
+            >
+              Unsave
+            </button>
+
           </li>
         `
       )
@@ -266,7 +284,23 @@ async function loadSavedProfessors() {
     list.innerHTML = "<li>Error loading saved professors</li>";
   }
 }
-    /* ============================
+
+async function unsaveProfessor(professorId) {
+  try {
+    await fetch("/saved-professors/remove", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uh_id, professor_id: professorId })
+    });
+
+    loadSavedProfessors(); // refresh list
+  } catch (err) {
+    console.error("❌ Error unsaving professor:", err);
+  }
+}
+
+
+/* ============================
        LOAD SAVED INTERNSHIPS
     ============================ */
     async function loadSavedInternships() {
