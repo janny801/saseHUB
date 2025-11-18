@@ -16,6 +16,38 @@
       window.location.href = "/login.html";
     }
   </script>
+
+  <style>
+    /* small styling ONLY for professor cards */
+    .professor-card {
+      background: #111820;
+      border: 1px solid #70c041;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .professor-card img {
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #70c041;
+    }
+
+    .professor-info h3 {
+      margin: 0;
+      color: #70c041;
+    }
+
+    .professor-list {
+      max-width: 800px;
+      margin: 30px auto;
+    }
+  </style>
 </head>
 
 <body>
@@ -40,19 +72,60 @@
   <a href="../index.html" class="back-btn">← Back to Dashboard</a>
 </div>
 
+<!-- NEW: Where professors will be rendered -->
+<div id="professorsSection" class="professor-list"></div>
+
 <script>
   function toggleMenu() {
     document.getElementById("dropdownMenu").classList.toggle("show");
   }
+
   window.onclick = function(event) {
     if (!event.target.matches('.hamburger')) {
       document.getElementById("dropdownMenu").classList.remove("show");
     }
   };
+
   function logout() {
     localStorage.clear();
     window.location.href = "/login.html";
   }
+
+  /* ================================
+        LOAD PROFESSORS
+     ================================ */
+  async function loadProfessors() {
+    try {
+      const res = await fetch("/professors/all");
+      const data = await res.json();
+
+      let html = "<h2 style='color:#70c041;text-align:center;'>UH Professors</h2>";
+
+      data.forEach(p => {
+        html += `
+          <div class="professor-card">
+            <img src="${p.profile_pic_url || '../images/saselogo.webp'}" />
+
+            <div class="professor-info">
+              <h3>${p.professor_name}</h3>
+              <p><strong>Majors:</strong> ${p.majors || "None"}</p>
+              <p><strong>Email:</strong> ${p.email}</p>
+              <p><strong>University:</strong> ${p.university}</p>
+              <p>${p.description || ""}</p>
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById("professorsSection").innerHTML = html;
+
+    } catch (err) {
+      console.error("Error loading professors:", err);
+    }
+  }
+
+  // Load immediately
+  loadProfessors();
 </script>
 
 </body>
