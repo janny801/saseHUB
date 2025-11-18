@@ -147,7 +147,22 @@
   }
 
   let allAlumni = [];
+  let savedAlumni = [];
   let industryList = [];
+
+  /* ======================
+        LOAD SAVED ALUMNI
+     ====================== */
+  async function loadSavedAlumni() {
+    const uh_id = localStorage.getItem("uh_id");
+
+    try {
+      const res = await fetch(`/saved-alumni/${uh_id}`);
+      savedAlumni = await res.json();
+    } catch (err) {
+      savedAlumni = [];
+    }
+  }
 
   async function loadIndustries() {
     const res = await fetch("/alumni/all");
@@ -174,7 +189,11 @@
     industryList = Array.from(set);
   }
 
+  /* ======================
+          LOAD ALUMNI
+     ====================== */
   async function loadAlumni() {
+    await loadSavedAlumni();
     const res = await fetch("/alumni/all");
     allAlumni = await res.json();
     applyFilters();
@@ -203,6 +222,34 @@
     renderAlumni(results);
   }
 
+  /* ======================
+        SAVE / UNSAVE
+     ====================== */
+  async function toggleSaveAlumni(alumniId) {
+    const uh_id = localStorage.getItem("uh_id");
+    const alreadySaved = savedAlumni.some(a => a.id === alumniId);
+
+    if (!alreadySaved) {
+      await fetch("/saved-alumni/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uh_id, alumni_id: alumniId })
+      });
+    } else {
+      await fetch("/saved-alumni/remove", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uh_id, alumni_id: alumniId })
+      });
+    }
+
+    await loadSavedAlumni();
+    applyFilters();
+  }
+
+  /* ======================
+         RENDER
+     ====================== */
   function renderAlumni(list) {
     let section = document.getElementById("alumniSection");
 
@@ -217,6 +264,8 @@
     let html = "<h2 style='color:#70c041;text-align:center;'>SASE Alumni</h2>";
 
     list.forEach(a => {
+      const isSaved = savedAlumni.some(sa => sa.id === a.id);
+
       html += `
         <div class="alumni-card">
           <img src="${a.profile_pic || '../images/saselogo.webp'}" />
@@ -229,8 +278,11 @@
             <p><strong>Industries:</strong> ${a.industries || "None"}</p>
           </div>
 
-          <button class="save-btn">
-            Save
+          <button 
+            class="save-btn ${isSaved ? "saved" : ""}"
+            onclick="toggleSaveAlumni(${a.id})"
+          >
+            ${isSaved ? "Saved ✓" : "Save"}
           </button>
         </div>
       `;
