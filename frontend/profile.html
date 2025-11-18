@@ -233,29 +233,39 @@
     /* ============================
        LOAD SAVED PROFESSORS
     ============================ */
-    async function loadSavedProfessors() {
-      const list = document.getElementById("savedProfessors");
+async function loadSavedProfessors() {
+  const list = document.getElementById("savedProfessors");
 
-      try {
-        const res = await fetch(`/saved-professors/${uh_id}`);
-        const professors = await res.json();
+  try {
+    const res = await fetch(`/saved-professors/${uh_id}`);
+    const professors = await res.json();
 
-        if (!professors.length) {
-          list.innerHTML = "<li>No saved professors yet</li>";
-          return;
-        }
-
-        list.innerHTML = professors
-          .map(
-            p => `<li><strong>${p.professor_name}</strong><br>Majors: ${p.majors}</li>`
-          )
-          .join("");
-      } catch (err) {
-        console.error("❌ Error loading saved professors:", err);
-        list.innerHTML = "<li>Error loading saved professors</li>";
-      }
+    if (!professors.length) {
+      list.innerHTML = "<li>No saved professors yet</li>";
+      return;
     }
 
+    list.innerHTML = professors
+      .map(
+        p => `
+          <li style="display:flex; align-items:center; gap:12px;">
+            <img 
+              src="${p.profile_pic_url || 'images/default_professor.png'}"
+              style="width:60px;height:60px;border-radius:8px;border:1px solid #70c041;object-fit:cover;"
+            />
+            <div>
+              <strong>${p.professor_name}</strong><br>
+              <span>Majors: ${p.majors || "None"}</span>
+            </div>
+          </li>
+        `
+      )
+      .join("");
+  } catch (err) {
+    console.error("❌ Error loading saved professors:", err);
+    list.innerHTML = "<li>Error loading saved professors</li>";
+  }
+}
     /* ============================
        LOAD SAVED INTERNSHIPS
     ============================ */
