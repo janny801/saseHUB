@@ -278,9 +278,6 @@ app.get("/alumni/all", async (req, res) => {
    GET ALL PROFESSORS
 ------------------------------------------------------------- */
 
-/* -------------------------------------------------------------
-   GET ALL PROFESSORS — MULTIPLE MAJORS SUPPORT
-------------------------------------------------------------- */
 app.get("/professors/all", async (req, res) => {
   try {
     const [rows] = await db.execute(`
@@ -604,6 +601,229 @@ app.get("/saved-professors/:uh_id", async (req, res) => {
   } catch (err) {
     console.error("❌ Error fetching saved professors:", err);
     return res.status(500).json({ message: "Server error fetching saved professors" });
+  }
+});
+
+
+
+/* -------------------------------------------------------------
+   ADD ALUMNI — MULTIPLE IMAGE UPLOADS
+------------------------------------------------------------- */
+app.post("/alumni/add",
+  upload.fields([
+    { name: "profile_pic", maxCount: 1 },
+    { name: "company_img", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    try {
+      console.log("📌 Add Alumni — Body:", req.body);
+
+      const {
+        full_name,
+        company,
+        role_title,
+        email,
+        linkedin,
+        other_link,
+        industries
+      } = req.body;
+
+      if (!full_name || !company || !role_title || !email) {
+        console.log("❌ Add Alumni failed — Missing fields");
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      let profile_pic_url = null;
+      let company_img_url = null;
+
+      // Upload profile picture if provided
+      if (req.files["profile_pic"]) {
+        const uploaded = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { folder: "sasehub_alumni" },
+            (err, result) => err ? reject(err) : resolve(result)
+          ).end(req.files["profile_pic"][0].buffer);
+        });
+
+        profile_pic_url = uploaded.secure_url;
+        console.log("📷 Alumni profile picture uploaded:", profile_pic_url);
+      }
+
+      // Upload company image if provided
+      if (req.files["company_img"]) {
+        const uploaded2 = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { folder: "sasehub_alumni" },
+            (err, result) => err ? reject(err) : resolve(result)
+          ).end(req.files["company_img"][0].buffer);
+        });
+
+        company_img_url = uploaded2.secure_url;
+        console.log("🏢 Alumni company image uploaded:", company_img_url);
+      }
+
+      const [result] = await db.execute(
+        `INSERT INTO alumni 
+          (full_name, company, role_title, email, linkedin, other_link, industries, profile_pic, company_img)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          full_name,
+          company,
+          role_title,
+          email,
+          linkedin,
+          other_link,
+          industries,
+          profile_pic_url,
+          company_img_url
+        ]
+      );
+
+      console.log(`🎓 Alumni added → ID: ${result.insertId}, Name: ${full_name}`);
+
+      return res.json({ message: "Alumni added successfully!" });
+
+    } catch (err) {
+      console.error("❌ Error adding alumni:", err);
+      return res.status(500).json({ message: "Server error adding alumni" });
+    }
+  }
+);
+
+
+/* -------------------------------------------------------------
+   UPDATE ALUMNI — OPTIONAL IMAGES
+------------------------------------------------------------- */
+app.post("/alumni/update",
+  upload.fields([
+    { name: "profile_pic", maxCount: 1 },
+    { name: "company_img", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    try {
+      console.log("📌 Update Alumni — Body:", req.body);
+
+      const {
+        id,
+        full_name,
+        company,
+        role_title,
+        email,
+        linkedin,
+        other_link,
+        industries
+      } = req.body;
+
+      if (!id) {
+        console.log("❌ Update Alumni failed — Missing ID");
+        return res.status(400).json({ message: "Missing alumni ID" });
+      }
+
+      let profile_pic_url = null;
+      let company_img_url = null;
+
+      // Upload profile picture only if file was provided
+      if (req.files["profile_pic"]) {
+        const uploaded = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { folder: "sasehub_alumni" },
+            (err, result) => err ? reject(err) : resolve(result)
+          ).end(req.files["profile_pic"][0].buffer);
+        });
+
+        profile_pic_url = uploaded.secure_url;
+        console.log("📷 Updated alumni profile pic:", profile_pic_url);
+      }
+
+      // Upload company image if provided
+      if (req.files["company_img"]) {
+        const uploaded2 = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { folder: "sasehub_alumni" },
+            (err, result) => err ? reject(err) : resolve(result)
+          ).end(req.files["company_img"][0].buffer);
+        });
+
+        company_img_url = uploaded2.secure_url;
+        console.log("🏢 Updated alumni company image:", company_img_url);
+      }
+
+      /* ---- Build dynamic update query ---- */
+
+      let query = `
+        UPDATE alumni SET
+          full_name = ?, 
+          company = ?, 
+          role_title = ?, 
+          email = ?, 
+          linkedin = ?, 
+          other_link = ?, 
+          industries = ?
+      `;
+
+      const values = [
+        full_name,
+        company,
+        role_title,
+        email,
+        linkedin,
+        other_link,
+        industries
+      ];
+
+      if (profile_pic_url) {
+        query += `, profile_pic = ?`;
+        values.push(profile_pic_url);
+      }
+
+      if (company_img_url) {
+        query += `, company_img = ?`;
+        values.push(company_img_url);
+      }
+
+      query += ` WHERE id = ?`;
+      values.push(id);
+
+      await db.execute(query, values);
+
+      console.log(`🛠 Alumni updated → ID: ${id}, Name: ${full_name}`);
+
+      return res.json({ message: "Alumni updated successfully!" });
+
+    } catch (err) {
+      console.error("❌ Error updating alumni:", err);
+      return res.status(500).json({ message: "Server error updating alumni" });
+    }
+  }
+);
+
+
+/* -------------------------------------------------------------
+   DELETE ALUMNI
+------------------------------------------------------------- */
+app.delete("/alumni/delete/:id", async (req, res) => {
+  try {
+    const alumniId = req.params.id;
+
+    console.log(`🗑️ Attempting to delete alumni ID: ${alumniId}`);
+
+    const [result] = await db.execute(
+      "DELETE FROM alumni WHERE id = ?",
+      [alumniId]
+    );
+
+    if (result.affectedRows === 0) {
+      console.log(`❌ Delete failed — Alumni ID ${alumniId} not found`);
+      return res.status(404).json({ message: "Alumni not found" });
+    }
+
+    console.log(`🚮 Alumni deleted → ID: ${alumniId}`);
+
+    return res.json({ message: "Alumni deleted successfully" });
+
+  } catch (err) {
+    console.error("❌ Error deleting alumni:", err);
+    return res.status(500).json({ message: "Server error deleting alumni" });
   }
 });
 

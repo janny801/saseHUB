@@ -74,8 +74,49 @@
     <input id="alumni_other" type="text" placeholder="Other Link" />
     <input id="alumni_tags" type="text" placeholder="Industry Tags (ex: Tech, Aerospace)" />
 
-    <button class="btn">Save Alumni</button>
+    <button class="btn" onclick="saveAlumni()">Save Alumni</button>
     <button class="btn close-btn" onclick="closeModal('alumniModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- =============================== -->
+<!--     EDIT ALUMNI MODAL          -->
+<!-- =============================== -->
+
+<div id="editAlumniModal" class="modal-bg">
+  <div class="modal">
+    <h2>Edit Alumni</h2>
+
+    <label style="color:#70c041">Company Image (optional)</label>
+    <input id="edit_alumni_company_img" type="file" accept="image/*" />
+
+    <label style="color:#70c041">Profile Picture (optional)</label>
+    <input id="edit_alumni_profile_pic" type="file" accept="image/*" />
+
+    <input id="edit_alumni_fullname" type="text" placeholder="Full Name" />
+    <input id="edit_alumni_company" type="text" placeholder="Company" />
+    <input id="edit_alumni_role" type="text" placeholder="Current Role Type" />
+    <input id="edit_alumni_email" type="email" placeholder="Email" />
+    <input id="edit_alumni_linkedin" type="text" placeholder="LinkedIn URL" />
+    <input id="edit_alumni_other" type="text" placeholder="Other Link" />
+    <input id="edit_alumni_tags" type="text" placeholder="Industry Tags" />
+
+    <button class="btn" onclick="saveAlumniUpdate()">Save Changes</button>
+    <button class="btn close-btn" onclick="closeModal('editAlumniModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- =============================== -->
+<!--  DELETE ALUMNI CONFIRM MODAL   -->
+<!-- =============================== -->
+
+<div id="deleteAlumniModal" class="modal-bg">
+  <div class="modal">
+    <h2>Delete Alumni?</h2>
+    <p>Are you sure you want to delete this alumni?</p>
+
+    <button class="btn" onclick="confirmDeleteAlumni()">Yes, Delete</button>
+    <button class="btn close-btn" onclick="closeModal('deleteAlumniModal')">Cancel</button>
   </div>
 </div>
 
@@ -173,8 +214,14 @@
 
 <script>
 
+  /* ========================= */
+  /*       MENU / LOGOUT       */
+  /* ========================= */
+
   let editProfID = null;
   let deleteProfID = null;
+  let editAlumniID = null;
+  let deleteAlumniID = null;
 
   function toggleMenu() {
     document.getElementById("dropdownMenu").classList.toggle("show");
@@ -203,6 +250,10 @@
     document.getElementById(id).style.display = "none";
   }
 
+  /* ========================= */
+  /*        LOAD ALUMNI        */
+  /* ========================= */
+
   async function loadAlumni() {
     const res = await fetch("/alumni/all");
     const data = await res.json();
@@ -221,7 +272,7 @@
         <th>Industries</th>
         <th>Profile Pic</th>
         <th>Company Img</th>
-        <th>Created</th>
+        <th>Actions</th>
       </tr>
     `;
 
@@ -236,9 +287,17 @@
           <td>${a.linkedin}</td>
           <td>${a.other_link}</td>
           <td>${a.industries}</td>
-          <td>${a.profile_pic}</td>
-          <td>${a.company_img}</td>
-          <td>${a.created_at}</td>
+          <td>${a.profile_pic ? `<img src="${a.profile_pic}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;">` : "None"}</td>
+          <td>${a.company_img ? `<img src="${a.company_img}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;">` : "None"}</td>
+          <td style="position:relative;">
+            <button class="kebab-btn" onclick="toggleKebabMenu(event, 'al-${a.id}')">⋮</button>
+            <div id="kebab-al-${a.id}" class="kebab-menu">
+              <div onclick="openEditAlumni(${a.id}, \`${a.full_name}\`, \`${a.company}\`, \`${a.role_title}\`, \`${a.email}\`, \`${a.linkedin}\`, \`${a.other_link}\`, \`${a.industries}\`)">
+                Edit
+              </div>
+              <div onclick="openDeleteAlumni(${a.id})">Delete</div>
+            </div>
+          </td>
         </tr>
       `;
     });
@@ -246,6 +305,120 @@
     html += "</table>";
     document.getElementById("dataSection").innerHTML = html;
   }
+
+  /* ========================= */
+  /*     ADD ALUMNI (POST)     */
+  /* ========================= */
+
+  async function saveAlumni() {
+    const formData = new FormData();
+
+    formData.append("full_name", document.getElementById("alumni_fullname").value);
+    formData.append("company", document.getElementById("alumni_company").value);
+    formData.append("role_title", document.getElementById("alumni_role").value);
+    formData.append("email", document.getElementById("alumni_email").value);
+    formData.append("linkedin", document.getElementById("alumni_linkedin").value);
+    formData.append("other_link", document.getElementById("alumni_other").value);
+    formData.append("industries", document.getElementById("alumni_tags").value);
+
+    if (document.getElementById("alumni_profile_pic").files[0]) {
+      formData.append("profile_pic", document.getElementById("alumni_profile_pic").files[0]);
+    }
+
+    if (document.getElementById("alumni_company_img").files[0]) {
+      formData.append("company_img", document.getElementById("alumni_company_img").files[0]);
+    }
+
+    const res = await fetch("/alumni/add", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+    alert(data.message);
+    closeModal("alumniModal");
+    loadAlumni();
+  }
+
+  /* ========================= */
+  /*     EDIT ALUMNI (OPEN)    */
+  /* ========================= */
+
+  function openEditAlumni(id, name, company, role, email, linkedin, other, tags) {
+    editAlumniID = id;
+
+    document.getElementById("edit_alumni_fullname").value = name;
+    document.getElementById("edit_alumni_company").value = company;
+    document.getElementById("edit_alumni_role").value = role;
+    document.getElementById("edit_alumni_email").value = email;
+    document.getElementById("edit_alumni_linkedin").value = linkedin;
+    document.getElementById("edit_alumni_other").value = other;
+    document.getElementById("edit_alumni_tags").value = tags;
+
+    document.getElementById("edit_alumni_company_img").value = "";
+    document.getElementById("edit_alumni_profile_pic").value = "";
+
+    openModal("editAlumniModal");
+  }
+
+  /* ========================= */
+  /*   UPDATE ALUMNI (POST)    */
+  /* ========================= */
+
+  async function saveAlumniUpdate() {
+    const formData = new FormData();
+
+    formData.append("id", editAlumniID);
+    formData.append("full_name", document.getElementById("edit_alumni_fullname").value);
+    formData.append("company", document.getElementById("edit_alumni_company").value);
+    formData.append("role_title", document.getElementById("edit_alumni_role").value);
+    formData.append("email", document.getElementById("edit_alumni_email").value);
+    formData.append("linkedin", document.getElementById("edit_alumni_linkedin").value);
+    formData.append("other_link", document.getElementById("edit_alumni_other").value);
+    formData.append("industries", document.getElementById("edit_alumni_tags").value);
+
+    if (document.getElementById("edit_alumni_profile_pic").files[0]) {
+      formData.append("profile_pic", document.getElementById("edit_alumni_profile_pic").files[0]);
+    }
+
+    if (document.getElementById("edit_alumni_company_img").files[0]) {
+      formData.append("company_img", document.getElementById("edit_alumni_company_img").files[0]);
+    }
+
+    const res = await fetch("/alumni/update", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+    alert(data.message);
+    closeModal("editAlumniModal");
+    loadAlumni();
+  }
+
+  /* ========================= */
+  /*   DELETE ALUMNI (MODAL)   */
+  /* ========================= */
+
+  function openDeleteAlumni(id) {
+    deleteAlumniID = id;
+    openModal("deleteAlumniModal");
+  }
+
+  async function confirmDeleteAlumni() {
+    const res = await fetch("/alumni/delete/" + deleteAlumniID, {
+      method: "DELETE"
+    });
+
+    const data = await res.json();
+    alert(data.message);
+    closeModal("deleteAlumniModal");
+    loadAlumni();
+  }
+
+  /* ========================= */
+  /*   LOAD PROFESSORS         */
+  /* ========================= */
 
   async function loadProfessors() {
     const res = await fetch("/professors/all");
@@ -283,8 +456,7 @@
           <td>${p.description}</td>
           <td>
             ${p.profile_pic_url
-              ? `<img src="${p.profile_pic_url}" 
-                      style="width:60px; height:60px; object-fit:cover; border-radius:6px;">`
+              ? `<img src="${p.profile_pic_url}" style="width:60px; height:60px; object-fit:cover; border-radius:6px;">`
               : "No Image"}
           </td>
           <td style="position:relative;">
@@ -293,9 +465,7 @@
               <div onclick="openEditProfessor(${p.id}, \`${nameSafe}\`, \`${majorsSafe}\`, \`${emailSafe}\`, \`${universitySafe}\`, \`${descriptionSafe}\`)">
                 Edit
               </div>
-              <div onclick="openDeleteProfessor(${p.id})">
-                Delete
-              </div>
+              <div onclick="openDeleteProfessor(${p.id})">Delete</div>
             </div>
           </td>
         </tr>
@@ -324,6 +494,10 @@
       m.style.display = "none";
     });
   });
+
+  /* ========================= */
+  /*   MAJORS FOR PROFESSORS   */
+  /* ========================= */
 
   let majorsCache = [];
   let selectedMajors = [];
@@ -406,6 +580,10 @@
     renderMajorDropdown(majorsCache);
   }
 
+  /* ========================= */
+  /*     SAVE PROFESSOR        */
+  /* ========================= */
+
   async function saveProfessor() {
     const name = document.getElementById("prof_name").value;
     const email = document.getElementById("prof_email").value;
@@ -437,9 +615,9 @@
     loadProfessors();
   }
 
-  /* ======================= */
-  /*   EDIT MAJORS HANDLING  */
-  /* ======================= */
+  /* ========================= */
+  /*       EDIT PROFESSOR      */
+  /* ========================= */
 
   let editMajorsCache = [];
   let editSelectedMajors = [];
@@ -542,6 +720,10 @@
     renderMajorDropdownEdit(editMajorsCache);
   }
 
+  /* ========================= */
+  /*   OPEN EDIT PROFESSOR     */
+  /* ========================= */
+
   async function openEditProfessor(id, name, majorNames, email, university, description) {
     editProfID = id;
 
@@ -555,6 +737,10 @@
     document.getElementById("edit_prof_pic").value = "";
     openModal("editProfModal");
   }
+
+  /* ========================= */
+  /*   SAVE PROFESSOR UPDATE   */
+  /* ========================= */
 
   async function saveProfessorUpdate() {
     const name = document.getElementById("edit_prof_name").value;
@@ -588,6 +774,10 @@
     loadProfessors();
   }
 
+  /* ========================= */
+  /*   DELETE PROFESSOR MODAL  */
+  /* ========================= */
+
   function openDeleteProfessor(id) {
     deleteProfID = id;
     openModal("deleteProfModal");
@@ -604,6 +794,20 @@
     closeModal("deleteProfModal");
     loadProfessors();
   }
+
+  /* ========================= */
+  /*       KEBAB MENU          */
+  /* ========================= */
+
+  function toggleKebabMenu(event, id) {
+    event.stopPropagation();
+    document.querySelectorAll(".kebab-menu").forEach(m => (m.style.display = "none"));
+    document.getElementById("kebab-" + id).style.display = "block";
+  }
+
+  document.body.addEventListener("click", () => {
+    document.querySelectorAll(".kebab-menu").forEach(m => (m.style.display = "none"));
+  });
 
 </script>
 
