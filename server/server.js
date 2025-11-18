@@ -36,6 +36,8 @@ const __dirname = path.dirname(__filename);
 const frontendPath = path.join(__dirname, "../frontend");
 app.use(express.static(frontendPath));
 
+app.use("/pages", express.static(path.join(frontendPath, "pages")));
+
 // Default route → login
 app.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "login.html"));
@@ -365,6 +367,63 @@ app.post("/professors/add", upload.single("profile_pic"), async (req, res) => {
     return res.status(500).json({ message: "Server error adding professor" });
   }
 });
+
+/* -------------------------------------------------------------
+   UPDATE PROFESSOR
+------------------------------------------------------------- */
+app.post("/professors/update", async (req, res) => {
+  try {
+    const { id, professor_name, email, university, description } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "Missing professor ID" });
+    }
+
+    const [result] = await db.execute(
+      `UPDATE professors 
+       SET professor_name = ?, email = ?, university = ?, description = ?
+       WHERE id = ?`,
+      [professor_name, email, university, description, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Professor not found" });
+    }
+
+    return res.json({ message: "Professor updated successfully" });
+
+  } catch (err) {
+    console.error("❌ Error updating professor:", err);
+    return res.status(500).json({ message: "Server error updating professor" });
+  }
+});
+
+/* -------------------------------------------------------------
+   DELETE PROFESSOR
+------------------------------------------------------------- */
+app.delete("/professors/delete/:id", async (req, res) => {
+  try {
+    const professorId = req.params.id;
+
+    const [result] = await db.execute(
+      "DELETE FROM professors WHERE id = ?",
+      [professorId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Professor not found" });
+    }
+
+    return res.json({ message: "Professor deleted successfully" });
+
+  } catch (err) {
+    console.error("❌ Error deleting professor:", err);
+    return res.status(500).json({ message: "Server error deleting professor" });
+  }
+});
+
+
+
 
 /* -------------------------------------------------------------
    START SERVER
