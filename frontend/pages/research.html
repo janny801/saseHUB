@@ -18,7 +18,6 @@
   </script>
 
   <style>
-    /* small styling ONLY for professor cards */
     .professor-card {
       background: #111820;
       border: 1px solid #70c041;
@@ -44,8 +43,27 @@
     }
 
     .professor-list {
-      max-width: 800px;
+      max-width: 850px;
       margin: 30px auto;
+    }
+
+    /* Search + filters */
+    .filter-bar {
+      max-width: 850px;
+      margin: 20px auto;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar input,
+    .filter-bar select {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #70c041;
+      background: #0f141a;
+      color: white;
+      flex: 1;
     }
   </style>
 </head>
@@ -67,64 +85,168 @@
 
 <div class="page-container">
   <h2>Find Professors & Labs</h2>
-  <p>This page will contain UH research opportunities, lab listings, and professor info.</p>
+  <p>Search for UH professors offering research opportunities.</p>
 
   <a href="../index.html" class="back-btn">← Back to Dashboard</a>
 </div>
 
-<!-- NEW: Where professors will be rendered -->
+<!-- ======================= -->
+<!-- Search + Filter Section -->
+<!-- ======================= -->
+<div class="filter-bar">
+  <input id="searchInput" type="text" placeholder="Search professors (name, major, university, etc.)" oninput="applyFilters()" />
+
+  <select id="collegeFilter" onchange="applyFilters()">
+    <option value="">Filter by College</option>
+  </select>
+
+  <select id="majorFilter" onchange="applyFilters()">
+    <option value="">Filter by Major</option>
+  </select>
+</div>
+
+<!-- Professors displayed here -->
 <div id="professorsSection" class="professor-list"></div>
 
 <script>
   function toggleMenu() {
     document.getElementById("dropdownMenu").classList.toggle("show");
   }
-
   window.onclick = function(event) {
     if (!event.target.matches('.hamburger')) {
-      document.getElementById("dropdownMenu").classList.remove("show");
+      const menu = document.getElementById("dropdownMenu");
+      if (menu) menu.classList.remove("show");
     }
   };
-
   function logout() {
     localStorage.clear();
     window.location.href = "/login.html";
   }
 
   /* ================================
-        LOAD PROFESSORS
+        LOAD PROFESSORS + MAJORS
      ================================ */
-  async function loadProfessors() {
-    try {
-      const res = await fetch("/professors/all");
-      const data = await res.json();
+  let allProfessors = [];
+  let majorsLookup = [];
 
-      let html = "<h2 style='color:#70c041;text-align:center;'>UH Professors</h2>";
+  async function loadMajorsForFilters() {
+    const res = await fetch("/majors/all");
+    const majors = await res.json();
 
-      data.forEach(p => {
-        html += `
-          <div class="professor-card">
-            <img src="${p.profile_pic_url || '../images/saselogo.webp'}" />
+    majorsLookup = majors;
 
-            <div class="professor-info">
-              <h3>${p.professor_name}</h3>
-              <p><strong>Majors:</strong> ${p.majors || "None"}</p>
-              <p><strong>Email:</strong> ${p.email}</p>
-              <p><strong>University:</strong> ${p.university}</p>
-              <p>${p.description || ""}</p>
-            </div>
-          </div>
-        `;
-      });
+    const collegeSet = new Set();
+    const majorSelect = document.getElementById("majorFilter");
+    const collegeSelect = document.getElementById("collegeFilter");
 
-      document.getElementById("professorsSection").innerHTML = html;
+    majors.forEach(m => {
+      // Add major to dropdown
+      const opt = document.createElement("option");
+      opt.value = m.major_name;
+      opt.textContent = m.major_name;
+      majorSelect.appendChild(opt);
 
-    } catch (err) {
-      console.error("Error loading professors:", err);
-    }
+      // Add college to dropdown
+      if (m.college_name && !collegeSet.has(m.college_name)) {
+        collegeSet.add(m.college_name);
+        const opt2 = document.createElement("option");
+        opt2.value = m.college_name;
+        opt2.textContent = m.college_name;
+        collegeSelect.appendChild(opt2);
+      }
+    });
   }
 
-  // Load immediately
+  async function loadProfessors() {
+    const res = await fetch("/professors/all");
+    allProfessors = await res.json();
+    applyFilters();
+  }
+
+  /* ================================
+        SEARCH + FILTER LOGIC
+     ================================ */
+  function applyFilters() {
+    const searchText = document.getElementById("searchInput").value.toLowerCase();
+    const selectedMajor = document.getElementById("majorFilter").value;
+    const selectedCollege = document.getElementById("collegeFilter").value;
+
+    let results = allProfessors;
+
+    // 1. Search text
+    results = results.filter(p => {
+      return (
+        p.professor_name.toLowerCase().includes(searchText) ||
+        (p.majors && p.majors.toLowerCase().includes(searchText)) ||
+        p.university.toLowerCase().includes(searchText) ||
+        (p.description && p.description.toLowerCase().includes(searchText)) ||
+        p.email.toLowerCase().includes(searchText)
+      );
+    });
+
+    // 2. Filter by major
+    if (selectedMajor) {
+      results = results.filter(p =>
+        p.majors && p.majors.toLowerCase().includes(selectedMajor.toLowerCase())
+      );
+    }
+
+    // 3. Filter by college
+    if (selectedCollege) {
+      results = results.filter(p => {
+        if (!p.majors) return false;
+
+        const profMajors = p.majors.split(",");
+        for (const maj of profMajors) {
+          const found = majorsLookup.find(
+            m => m.major_name.trim().toLowerCase() === maj.trim().toLowerCase()
+          );
+          if (found && found.college_name === selectedCollege) return true;
+        }
+        return false;
+      });
+    }
+
+    renderProfessors(results);
+  }
+
+  /* ================================
+        RENDER CARDS
+     ================================ */
+  function renderProfessors(list) {
+    let section = document.getElementById("professorsSection");
+
+    if (list.length === 0) {
+      section.innerHTML = `
+        <p style="text-align:center; color:#70c041; margin-top:40px;">
+          No professors are offering research or match your criteria.
+        </p>`;
+      return;
+    }
+
+    let html = "<h2 style='color:#70c041;text-align:center;'>UH Professors</h2>";
+
+    list.forEach(p => {
+      html += `
+        <div class="professor-card">
+          <img src="${p.profile_pic_url || '../images/saselogo.webp'}" />
+
+          <div class="professor-info">
+            <h3>${p.professor_name}</h3>
+            <p><strong>Majors:</strong> ${p.majors || "None"}</p>
+            <p><strong>University:</strong> ${p.university}</p>
+            <p><strong>Email:</strong> ${p.email}</p>
+            <p>${p.description || ""}</p>
+          </div>
+        </div>
+      `;
+    });
+
+    section.innerHTML = html;
+  }
+
+  // Load everything
+  loadMajorsForFilters();
   loadProfessors();
 </script>
 
