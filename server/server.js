@@ -504,6 +504,98 @@ app.delete("/professors/delete/:id", async (req, res) => {
 });
 
 
+/* -------------------------------------------------------------
+   SAVE PROFESSOR FOR USER
+------------------------------------------------------------- */
+app.post("/saved-professors/save", async (req, res) => {
+  try {
+    const { uh_id, professor_id } = req.body;
+
+    if (!uh_id || !professor_id) {
+      return res.status(400).json({ message: "Missing uh_id or professor_id" });
+    }
+
+    // Prevent duplicates
+    const [existing] = await db.execute(
+      "SELECT * FROM saved_professors WHERE uh_id = ? AND professor_id = ?",
+      [uh_id, professor_id]
+    );
+
+    if (existing.length > 0) {
+      return res.json({ message: "Professor already saved" });
+    }
+
+    await db.execute(
+      "INSERT INTO saved_professors (uh_id, professor_id) VALUES (?, ?)",
+      [uh_id, professor_id]
+    );
+
+    return res.json({ message: "Professor saved successfully" });
+  } catch (err) {
+    console.error("❌ Error saving professor:", err);
+    return res.status(500).json({ message: "Server error saving professor" });
+  }
+});
+
+/* -------------------------------------------------------------
+   REMOVE SAVED PROFESSOR
+------------------------------------------------------------- */
+app.delete("/saved-professors/remove", async (req, res) => {
+  try {
+    const { uh_id, professor_id } = req.body;
+
+    if (!uh_id || !professor_id) {
+      return res.status(400).json({ message: "Missing uh_id or professor_id" });
+    }
+
+    await db.execute(
+      "DELETE FROM saved_professors WHERE uh_id = ? AND professor_id = ?",
+      [uh_id, professor_id]
+    );
+
+    return res.json({ message: "Professor unsaved successfully" });
+  } catch (err) {
+    console.error("❌ Error removing saved professor:", err);
+    return res.status(500).json({ message: "Server error removing saved professor" });
+  }
+});
+
+/* -------------------------------------------------------------
+   GET SAVED PROFESSORS FOR USER
+------------------------------------------------------------- */
+app.get("/saved-professors/:uh_id", async (req, res) => {
+  try {
+    const { uh_id } = req.params;
+
+    const [rows] = await db.execute(
+      `
+      SELECT 
+        p.id,
+        p.professor_name,
+        p.email,
+        p.university,
+        p.description,
+        p.profile_pic_url,
+        GROUP_CONCAT(m.major_name ORDER BY m.major_name SEPARATOR ', ') AS majors
+      FROM saved_professors sp
+      JOIN professors p ON sp.professor_id = p.id
+      LEFT JOIN professor_majors pm ON p.id = pm.professor_id
+      LEFT JOIN majors m ON pm.major_id = m.id
+      WHERE sp.uh_id = ?
+      GROUP BY p.id
+      `,
+      [uh_id]
+    );
+
+    return res.json(rows);
+  } catch (err) {
+    console.error("❌ Error fetching saved professors:", err);
+    return res.status(500).json({ message: "Server error fetching saved professors" });
+  }
+});
+
+
+
 
 /* -------------------------------------------------------------
    START SERVER

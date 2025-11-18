@@ -27,6 +27,7 @@
       display: flex;
       gap: 20px;
       align-items: flex-start;
+      justify-content: space-between;
     }
 
     .professor-card img {
@@ -35,6 +36,10 @@
       object-fit: cover;
       border-radius: 10px;
       border: 1px solid #70c041;
+    }
+
+    .professor-info {
+      flex: 1;
     }
 
     .professor-info h3 {
@@ -47,7 +52,6 @@
       margin: 30px auto;
     }
 
-    /* Search + filters */
     .filter-bar {
       max-width: 850px;
       margin: 20px auto;
@@ -64,6 +68,23 @@
       background: #0f141a;
       color: white;
       flex: 1;
+    }
+
+    .save-btn {
+      background: #70c041;
+      color: black;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      height: fit-content;
+    }
+
+    .save-btn.saved {
+      background: #333;
+      color: #70c041;
+      cursor: default;
     }
   </style>
 </head>
@@ -90,22 +111,17 @@
   <a href="../index.html" class="back-btn">← Back to Dashboard</a>
 </div>
 
-<!-- ======================= -->
 <!-- Search + Filter Section -->
-<!-- ======================= -->
 <div class="filter-bar">
   <input id="searchInput" type="text" placeholder="Search professors (name, major, university, etc.)" oninput="applyFilters()" />
-
   <select id="collegeFilter" onchange="applyFilters()">
     <option value="">Filter by College</option>
   </select>
-
   <select id="majorFilter" onchange="applyFilters()">
     <option value="">Filter by Major</option>
   </select>
 </div>
 
-<!-- Professors displayed here -->
 <div id="professorsSection" class="professor-list"></div>
 
 <script>
@@ -118,14 +134,15 @@
       if (menu) menu.classList.remove("show");
     }
   };
+
   function logout() {
     localStorage.clear();
     window.location.href = "/login.html";
   }
 
-  /* ================================
-        LOAD PROFESSORS + MAJORS
-     ================================ */
+  /* ==========================
+       LOAD MAJORS + PROFESSORS
+     ========================== */
   let allProfessors = [];
   let majorsLookup = [];
 
@@ -140,13 +157,11 @@
     const collegeSelect = document.getElementById("collegeFilter");
 
     majors.forEach(m => {
-      // Add major to dropdown
       const opt = document.createElement("option");
       opt.value = m.major_name;
       opt.textContent = m.major_name;
       majorSelect.appendChild(opt);
 
-      // Add college to dropdown
       if (m.college_name && !collegeSet.has(m.college_name)) {
         collegeSet.add(m.college_name);
         const opt2 = document.createElement("option");
@@ -163,9 +178,9 @@
     applyFilters();
   }
 
-  /* ================================
-        SEARCH + FILTER LOGIC
-     ================================ */
+  /* ==========================
+       SEARCH + FILTER LOGIC
+     ========================== */
   function applyFilters() {
     const searchText = document.getElementById("searchInput").value.toLowerCase();
     const selectedMajor = document.getElementById("majorFilter").value;
@@ -173,29 +188,23 @@
 
     let results = allProfessors;
 
-    // 1. Search text
-    results = results.filter(p => {
-      return (
-        p.professor_name.toLowerCase().includes(searchText) ||
-        (p.majors && p.majors.toLowerCase().includes(searchText)) ||
-        p.university.toLowerCase().includes(searchText) ||
-        (p.description && p.description.toLowerCase().includes(searchText)) ||
-        p.email.toLowerCase().includes(searchText)
-      );
-    });
+    results = results.filter(p =>
+      p.professor_name.toLowerCase().includes(searchText) ||
+      (p.majors && p.majors.toLowerCase().includes(searchText)) ||
+      p.university.toLowerCase().includes(searchText) ||
+      (p.description && p.description.toLowerCase().includes(searchText)) ||
+      p.email.toLowerCase().includes(searchText)
+    );
 
-    // 2. Filter by major
     if (selectedMajor) {
       results = results.filter(p =>
         p.majors && p.majors.toLowerCase().includes(selectedMajor.toLowerCase())
       );
     }
 
-    // 3. Filter by college
     if (selectedCollege) {
       results = results.filter(p => {
         if (!p.majors) return false;
-
         const profMajors = p.majors.split(",");
         for (const maj of profMajors) {
           const found = majorsLookup.find(
@@ -210,11 +219,41 @@
     renderProfessors(results);
   }
 
-  /* ================================
-        RENDER CARDS
-     ================================ */
+  /* ==========================
+        SAVE FEATURE (LOCAL)
+     ========================== */
+
+  function getSavedList() {
+    const uh_id = localStorage.getItem("uh_id");
+    const data = JSON.parse(localStorage.getItem("savedProfessors")) || {};
+    return data[uh_id] || [];
+  }
+
+  function toggleSaveProfessor(professorId) {
+    const uh_id = localStorage.getItem("uh_id");
+    let data = JSON.parse(localStorage.getItem("savedProfessors")) || {};
+
+    if (!data[uh_id]) data[uh_id] = [];
+
+    const alreadySaved = data[uh_id].includes(professorId);
+
+    if (alreadySaved) {
+      data[uh_id] = data[uh_id].filter(id => id !== professorId);
+    } else {
+      data[uh_id].push(professorId);
+    }
+
+    localStorage.setItem("savedProfessors", JSON.stringify(data));
+
+    applyFilters(); // re-render
+  }
+
+  /* ==========================
+        RENDER PROFESSOR CARDS
+     ========================== */
   function renderProfessors(list) {
     let section = document.getElementById("professorsSection");
+    const savedList = getSavedList();
 
     if (list.length === 0) {
       section.innerHTML = `
@@ -227,6 +266,8 @@
     let html = "<h2 style='color:#70c041;text-align:center;'>UH Professors</h2>";
 
     list.forEach(p => {
+      const isSaved = savedList.includes(p.id);
+
       html += `
         <div class="professor-card">
           <img src="${p.profile_pic_url || '../images/saselogo.webp'}" />
@@ -238,6 +279,13 @@
             <p><strong>Email:</strong> ${p.email}</p>
             <p>${p.description || ""}</p>
           </div>
+
+          <button 
+            class="save-btn ${isSaved ? "saved" : ""}"
+            onclick="toggleSaveProfessor(${p.id})"
+          >
+            ${isSaved ? "Saved ✓" : "Save"}
+          </button>
         </div>
       `;
     });
@@ -245,7 +293,6 @@
     section.innerHTML = html;
   }
 
-  // Load everything
   loadMajorsForFilters();
   loadProfessors();
 </script>
