@@ -371,24 +371,95 @@ app.post("/professors/add", upload.single("profile_pic"), async (req, res) => {
 /* -------------------------------------------------------------
    UPDATE PROFESSOR
 ------------------------------------------------------------- */
-app.post("/professors/update", async (req, res) => {
+/* -------------------------------------------------------------
+   UPDATE PROFESSOR — NOW SUPPORTS IMAGE + MAJOR UPDATE + LOGGING
+------------------------------------------------------------- */
+
+app.post("/professors/update", upload.single("profile_pic"), async (req, res) => {
+  console.log("📌 Received request to update professor.");
+
   try {
-    const { id, professor_name, email, university, description } = req.body;
+    console.log("➡ Body received:", req.body);
+
+    const {
+      id,
+      professor_name,
+      email,
+      university,
+      description,
+      major_id
+    } = req.body;
 
     if (!id) {
+      console.log("❌ Missing professor ID!");
       return res.status(400).json({ message: "Missing professor ID" });
     }
 
-    const [result] = await db.execute(
-      `UPDATE professors 
-       SET professor_name = ?, email = ?, university = ?, description = ?
-       WHERE id = ?`,
-      [professor_name, email, university, description, id]
-    );
+    let profile_pic_url = null;
+
+    /* ----------- HANDLE OPTIONAL PROFILE PIC UPLOAD ----------- */
+    if (req.file) {
+      console.log("📸 New profile picture uploaded. Uploading to Cloudinary...");
+
+      try {
+        const uploaded = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { folder: "sasehub_professors" },
+            (err, result) => {
+              if (err) reject(err);
+              else resolve(result);
+            }
+          ).end(req.file.buffer);
+        });
+
+        profile_pic_url = uploaded.secure_url;
+        console.log("✅ Cloudinary upload success:", profile_pic_url);
+
+      } catch (err) {
+        console.error("❌ Cloudinary upload error:", err);
+      }
+    } else {
+      console.log("ℹ No new profile picture included.");
+    }
+
+    /* ----------- BUILD SQL UPDATE QUERY ----------- */
+
+    let updateQuery = `
+      UPDATE professors 
+      SET professor_name = ?, email = ?, university = ?, description = ?
+    `;
+
+    const updateValues = [professor_name, email, university, description];
+
+    // If updating profile picture
+    if (profile_pic_url) {
+      updateQuery += `, profile_pic_url = ?`;
+      updateValues.push(profile_pic_url);
+      console.log("📌 Profile picture will be updated.");
+    }
+
+    // If major_id is provided
+    if (major_id && major_id.trim() !== "") {
+      updateQuery += `, major_id = ?`;
+      updateValues.push(major_id);
+      console.log("📌 Major will be updated:", major_id);
+    }
+
+    updateQuery += ` WHERE id = ?`;
+    updateValues.push(id);
+
+    console.log("🛠 Final SQL Query:", updateQuery);
+    console.log("🛠 SQL Values:", updateValues);
+
+    /* ----------- PERFORM UPDATE IN DATABASE ----------- */
+    const [result] = await db.execute(updateQuery, updateValues);
 
     if (result.affectedRows === 0) {
+      console.log("❌ Professor not found in DB.");
       return res.status(404).json({ message: "Professor not found" });
     }
+
+    console.log("✅ Professor updated successfully:", id);
 
     return res.json({ message: "Professor updated successfully" });
 
@@ -397,7 +468,6 @@ app.post("/professors/update", async (req, res) => {
     return res.status(500).json({ message: "Server error updating professor" });
   }
 });
-
 /* -------------------------------------------------------------
    DELETE PROFESSOR
 ------------------------------------------------------------- */

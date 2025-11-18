@@ -3,8 +3,271 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>SASE Admin Portal</title>
-  <link rel="stylesheet" href="/pages/admin.css" />
+
+<style>
+    body {
+      background-color: #0b0c10;
+      color: #f5f5f5;
+      font-family: "Trebuchet MS", sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .page-title {
+      color: #70c041;
+      font-size: 1.8em;
+      margin: 0;
+    }
+
+    .simple-header {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 2px solid #70c041;
+    }
+
+    .sase-logo {
+      width: 140px;
+      margin-right: 15px;
+    }
+
+    .menu-container {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+    }
+
+    .hamburger {
+      background-color: #70c041;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 14px;
+      cursor: pointer;
+      color: #0b0c10;
+      font-size: 18px;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .hamburger:hover {
+      background-color: #66b3ff;
+      color: white;
+    }
+
+    .dropdown {
+      display: none;
+      position: absolute;
+      top: 45px;
+      right: 0;
+      background-color: #0f1722;
+      border: 1px solid #70c041;
+      border-radius: 6px;
+      min-width: 160px;
+      z-index: 5;
+      box-shadow: 0 0 10px rgba(112,192,65,0.3);
+    }
+
+    .dropdown a {
+      color: #f5f5f5;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
+
+    .dropdown a:hover {
+      background-color: #66b3ff;
+    }
+
+    .show {
+      display: block;
+    }
+
+    .admin-wrapper {
+      max-width: 900px;
+      margin: 40px auto;
+      background: #0f1722;
+      padding: 25px;
+      border: 2px solid #70c041;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(112,192,65,0.3);
+      text-align: center;
+    }
+
+    .admin-buttons { margin-top: 25px; }
+
+    .btn {
+      background: #70c041;
+      color: #0b0c10;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 8px;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: #66b3ff;
+      color: white;
+    }
+
+    #dataSection {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #0f1722;
+      border: 2px solid #70c041;
+    }
+
+    th, td {
+      border: 1px solid #70c041;
+      padding: 10px;
+      font-size: 0.9em;
+    }
+
+    th {
+      background: #122030;
+      color: #70c041;
+    }
+
+    .modal-bg {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .modal {
+      background: #0f1722;
+      border: 2px solid #70c041;
+      border-radius: 10px;
+      padding: 20px;
+      width: 420px;
+      text-align: left;
+      box-shadow: 0 0 10px rgba(112,192,65,0.3);
+    }
+
+    .modal input,
+    .modal textarea {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 2px solid #66b3ff;
+      border-radius: 6px;
+      background: #0b0c10;
+      color: #f5f5f5;
+    }
+
+    .close-btn {
+      background: #ff4f4f;
+      color: white;
+    }
+
+    .close-btn:hover { background: #ff3333; }
+
+    /* ================================== */
+    /*       DROPDOWN MAJORS SECTION     */
+    /* ================================== */
+
+    .dropdown-container {
+      width: 100%;
+      margin: 10px 0;
+      text-align: left;
+      position: relative;
+    }
+
+    #major_search {
+      width: 90%;
+      background: #0b0c10;
+      border: 2px solid #66b3ff;
+      border-radius: 6px;
+      padding: 10px;
+      color: #f5f5f5;
+    }
+
+    .dropdown-list {
+      background: #0f1722;
+      border: 2px solid #70c041;
+      border-radius: 6px;
+      max-height: 180px;
+      overflow-y: auto;
+      display: none;
+      width: 100%;
+      margin-top: 5px;
+      padding: 0;
+      box-shadow: 0 0 10px rgba(112,192,65,0.3);
+      z-index: 9999;
+    }
+
+    .dropdown-item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 6px 10px;
+      border-bottom: 1px solid rgba(112,192,65,0.2);
+      white-space: nowrap;
+      overflow: hidden;
+      cursor: pointer; /* click to select */
+    }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    /* selected major = green row */
+    .dropdown-item.selected {
+      background: #70c041;
+      color: #0b0c10;
+    }
+
+    .dropdown-item span {
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 0.9em;
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    #major_tags {
+      margin-top: 10px;
+    }
+
+    .major-tag {
+      display: inline-flex;
+      background: #70c041;
+      color: #0b0c10;
+      padding: 6px 12px;
+      border-radius: 14px;
+      margin: 4px;
+      font-size: 0.85em;
+      font-weight: bold;
+    }
+
+    .major-tag span {
+      margin-left: 8px;
+      cursor: pointer;
+    }
+</style>
+
+
 </head>
 
 <body>
@@ -52,43 +315,74 @@
 
 <div id="dataSection"></div>
 
-<!-- EXISTING ALUMNI MODAL (unchanged) -->
-<div id="alumniModal" class="modal-bg">...</div>
+<!-- =============================== -->
+<!--        ADD ALUMNI MODAL        -->
+<!-- =============================== -->
 
-<!-- NEW: EDIT PROFESSOR MODAL -->
-<div id="editProfModal" class="modal-bg">
+<div id="alumniModal" class="modal-bg">
   <div class="modal">
-    <h2>Edit Professor</h2>
+    <h2>Add New Alumni</h2>
 
-    <input id="edit_prof_name" type="text" placeholder="Professor Name" />
-    <input id="edit_prof_email" type="email" placeholder="Email" />
-    <input id="edit_prof_university" type="text" placeholder="University" />
-    <textarea id="edit_prof_desc" rows="3" placeholder="Description"></textarea>
+    <label style="color:#70c041">Company Image</label>
+    <input id="alumni_company_img" type="file" accept="image/*" />
 
-    <button class="btn" onclick="saveProfessorUpdate()">Save Changes</button>
-    <button class="btn close-btn" onclick="closeModal('editProfModal')">Cancel</button>
+    <label style="color:#70c041">Profile Picture</label>
+    <input id="alumni_profile_pic" type="file" accept="image/*" />
+
+    <input id="alumni_fullname" type="text" placeholder="Full Name" />
+    <input id="alumni_company" type="text" placeholder="Company" />
+    <input id="alumni_role" type="text" placeholder="Current Role Type" />
+    <input id="alumni_email" type="email" placeholder="Email" />
+    <input id="alumni_linkedin" type="text" placeholder="LinkedIn URL" />
+    <input id="alumni_other" type="text" placeholder="Other Link" />
+    <input id="alumni_tags" type="text" placeholder="Industry Tags (ex: Tech, Aerospace)" />
+
+    <button class="btn">Save Alumni</button>
+    <button class="btn close-btn" onclick="closeModal('alumniModal')">Cancel</button>
   </div>
 </div>
 
-<!-- NEW: DELETE CONFIRM MODAL -->
-<div id="deleteProfModal" class="modal-bg">
-  <div class="modal">
-    <h2>Delete Professor?</h2>
-    <p>Are you sure you want to delete this professor?</p>
+<!-- =============================== -->
+<!--     ADD PROFESSOR MODAL        -->
+<!-- =============================== -->
 
-    <button class="btn" onclick="confirmDeleteProfessor()">Yes, Delete</button>
-    <button class="btn close-btn" onclick="closeModal('deleteProfModal')">Cancel</button>
+<div id="profModal" class="modal-bg">
+  <div class="modal">
+    <h2>Add New Professor</h2>
+
+    <label style="color:#70c041">Profile Picture</label>
+    <input id="prof_pic" type="file" accept="image/*" />
+
+    <input id="prof_name" type="text" placeholder="Professor Name" />
+    <input id="prof_email" type="email" placeholder="Email" />
+    <input id="prof_university" type="text" placeholder="University" />
+
+    <textarea id="prof_desc" placeholder="Description/Bio" rows="3"></textarea>
+
+    <label style="color:#70c041">Select Majors</label>
+
+    <div class="dropdown-container">
+      <input 
+        id="major_search"
+        type="text"
+        placeholder="Search or select majors..."
+        onclick="toggleMajorDropdown()"
+        oninput="filterMajors()"
+      />
+
+      <div id="major_tags"></div>
+
+      <div id="major_list" class="dropdown-list"></div>
+    </div>
+
+    <input type="hidden" id="selected_major_ids" />
+
+    <button class="btn" onclick="saveProfessor()">Save Professor</button>
+    <button class="btn close-btn" onclick="closeModal('profModal')">Cancel</button>
   </div>
 </div>
-
-<!-- EXISTING PROFESSOR MODAL (unchanged) -->
-<div id="profModal" class="modal-bg">...</div>
 
 <script>
-
-  let editProfID = null;
-  let deleteProfID = null;
-
   function toggleMenu() {
     document.getElementById("dropdownMenu").classList.toggle("show");
   }
@@ -113,7 +407,49 @@
     document.getElementById(id).style.display = "none";
   }
 
-  /* -------------------- LOAD PROFESSORS -------------------- */
+  async function loadAlumni() {
+    const res = await fetch("/alumni/all");
+    const data = await res.json();
+
+    let html = `
+      <h2 style="color:#70c041; text-align:center;">All Alumni</h2>
+      <table>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Company</th>
+        <th>Role</th>
+        <th>Email</th>
+        <th>LinkedIn</th>
+        <th>Other Link</th>
+        <th>Industries</th>
+        <th>Profile Pic</th>
+        <th>Company Img</th>
+        <th>Created</th>
+      </tr>
+    `;
+
+    data.forEach(a => {
+      html += `
+        <tr>
+          <td>${a.id}</td>
+          <td>${a.full_name}</td>
+          <td>${a.company}</td>
+          <td>${a.role_title}</td>
+          <td>${a.email}</td>
+          <td>${a.linkedin}</td>
+          <td>${a.other_link}</td>
+          <td>${a.industries}</td>
+          <td>${a.profile_pic}</td>
+          <td>${a.company_img}</td>
+          <td>${a.created_at}</td>
+        </tr>
+      `;
+    });
+
+    html += "</table>";
+    document.getElementById("dataSection").innerHTML = html;
+  }
 
   async function loadProfessors() {
     const res = await fetch("/professors/all");
@@ -130,12 +466,10 @@
         <th>University</th>
         <th>Description</th>
         <th>Profile Pic</th>
-        <th>Actions</th>
       </tr>
     `;
 
     data.forEach(p => {
-
       html += `
         <tr>
           <td>${p.id}</td>
@@ -144,26 +478,7 @@
           <td>${p.email}</td>
           <td>${p.university}</td>
           <td>${p.description}</td>
-          <td>
-            ${p.profile_pic_url
-              ? `<img src="${p.profile_pic_url}" 
-                      style="width:60px; height:60px; object-fit:cover; border-radius:6px;">`
-              : "No Image"}
-          </td>
-
-          <!-- NEW: kebab menu -->
-          <td style="position:relative;">
-            <button class="kebab-btn" onclick="toggleKebabMenu(event, ${p.id})">⋮</button>
-
-            <div id="kebab-${p.id}" class="kebab-menu">
-              <div onclick="openEditProfessor(${p.id}, '${p.professor_name}', '${p.email}', '${p.university}', \`${p.description}\`)">
-                Edit
-              </div>
-              <div onclick="openDeleteProfessor(${p.id})">
-                Delete
-              </div>
-            </div>
-          </td>
+          <td>${p.profile_pic_url}</td>
         </tr>
       `;
     });
@@ -171,84 +486,6 @@
     html += "</table>";
     document.getElementById("dataSection").innerHTML = html;
   }
-
-
-  /* -------------------- KEBAB MENU LOGIC -------------------- */
-
-  function toggleKebabMenu(event, id) {
-    event.stopPropagation();
-
-    document.querySelectorAll(".kebab-menu").forEach(m => {
-      m.style.display = "none";
-    });
-
-    document.getElementById("kebab-" + id).style.display = "block";
-  }
-
-  document.body.addEventListener("click", () => {
-    document.querySelectorAll(".kebab-menu").forEach(m => {
-      m.style.display = "none";
-    });
-  });
-
-
-  /* -------------------- EDIT PROFESSOR -------------------- */
-
-  function openEditProfessor(id, name, email, university, description) {
-    editProfID = id;
-
-    document.getElementById("edit_prof_name").value = name;
-    document.getElementById("edit_prof_email").value = email;
-    document.getElementById("edit_prof_university").value = university;
-    document.getElementById("edit_prof_desc").value = description;
-
-    openModal("editProfModal");
-  }
-
-  async function saveProfessorUpdate() {
-    const body = {
-      id: editProfID,
-      professor_name: document.getElementById("edit_prof_name").value,
-      email: document.getElementById("edit_prof_email").value,
-      university: document.getElementById("edit_prof_university").value,
-      description: document.getElementById("edit_prof_desc").value,
-    };
-
-    const res = await fetch("/professors/update", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(body)
-    });
-
-    const data = await res.json();
-    alert(data.message);
-
-    closeModal("editProfModal");
-    loadProfessors();
-  }
-
-
-  /* -------------------- DELETE PROFESSOR -------------------- */
-
-  function openDeleteProfessor(id) {
-    deleteProfID = id;
-    openModal("deleteProfModal");
-  }
-
-  async function confirmDeleteProfessor() {
-    const res = await fetch("/professors/delete/" + deleteProfID, {
-      method: "DELETE"
-    });
-
-    const data = await res.json();
-
-    alert(data.message);
-    closeModal("deleteProfModal");
-    loadProfessors();
-  }
-
-
-  /* -------------------- MAJORS + SAVE PROFESSOR (unchanged) -------------------- */
 
   let majorsCache = [];
   let selectedMajors = [];
@@ -281,6 +518,7 @@
       const item = document.createElement("div");
       item.className = "dropdown-item";
 
+      // highlight if currently selected
       if (selectedMajors.find(x => x.id === m.id)) {
         item.classList.add("selected");
       }
@@ -288,6 +526,7 @@
       const nameSpan = document.createElement("span");
       nameSpan.textContent = m.major_name.trim();
 
+      // click row to toggle selection
       item.onclick = function() {
         toggleMajorSelection(m);
       };
@@ -307,6 +546,8 @@
     }
 
     updateMajorTags();
+
+    // re-render full list so selected rows get green background
     renderMajorDropdown(majorsCache);
   }
 
@@ -331,6 +572,14 @@
     renderMajorDropdown(majorsCache);
   }
 
+  function fileToBase64(file) {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function saveProfessor() {
     const name = document.getElementById("prof_name").value;
     const email = document.getElementById("prof_email").value;
@@ -339,20 +588,22 @@
     const major_ids = selectedMajors.map(m => m.id).join(",");
     const picFile = document.getElementById("prof_pic").files[0];
 
-    const formData = new FormData();
-    formData.append("professor_name", name);
-    formData.append("email", email);
-    formData.append("university", university);
-    formData.append("description", description);
-    formData.append("major_id", major_ids);
+    let picBase64 = null;
+    if (picFile) picBase64 = await fileToBase64(picFile);
 
-    if (picFile) {
-      formData.append("profile_pic", picFile);
-    }
+    const payload = {
+      professor_name: name,
+      major_id: major_ids,
+      email: email,
+      university: university,
+      description: description,
+      profile_pic_base64: picBase64
+    };
 
     const res = await fetch("/professors/add", {
       method: "POST",
-      body: formData
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
     });
 
     const data = await res.json();
@@ -361,7 +612,6 @@
     closeModal("profModal");
     loadProfessors();
   }
-
 </script>
 
 </body>
