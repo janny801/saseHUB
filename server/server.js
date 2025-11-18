@@ -309,11 +309,10 @@ app.get("/professors/all", async (req, res) => {
 /* -------------------------------------------------------------
    GET ALL MAJORS
 ------------------------------------------------------------- */
-
 app.get("/majors/all", async (req, res) => {
   try {
     const [rows] = await db.execute(
-      "SELECT id, major_name FROM majors ORDER BY major_name"
+      "SELECT id, major_name, college_name FROM majors ORDER BY major_name"
     );
 
     return res.json(rows);
@@ -325,10 +324,6 @@ app.get("/majors/all", async (req, res) => {
 
 /* -------------------------------------------------------------
    ADD PROFESSOR — NOW USING MULTER
-------------------------------------------------------------- */
-
-/* -------------------------------------------------------------
-   ADD PROFESSOR — MULTIPLE MAJORS + CLOUDINARY
 ------------------------------------------------------------- */
 app.post("/professors/add", upload.single("profile_pic"), async (req, res) => {
   try {
