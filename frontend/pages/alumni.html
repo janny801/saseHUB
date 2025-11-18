@@ -8,15 +8,94 @@
   <link rel="stylesheet" href="../pages/pagestyle.css" />
 
   <script>
-    // login expiration
     const loggedIn = localStorage.getItem("loggedIn");
     const loginTime = localStorage.getItem("loginTime");
-    const oneHour = 60 * 60 * 1000;
-    if (!loggedIn || !loginTime || Date.now() - parseInt(loginTime) > oneHour) {
+    const oneHour = 3600000;
+    if (!loggedIn || !loginTime || Date.now() - loginTime > oneHour) {
       localStorage.clear();
       window.location.href = "/login.html";
     }
   </script>
+
+<style>
+  .alumni-card {
+    background: transparent;
+    border: none;
+    padding: 20px 5px;
+    margin-bottom: 30px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-radius: 0;
+    border-bottom: 1px solid #70c041;
+    padding-bottom: 25px;
+  }
+
+  .alumni-card:last-child {
+    border-bottom: none;
+  }
+
+  .alumni-card img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #70c041;
+  }
+
+  .alumni-info {
+    flex: 1;
+    max-width: 100%;
+  }
+
+  .alumni-info h3 {
+    margin: 0;
+    color: #70c041;
+  }
+
+  .alumni-list {
+    max-width: 900px;
+    margin: 30px auto;
+  }
+
+  .filter-bar {
+    max-width: 900px;
+    margin: 20px auto;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .filter-bar input,
+  .filter-bar select {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #70c041;
+    background: #0f141a;
+    color: white;
+    flex: 1;
+  }
+
+  .save-btn {
+    background: #70c041;
+    color: black;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    height: fit-content;
+    white-space: nowrap;
+  }
+
+  .save-btn.saved {
+    background: #333;
+    color: #70c041;
+    cursor: default;
+  }
+</style>
+
 </head>
 
 <body>
@@ -36,10 +115,20 @@
 
 <div class="page-container">
   <h2>Connect With Alumni</h2>
-  <p>Here you can list alumni profiles, industries, mentorship opportunities, etc.</p>
+  <p>Find alumni by industry, company, skills, and more.</p>
 
   <a href="../index.html" class="back-btn">← Back to Dashboard</a>
 </div>
+
+<!-- Search + Filter Section -->
+<div class="filter-bar">
+  <input id="searchInput" type="text" placeholder="Search alumni (name, company, industry, etc.)" oninput="applyFilters()" />
+  <select id="industryFilter" onchange="applyFilters()">
+    <option value="">Filter by Industry</option>
+  </select>
+</div>
+
+<div id="alumniSection" class="alumni-list"></div>
 
 <script>
   function toggleMenu() {
@@ -47,13 +136,111 @@
   }
   window.onclick = function(event) {
     if (!event.target.matches('.hamburger')) {
-      document.getElementById("dropdownMenu").classList.remove("show");
+      const menu = document.getElementById("dropdownMenu");
+      if (menu) menu.classList.remove("show");
     }
   };
+
   function logout() {
     localStorage.clear();
     window.location.href = "/login.html";
   }
+
+  let allAlumni = [];
+  let industryList = [];
+
+  async function loadIndustries() {
+    const res = await fetch("/alumni/all");
+    const data = await res.json();
+
+    const set = new Set();
+    data.forEach(a => {
+      if (a.industries) {
+        a.industries.split(",").forEach(tag => {
+          const clean = tag.trim();
+          if (clean.length > 0) set.add(clean);
+        });
+      }
+    });
+
+    const select = document.getElementById("industryFilter");
+    set.forEach(ind => {
+      const opt = document.createElement("option");
+      opt.value = ind;
+      opt.textContent = ind;
+      select.appendChild(opt);
+    });
+
+    industryList = Array.from(set);
+  }
+
+  async function loadAlumni() {
+    const res = await fetch("/alumni/all");
+    allAlumni = await res.json();
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const searchText = document.getElementById("searchInput").value.toLowerCase();
+    const industryFilter = document.getElementById("industryFilter").value;
+
+    let results = allAlumni;
+
+    results = results.filter(a =>
+      a.full_name.toLowerCase().includes(searchText) ||
+      a.company.toLowerCase().includes(searchText) ||
+      a.role_title.toLowerCase().includes(searchText) ||
+      (a.industries && a.industries.toLowerCase().includes(searchText))
+    );
+
+    if (industryFilter) {
+      results = results.filter(a =>
+        a.industries &&
+        a.industries.toLowerCase().includes(industryFilter.toLowerCase())
+      );
+    }
+
+    renderAlumni(results);
+  }
+
+  function renderAlumni(list) {
+    let section = document.getElementById("alumniSection");
+
+    if (list.length === 0) {
+      section.innerHTML = `
+        <p style="text-align:center; color:#70c041; margin-top:40px;">
+          No alumni match your criteria.
+        </p>`;
+      return;
+    }
+
+    let html = "<h2 style='color:#70c041;text-align:center;'>SASE Alumni</h2>";
+
+    list.forEach(a => {
+      html += `
+        <div class="alumni-card">
+          <img src="${a.profile_pic || '../images/saselogo.webp'}" />
+
+          <div class="alumni-info">
+            <h3>${a.full_name}</h3>
+            <p><strong>Company:</strong> ${a.company}</p>
+            <p><strong>Role:</strong> ${a.role_title}</p>
+            <p><strong>Email:</strong> ${a.email}</p>
+            <p><strong>Industries:</strong> ${a.industries || "None"}</p>
+          </div>
+
+          <button class="save-btn">
+            Save
+          </button>
+        </div>
+      `;
+    });
+
+    section.innerHTML = html;
+  }
+
+  loadIndustries();
+  loadAlumni();
 </script>
 
 </body>
