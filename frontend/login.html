@@ -72,6 +72,50 @@
       color: #b0c7b6;
       font-size: 0.9em;
     }
+
+    /* ------------------ POPUP STYLES ------------------ */
+    #errorPopup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .popup-hidden {
+      display: none !important;
+    }
+
+    .popup-content {
+      background-color: #0f1722;
+      border: 2px solid #70c041;
+      border-radius: 10px;
+      padding: 25px;
+      width: 300px;
+      text-align: center;
+      color: #f5f5f5;
+      box-shadow: 0 0 18px rgba(112,192,65,0.3);
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: bold;
+      color: #70c041;
+    }
+
+    .close-btn:hover {
+      color: #66b3ff;
+    }
   </style>
 </head>
 
@@ -81,7 +125,8 @@
     <img src="images/saselogo.webp" alt="SASE Logo" />
     <h1>SASE UH Member Login</h1>
 
-    <form onsubmit="handleLogin(event)">
+    <!-- MAIN FIX IS HERE -->
+    <form onsubmit="return handleLogin(event)">
       <input type="text" id="login-uhid" placeholder="Enter your UH ID" required />
       <button type="submit">Login</button>
     </form>
@@ -89,7 +134,24 @@
 
   <footer>© 2025 SASE University of Houston</footer>
 
+  <!-- POPUP ERROR BOX -->
+  <div id="errorPopup" class="popup-hidden">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closePopup()">×</span>
+      <p id="popupMessage"></p>
+    </div>
+  </div>
+
 <script>
+  function showPopup(message) {
+    document.getElementById("popupMessage").textContent = message;
+    document.getElementById("errorPopup").classList.remove("popup-hidden");
+  }
+
+  function closePopup() {
+    document.getElementById("errorPopup").classList.add("popup-hidden");
+  }
+
   async function handleLogin(event) {
     event.preventDefault();
     const uh_id = document.getElementById("login-uhid").value.trim();
@@ -102,28 +164,26 @@
       });
 
       const data = await res.json();
-      alert(data.message);
 
-      if (data.message === "Login successful") {
-
-        const user = data.user;   // <-- IMPORTANT
-
-        // Save login state
-        localStorage.setItem("loggedIn", "true");
-        localStorage.setItem("loginTime", Date.now().toString());
-        localStorage.setItem("uh_id", user.uh_id);
-
-        // Save admin flag returned from backend
-        localStorage.setItem("admin", user.admin);  
-
-        console.log("Saved admin =", user.admin);
-
-        // Redirect
-        window.location.href = "/index.html";
+      if (data.message !== "Login successful") {
+        showPopup(data.message);
+        return false;  // prevent browser default popup
       }
+
+      const user = data.user;
+
+      localStorage.setItem("loggedIn", "true");
+      localStorage.setItem("loginTime", Date.now().toString());
+      localStorage.setItem("uh_id", user.uh_id);
+      localStorage.setItem("admin", user.admin);
+
+      window.location.href = "/index.html";
+      return false;
+
     } catch (err) {
       console.error("Login failed:", err);
-      alert("Login failed. Please try again.");
+      showPopup("Login failed. Please try again.");
+      return false;
     }
   }
 </script>
