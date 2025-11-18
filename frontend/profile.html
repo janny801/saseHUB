@@ -277,18 +277,19 @@
                     style="width:60px;height:60px;border-radius:8px;border:1px solid #70c041;object-fit:cover;"
                   />
                   
-                  <div style="flex:1;">
-                    <strong>${p.professor_name}</strong><br>
-                    <span>Majors: ${p.majors || "None"}</span><br>
+                <div style="flex:1;">
+                  <strong>${p.professor_name}</strong><br>
+                  <span>Majors: ${p.majors || "None"}</span><br>
+                  <span>Email: ${p.email || "No email listed"}</span><br>
 
-                    <div style="margin-top:6px;">
-                      <span style="font-weight:bold;color:#70c041;">Bio:</span><br>
-                      <span style="font-size:0.9em;color:#cccccc;line-height:1.3;">
-                        ${p.description || "No bio available."}
-                      </span>
-                    </div>
+                  <div style="margin-top:6px;">
+                    <span style="font-weight:bold;color:#70c041;">Bio:</span><br>
+                    <span style="font-size:0.9em;color:#cccccc;line-height:1.3;">
+                      ${p.description || "No bio available."}
+                    </span>
                   </div>
-                </div>
+                </div>   
+             </div>
 
                 <button class="unsave-btn" onclick="confirmUnsave(${p.id})">
                   Unsave
