@@ -505,7 +505,7 @@ app.delete("/professors/delete/:id", async (req, res) => {
 
 
 /* -------------------------------------------------------------
-   SAVE PROFESSOR FOR USER
+   SAVE PROFESSOR FOR USER (with logging)
 ------------------------------------------------------------- */
 app.post("/saved-professors/save", async (req, res) => {
   try {
@@ -522,6 +522,7 @@ app.post("/saved-professors/save", async (req, res) => {
     );
 
     if (existing.length > 0) {
+      console.log(`⚠️ User ${uh_id} attempted to save professor ${professor_id}, but it's already saved.`);
       return res.json({ message: "Professor already saved" });
     }
 
@@ -530,15 +531,16 @@ app.post("/saved-professors/save", async (req, res) => {
       [uh_id, professor_id]
     );
 
+    console.log(`💾 User ${uh_id} saved professor ${professor_id}`);
+
     return res.json({ message: "Professor saved successfully" });
   } catch (err) {
     console.error("❌ Error saving professor:", err);
     return res.status(500).json({ message: "Server error saving professor" });
   }
 });
-
 /* -------------------------------------------------------------
-   REMOVE SAVED PROFESSOR
+   REMOVE SAVED PROFESSOR (with logging)
 ------------------------------------------------------------- */
 app.delete("/saved-professors/remove", async (req, res) => {
   try {
@@ -553,6 +555,8 @@ app.delete("/saved-professors/remove", async (req, res) => {
       [uh_id, professor_id]
     );
 
+    console.log(`🗑️ User ${uh_id} UNSAVED professor ${professor_id}`);
+
     return res.json({ message: "Professor unsaved successfully" });
   } catch (err) {
     console.error("❌ Error removing saved professor:", err);
@@ -560,8 +564,9 @@ app.delete("/saved-professors/remove", async (req, res) => {
   }
 });
 
+
 /* -------------------------------------------------------------
-   GET SAVED PROFESSORS FOR USER
+   GET SAVED PROFESSORS FOR USER (with logging)
 ------------------------------------------------------------- */
 app.get("/saved-professors/:uh_id", async (req, res) => {
   try {
@@ -587,14 +592,20 @@ app.get("/saved-professors/:uh_id", async (req, res) => {
       [uh_id]
     );
 
+    if (rows.length === 0) {
+      console.log(`📭 User ${uh_id} has NO saved professors.`);
+    } else {
+      const names = rows.map(r => r.professor_name).join(", ");
+      console.log(`📚 User ${uh_id} has saved professors: ${names}`);
+    }
+
     return res.json(rows);
+
   } catch (err) {
     console.error("❌ Error fetching saved professors:", err);
     return res.status(500).json({ message: "Server error fetching saved professors" });
   }
 });
-
-
 
 
 /* -------------------------------------------------------------

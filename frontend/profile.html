@@ -119,6 +119,27 @@
       background-color: #70c041;
       color: #0b0c10;
     }
+
+    /* consistent small unsave button */
+    .unsave-btn {
+      padding: 6px 14px;
+      background: #ff4d4d;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.25s ease-in-out;
+      font-size: 0.9em;
+      min-width: 85px;
+      text-align: center;
+      box-shadow: 0px 0px 6px rgba(255, 77, 77, 0.4);
+    }
+
+    .unsave-btn:hover {
+      background: #ff6666;
+      box-shadow: 0px 0px 10px rgba(255, 102, 102, 0.6);
+    }
   </style>
 </head>
 
@@ -145,9 +166,7 @@
 
     <button onclick="saveProfile()">Save Changes</button>
 
-    <!-- ========================================= -->
     <!-- SAVED PROFESSORS -->
-    <!-- ========================================= -->
     <div class="saved-section">
       <h2>Saved Professors</h2>
       <ul id="savedProfessors">
@@ -155,9 +174,7 @@
       </ul>
     </div>
 
-    <!-- ========================================= -->
     <!-- SAVED INTERNSHIPS -->
-    <!-- ========================================= -->
     <div class="saved-section">
       <h2>Saved Internships</h2>
       <ul id="savedInternships">
@@ -174,15 +191,12 @@
       window.location.href = "login.html";
     }
 
-    document.addEventListener("DOMContentLoaded", async () => {
+    document.addEventListener("DOMContentLoaded", () => {
       loadProfile();
       loadSavedProfessors();
       loadSavedInternships();
     });
 
-    /* ============================
-       LOAD PROFILE DATA
-    ============================ */
     async function loadProfile() {
       try {
         const res = await fetch(`/get-profile?uh_id=${uh_id}`);
@@ -203,9 +217,6 @@
       }
     }
 
-    /* ============================
-       SAVE PROFILE
-    ============================ */
     async function saveProfile() {
       const profileData = {
         uh_id,
@@ -226,81 +237,75 @@
         alert(data.message || "Profile updated successfully!");
       } catch (err) {
         console.error("❌ Error saving profile:", err);
-        alert("Error updating profile. Please try again.");
       }
     }
 
     /* ============================
        LOAD SAVED PROFESSORS
     ============================ */
-async function loadSavedProfessors() {
-  const list = document.getElementById("savedProfessors");
+    async function loadSavedProfessors() {
+      const list = document.getElementById("savedProfessors");
 
-  try {
-    const res = await fetch(`/saved-professors/${uh_id}`);
-    const professors = await res.json();
+      try {
+        const res = await fetch(`/saved-professors/${uh_id}`);
+        const professors = await res.json();
 
-    if (!professors.length) {
-      list.innerHTML = "<li>No saved professors yet</li>";
-      return;
+        if (!professors.length) {
+          list.innerHTML = "<li>No saved professors yet</li>";
+          return;
+        }
+
+        list.innerHTML = professors
+          .map(
+            p => `
+              <li style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <img 
+                    src="${p.profile_pic_url || 'images/default_professor.png'}"
+                    style="width:60px;height:60px;border-radius:8px;border:1px solid #70c041;object-fit:cover;"
+                  />
+                  <div>
+                    <strong>${p.professor_name}</strong><br>
+                    <span>Majors: ${p.majors || "None"}</span><br>
+                    <span style="font-size:0.9em;color:#cccccc;">${p.description || "No bio available."}</span>
+                  </div>
+                </div>
+
+                <button class="unsave-btn" onclick="confirmUnsave(${p.id})">
+                  Unsave
+                </button>
+
+              </li>
+            `
+          )
+          .join("");
+      } catch (err) {
+        console.error("❌ Error loading saved professors:", err);
+        list.innerHTML = "<li>Error loading saved professors</li>";
+      }
     }
 
-    list.innerHTML = professors
-      .map(
-        p => `
-          <li style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
-            
-            <div style="display:flex; align-items:center; gap:12px;">
-              <img 
-                src="${p.profile_pic_url || 'images/default_professor.png'}"
-                style="width:60px;height:60px;border-radius:8px;border:1px solid #70c041;object-fit:cover;"
-              />
-              <div>
-                <strong>${p.professor_name}</strong><br>
-                <span>Majors: ${p.majors || "None"}</span>
-              </div>
-            </div>
+    function confirmUnsave(id) {
+      const ok = confirm("Are you sure you want to unsave this professor?");
+      if (ok) unsaveProfessor(id);
+    }
 
-            <button 
-              onclick="unsaveProfessor(${p.id})"
-              style="
-                padding:6px 10px;
-                background:#ff4d4d;
-                color:white;
-                border:none;
-                border-radius:6px;
-                cursor:pointer;
-              "
-            >
-              Unsave
-            </button>
+    async function unsaveProfessor(professorId) {
+      try {
+        await fetch("/saved-professors/remove", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uh_id, professor_id: professorId })
+        });
 
-          </li>
-        `
-      )
-      .join("");
-  } catch (err) {
-    console.error("❌ Error loading saved professors:", err);
-    list.innerHTML = "<li>Error loading saved professors</li>";
-  }
-}
+        loadSavedProfessors();
+      } catch (err) {
+        console.error("❌ Error unsaving professor:", err);
+      }
+    }
 
-async function unsaveProfessor(professorId) {
-  try {
-    await fetch("/saved-professors/remove", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ uh_id, professor_id: professorId })
-    });
-
-    loadSavedProfessors(); // refresh list
-  } catch (err) {
-    console.error("❌ Error unsaving professor:", err);
-  }
-}
-
-
-/* ============================
+    /* ============================
        LOAD SAVED INTERNSHIPS
     ============================ */
     async function loadSavedInternships() {
@@ -316,10 +321,7 @@ async function unsaveProfessor(professorId) {
         }
 
         list.innerHTML = internships
-          .map(
-            i =>
-              `<li><strong>${i.company}</strong> - ${i.title}</li>`
-          )
+          .map(i => `<li><strong>${i.company}</strong> - ${i.title}</li>`)
           .join("");
       } catch (err) {
         console.error("❌ Error loading saved internships:", err);
