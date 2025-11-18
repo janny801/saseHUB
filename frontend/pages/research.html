@@ -17,76 +17,90 @@
     }
   </script>
 
-  <style>
-    .professor-card {
-      background: #111820;
-      border: 1px solid #70c041;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      display: flex;
-      gap: 20px;
-      align-items: flex-start;
-      justify-content: space-between;
-    }
 
-    .professor-card img {
-      width: 90px;
-      height: 90px;
-      object-fit: cover;
-      border-radius: 10px;
-      border: 1px solid #70c041;
-    }
 
-    .professor-info {
-      flex: 1;
-    }
+<style>
+  /* professor container — no box */
+  .professor-card {
+    background: transparent;
+    border: none;
+    padding: 20px 5px;
+    margin-bottom: 30px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-radius: 0;
+    border-bottom: 1px solid #70c041; /* separator line */
+    padding-bottom: 25px;
+  }
 
-    .professor-info h3 {
-      margin: 0;
-      color: #70c041;
-    }
+  .professor-card:last-child {
+    border-bottom: none; /* removes last line */
+  }
 
-    .professor-list {
-      max-width: 850px;
-      margin: 30px auto;
-    }
+  .professor-card img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #70c041;
+  }
 
-    .filter-bar {
-      max-width: 850px;
-      margin: 20px auto;
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
+  .professor-info {
+    flex: 1;
+    max-width: 100%;
+  }
 
-    .filter-bar input,
-    .filter-bar select {
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #70c041;
-      background: #0f141a;
-      color: white;
-      flex: 1;
-    }
+  .professor-info h3 {
+    margin: 0;
+    color: #70c041;
+  }
 
-    .save-btn {
-      background: #70c041;
-      color: black;
-      padding: 10px 15px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      height: fit-content;
-    }
+  .professor-list {
+    max-width: 900px;
+    margin: 30px auto;
+  }
 
-    .save-btn.saved {
-      background: #333;
-      color: #70c041;
-      cursor: default;
-    }
-  </style>
+  .filter-bar {
+    max-width: 900px;
+    margin: 20px auto;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .filter-bar input,
+  .filter-bar select {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #70c041;
+    background: #0f141a;
+    color: white;
+    flex: 1;
+  }
+
+  /* Save button stays on right */
+  .save-btn {
+    background: #70c041;
+    color: black;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    height: fit-content;
+    white-space: nowrap;
+  }
+
+  .save-btn.saved {
+    background: #333;
+    color: #70c041;
+    cursor: default;
+  }
+</style>
+
+
 </head>
 
 <body>
