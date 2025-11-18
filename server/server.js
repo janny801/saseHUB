@@ -278,15 +278,27 @@ app.get("/alumni/all", async (req, res) => {
    GET ALL PROFESSORS
 ------------------------------------------------------------- */
 
+/* -------------------------------------------------------------
+   GET ALL PROFESSORS — MULTIPLE MAJORS SUPPORT
+------------------------------------------------------------- */
 app.get("/professors/all", async (req, res) => {
   try {
-    const [rows] = await db.execute(
-      `SELECT p.id, p.professor_name, m.major_name, p.email, p.university,
-              p.description, p.profile_pic_url
-       FROM professors p
-       LEFT JOIN majors m ON p.major_id = m.id
-       ORDER BY p.id DESC`
-    );
+    const [rows] = await db.execute(`
+      SELECT 
+        p.id,
+        p.professor_name,
+        p.email,
+        p.university,
+        p.description,
+        p.profile_pic_url,
+        GROUP_CONCAT(m.major_name ORDER BY m.major_name SEPARATOR ', ') AS majors,
+        GROUP_CONCAT(m.id ORDER BY m.major_name SEPARATOR ',') AS major_ids
+      FROM professors p
+      LEFT JOIN professor_majors pm ON p.id = pm.professor_id
+      LEFT JOIN majors m ON pm.major_id = m.id
+      GROUP BY p.id
+      ORDER BY p.id DESC
+    `);
 
     return res.json(rows);
   } catch (err) {
@@ -294,7 +306,6 @@ app.get("/professors/all", async (req, res) => {
     return res.status(500).json({ message: "Server error fetching professors" });
   }
 });
-
 /* -------------------------------------------------------------
    GET ALL MAJORS
 ------------------------------------------------------------- */
@@ -316,50 +327,63 @@ app.get("/majors/all", async (req, res) => {
    ADD PROFESSOR — NOW USING MULTER
 ------------------------------------------------------------- */
 
+/* -------------------------------------------------------------
+   ADD PROFESSOR — MULTIPLE MAJORS + CLOUDINARY
+------------------------------------------------------------- */
 app.post("/professors/add", upload.single("profile_pic"), async (req, res) => {
   try {
+    console.log("📌 Add Professor — Body:", req.body);
+
     const {
       professor_name,
-      major_id,
       email,
       university,
-      description
+      description,
+      major_ids // comma separated list
     } = req.body;
 
-    if (!professor_name || !major_id || !email || !university) {
+    if (!professor_name || !email || !university || !major_ids) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
     let profile_pic_url = null;
 
-    // Upload to Cloudinary if a file was provided
     if (req.file) {
-      try {
-        const uploaded = await new Promise((resolve, reject) => {
-          cloudinary.uploader.upload_stream(
-            { folder: "sasehub_professors" },
-            (err, result) => {
-              if (err) reject(err);
-              else resolve(result);
-            }
-          ).end(req.file.buffer);
-        });
+      const uploaded = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "sasehub_professors" },
+          (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+          }
+        ).end(req.file.buffer);
+      });
 
-        profile_pic_url = uploaded.secure_url;
-      } catch (err) {
-        console.error("❌ Cloudinary upload error:", err);
-      }
+      profile_pic_url = uploaded.secure_url;
     }
 
+    // Insert into professors table
     const [result] = await db.execute(
-      `INSERT INTO professors (professor_name, major_id, email, university, description, profile_pic_url)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [professor_name, major_id, email, university, description, profile_pic_url]
+      `INSERT INTO professors (professor_name, email, university, description, profile_pic_url)
+       VALUES (?, ?, ?, ?, ?)`,
+      [professor_name, email, university, description, profile_pic_url]
     );
+
+    const professorId = result.insertId;
+
+    // Insert multiple majors into junction table
+    const majorsList = major_ids.split(",").map((v) => v.trim());
+
+    for (const majorId of majorsList) {
+      await db.execute(
+        "INSERT INTO professor_majors (professor_id, major_id) VALUES (?, ?)",
+        [professorId, majorId]
+      );
+    }
 
     return res.json({
       message: "Professor added successfully",
-      inserted_id: result.insertId
+      professor_id: professorId
     });
 
   } catch (err) {
@@ -368,98 +392,86 @@ app.post("/professors/add", upload.single("profile_pic"), async (req, res) => {
   }
 });
 
+
 /* -------------------------------------------------------------
    UPDATE PROFESSOR
 ------------------------------------------------------------- */
-/* -------------------------------------------------------------
-   UPDATE PROFESSOR — NOW SUPPORTS IMAGE + MAJOR UPDATE + LOGGING
-------------------------------------------------------------- */
 
+/* -------------------------------------------------------------
+   UPDATE PROFESSOR — MULTIPLE MAJORS + OPTIONAL IMAGE
+------------------------------------------------------------- */
 app.post("/professors/update", upload.single("profile_pic"), async (req, res) => {
-  console.log("📌 Received request to update professor.");
+  console.log("📌 Update Professor — Body:", req.body);
 
   try {
-    console.log("➡ Body received:", req.body);
-
     const {
       id,
       professor_name,
       email,
       university,
       description,
-      major_id
+      major_ids // comma-separated major list
     } = req.body;
 
     if (!id) {
-      console.log("❌ Missing professor ID!");
       return res.status(400).json({ message: "Missing professor ID" });
     }
 
     let profile_pic_url = null;
 
-    /* ----------- HANDLE OPTIONAL PROFILE PIC UPLOAD ----------- */
     if (req.file) {
-      console.log("📸 New profile picture uploaded. Uploading to Cloudinary...");
+      const uploaded = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "sasehub_professors" },
+          (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+          }
+        ).end(req.file.buffer);
+      });
 
-      try {
-        const uploaded = await new Promise((resolve, reject) => {
-          cloudinary.uploader.upload_stream(
-            { folder: "sasehub_professors" },
-            (err, result) => {
-              if (err) reject(err);
-              else resolve(result);
-            }
-          ).end(req.file.buffer);
-        });
-
-        profile_pic_url = uploaded.secure_url;
-        console.log("✅ Cloudinary upload success:", profile_pic_url);
-
-      } catch (err) {
-        console.error("❌ Cloudinary upload error:", err);
-      }
-    } else {
-      console.log("ℹ No new profile picture included.");
+      profile_pic_url = uploaded.secure_url;
     }
 
-    /* ----------- BUILD SQL UPDATE QUERY ----------- */
-
-    let updateQuery = `
+    /* -------- UPDATE BASE PROFESSOR INFO -------- */
+    let query = `
       UPDATE professors 
       SET professor_name = ?, email = ?, university = ?, description = ?
     `;
+    const values = [professor_name, email, university, description];
 
-    const updateValues = [professor_name, email, university, description];
-
-    // If updating profile picture
     if (profile_pic_url) {
-      updateQuery += `, profile_pic_url = ?`;
-      updateValues.push(profile_pic_url);
-      console.log("📌 Profile picture will be updated.");
+      query += `, profile_pic_url = ?`;
+      values.push(profile_pic_url);
     }
 
-    // If major_id is provided
-    if (major_id && major_id.trim() !== "") {
-      updateQuery += `, major_id = ?`;
-      updateValues.push(major_id);
-      console.log("📌 Major will be updated:", major_id);
+    query += ` WHERE id = ?`;
+    values.push(id);
+
+    await db.execute(query, values);
+
+    console.log("🛠 Updated base professor data.");
+
+    /* -------- UPDATE MAJORS -------- */
+    if (major_ids) {
+      const majorsList = major_ids
+        .split(",")
+        .map((v) => v.trim())
+        .filter((v) => v !== "");
+
+      console.log("🔄 Updating majors:", majorsList);
+
+      // Delete old
+      await db.execute("DELETE FROM professor_majors WHERE professor_id = ?", [id]);
+
+      // Insert new
+      for (const majorId of majorsList) {
+        await db.execute(
+          "INSERT INTO professor_majors (professor_id, major_id) VALUES (?, ?)",
+          [id, majorId]
+        );
+      }
     }
-
-    updateQuery += ` WHERE id = ?`;
-    updateValues.push(id);
-
-    console.log("🛠 Final SQL Query:", updateQuery);
-    console.log("🛠 SQL Values:", updateValues);
-
-    /* ----------- PERFORM UPDATE IN DATABASE ----------- */
-    const [result] = await db.execute(updateQuery, updateValues);
-
-    if (result.affectedRows === 0) {
-      console.log("❌ Professor not found in DB.");
-      return res.status(404).json({ message: "Professor not found" });
-    }
-
-    console.log("✅ Professor updated successfully:", id);
 
     return res.json({ message: "Professor updated successfully" });
 
@@ -468,9 +480,13 @@ app.post("/professors/update", upload.single("profile_pic"), async (req, res) =>
     return res.status(500).json({ message: "Server error updating professor" });
   }
 });
+
+
+
 /* -------------------------------------------------------------
    DELETE PROFESSOR
 ------------------------------------------------------------- */
+
 app.delete("/professors/delete/:id", async (req, res) => {
   try {
     const professorId = req.params.id;
@@ -491,7 +507,6 @@ app.delete("/professors/delete/:id", async (req, res) => {
     return res.status(500).json({ message: "Server error deleting professor" });
   }
 });
-
 
 
 

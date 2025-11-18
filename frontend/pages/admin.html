@@ -559,7 +559,7 @@
 
     data.forEach(p => {
       const descriptionSafe = p.description || "";
-      const majorsSafe = p.major_name || "";
+      const majorsSafe = p.majors || "";
       const nameSafe = p.professor_name || "";
       const emailSafe = p.email || "";
       const universitySafe = p.university || "";
@@ -568,7 +568,7 @@
         <tr>
           <td>${p.id}</td>
           <td>${p.professor_name}</td>
-          <td>${p.major_name}</td>
+          <td>${p.majors || "None"}</td>
           <td>${p.email}</td>
           <td>${p.university}</td>
           <td>${p.description}</td>
@@ -710,7 +710,7 @@
     formData.append("email", email);
     formData.append("university", university);
     formData.append("description", description);
-    formData.append("major_id", major_ids);
+    formData.append("major_ids", major_ids);
 
     if (picFile) {
       formData.append("profile_pic", picFile);
@@ -861,7 +861,7 @@
     formData.append("email", email);
     formData.append("university", university);
     formData.append("description", description);
-    formData.append("major_id", major_ids);
+    formData.append("major_ids", major_ids);
 
     if (picFile) {
       formData.append("profile_pic", picFile);
