@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SASE Admin Portal</title>
 
-<style>
+  <style>
     body {
       background-color: #0b0c10;
       color: #f5f5f5;
@@ -188,7 +188,8 @@
       position: relative;
     }
 
-    #major_search {
+    #major_search,
+    #edit_major_search {
       width: 90%;
       background: #0b0c10;
       border: 2px solid #66b3ff;
@@ -240,7 +241,8 @@
       white-space: nowrap;
     }
 
-    #major_tags {
+    #major_tags,
+    #edit_major_tags {
       margin-top: 10px;
     }
 
@@ -259,7 +261,41 @@
       margin-left: 8px;
       cursor: pointer;
     }
-</style>
+
+    /* kebab menu for actions */
+    .kebab-btn {
+      background: transparent;
+      border: none;
+      color: #f5f5f5;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px 8px;
+    }
+
+    .kebab-menu {
+      display: none;
+      position: absolute;
+      right: 5px;
+      top: 25px;
+      background: #0f1722;
+      border: 1px solid #70c041;
+      border-radius: 6px;
+      min-width: 120px;
+      z-index: 50;
+      box-shadow: 0 0 10px rgba(112,192,65,0.3);
+    }
+
+    .kebab-menu div {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+
+    .kebab-menu div:hover {
+      background: #66b3ff;
+      color: white;
+    }
+  </style>
 </head>
 
 <body>
@@ -307,6 +343,10 @@
 
 <div id="dataSection"></div>
 
+<!-- =============================== -->
+<!--        ADD ALUMNI MODAL        -->
+<!-- =============================== -->
+
 <div id="alumniModal" class="modal-bg">
   <div class="modal">
     <h2>Add New Alumni</h2>
@@ -330,6 +370,10 @@
   </div>
 </div>
 
+<!-- =============================== -->
+<!--     ADD PROFESSOR MODAL        -->
+<!-- =============================== -->
+
 <div id="profModal" class="modal-bg">
   <div class="modal">
     <h2>Add New Professor</h2>
@@ -343,7 +387,7 @@
 
     <textarea id="prof_desc" placeholder="Description/Bio" rows="3"></textarea>
 
-    <label style="color:#70c041">Select Majors</label>
+    <label style="color:#70c041">Major(s)</label>
 
     <div class="dropdown-container">
       <input 
@@ -366,7 +410,62 @@
   </div>
 </div>
 
+<!-- =============================== -->
+<!--     EDIT PROFESSOR MODAL       -->
+<!-- =============================== -->
+
+<div id="editProfModal" class="modal-bg">
+  <div class="modal">
+    <h2>Edit Professor</h2>
+
+    <label style="color:#70c041">Profile Picture (optional)</label>
+    <input id="edit_prof_pic" type="file" accept="image/*" />
+
+    <input id="edit_prof_name" type="text" placeholder="Professor Name" />
+    <input id="edit_prof_email" type="email" placeholder="Email" />
+    <input id="edit_prof_university" type="text" placeholder="University" />
+
+    <textarea id="edit_prof_desc" placeholder="Description/Bio" rows="3"></textarea>
+
+    <label style="color:#70c041">Major(s)</label>
+    <div class="dropdown-container">
+      <input
+        id="edit_major_search"
+        type="text"
+        placeholder="Search or select majors..."
+        onclick="toggleMajorDropdownEdit()"
+        oninput="filterMajorsEdit()"
+      />
+
+      <div id="edit_major_tags"></div>
+      <div id="edit_major_list" class="dropdown-list"></div>
+    </div>
+
+    <input type="hidden" id="edit_selected_major_ids" />
+
+    <button class="btn" onclick="saveProfessorUpdate()">Save Changes</button>
+    <button class="btn close-btn" onclick="closeModal('editProfModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- =============================== -->
+<!--  DELETE PROFESSOR CONFIRM MODAL -->
+<!-- =============================== -->
+
+<div id="deleteProfModal" class="modal-bg">
+  <div class="modal">
+    <h2>Delete Professor?</h2>
+    <p>Are you sure you want to delete this professor?</p>
+
+    <button class="btn" onclick="confirmDeleteProfessor()">Yes, Delete</button>
+    <button class="btn close-btn" onclick="closeModal('deleteProfModal')">Cancel</button>
+  </div>
+</div>
+
 <script>
+
+  let editProfID = null;
+  let deleteProfID = null;
 
   function toggleMenu() {
     document.getElementById("dropdownMenu").classList.toggle("show");
@@ -374,7 +473,10 @@
 
   window.onclick = function(event) {
     if (!event.target.matches('.hamburger')) {
-      document.getElementById("dropdownMenu").classList.remove("show");
+      const menu = document.getElementById("dropdownMenu");
+      if (menu) {
+        menu.classList.remove("show");
+      }
     }
   };
 
@@ -446,15 +548,22 @@
       <tr>
         <th>ID</th>
         <th>Name</th>
-        <th>Major</th>
+        <th>Major(s)</th>
         <th>Email</th>
         <th>University</th>
         <th>Description</th>
         <th>Profile Pic</th>
+        <th>Actions</th>
       </tr>
     `;
 
     data.forEach(p => {
+      const descriptionSafe = p.description || "";
+      const majorsSafe = p.major_name || "";
+      const nameSafe = p.professor_name || "";
+      const emailSafe = p.email || "";
+      const universitySafe = p.university || "";
+
       html += `
         <tr>
           <td>${p.id}</td>
@@ -469,6 +578,17 @@
                       style="width:60px; height:60px; object-fit:cover; border-radius:6px;">`
               : "No Image"}
           </td>
+          <td style="position:relative;">
+            <button class="kebab-btn" onclick="toggleKebabMenu(event, ${p.id})">⋮</button>
+            <div id="kebab-${p.id}" class="kebab-menu">
+              <div onclick="openEditProfessor(${p.id}, \`${nameSafe}\`, \`${majorsSafe}\`, \`${emailSafe}\`, \`${universitySafe}\`, \`${descriptionSafe}\`)">
+                Edit
+              </div>
+              <div onclick="openDeleteProfessor(${p.id})">
+                Delete
+              </div>
+            </div>
+          </td>
         </tr>
       `;
     });
@@ -476,6 +596,25 @@
     html += "</table>";
     document.getElementById("dataSection").innerHTML = html;
   }
+
+  function toggleKebabMenu(event, id) {
+    event.stopPropagation();
+
+    document.querySelectorAll(".kebab-menu").forEach(m => {
+      m.style.display = "none";
+    });
+
+    const menu = document.getElementById("kebab-" + id);
+    if (menu) {
+      menu.style.display = "block";
+    }
+  }
+
+  document.body.addEventListener("click", () => {
+    document.querySelectorAll(".kebab-menu").forEach(m => {
+      m.style.display = "none";
+    });
+  });
 
   let majorsCache = [];
   let selectedMajors = [];
@@ -558,8 +697,6 @@
     renderMajorDropdown(majorsCache);
   }
 
-  /* -------------- REMOVE BASE64 COMPLETELY -------------- */
-
   async function saveProfessor() {
     const name = document.getElementById("prof_name").value;
     const email = document.getElementById("prof_email").value;
@@ -588,6 +725,174 @@
 
     alert(data.message);
     closeModal("profModal");
+    loadProfessors();
+  }
+
+  /* ======================= */
+  /*   EDIT MAJORS HANDLING  */
+  /* ======================= */
+
+  let editMajorsCache = [];
+  let editSelectedMajors = [];
+
+  function toggleMajorDropdownEdit() {
+    const list = document.getElementById("edit_major_list");
+    list.style.display = list.style.display === "block" ? "none" : "block";
+  }
+
+  async function loadMajorsEdit(initialMajorNames) {
+    const res = await fetch("/majors/all");
+    editMajorsCache = await res.json();
+
+    editSelectedMajors = [];
+
+    if (initialMajorNames) {
+      const names = initialMajorNames
+        .split(",")
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+
+      names.forEach(n => {
+        const match = editMajorsCache.find(
+          m => m.major_name.trim().toLowerCase() === n.toLowerCase()
+        );
+        if (match && !editSelectedMajors.find(x => x.id === match.id)) {
+          editSelectedMajors.push(match);
+        }
+      });
+    }
+
+    renderMajorDropdownEdit(editMajorsCache);
+    updateEditMajorTags();
+  }
+
+  function filterMajorsEdit() {
+    const query = document.getElementById("edit_major_search").value.toLowerCase();
+    const filtered = editMajorsCache.filter(m =>
+      m.major_name.toLowerCase().includes(query)
+    );
+    renderMajorDropdownEdit(filtered);
+  }
+
+  function renderMajorDropdownEdit(list) {
+    const container = document.getElementById("edit_major_list");
+    container.innerHTML = "";
+    container.style.display = "block";
+
+    list.forEach(m => {
+      const item = document.createElement("div");
+      item.className = "dropdown-item";
+
+      if (editSelectedMajors.find(x => x.id === m.id)) {
+        item.classList.add("selected");
+      }
+
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = m.major_name.trim();
+
+      item.onclick = function() {
+        toggleEditMajor(m);
+      };
+
+      item.appendChild(nameSpan);
+      container.appendChild(item);
+    });
+  }
+
+  function toggleEditMajor(major) {
+    const exists = editSelectedMajors.find(m => m.id === major.id);
+
+    if (exists) {
+      editSelectedMajors = editSelectedMajors.filter(m => m.id !== major.id);
+    } else {
+      editSelectedMajors.push(major);
+    }
+
+    updateEditMajorTags();
+    renderMajorDropdownEdit(editMajorsCache);
+  }
+
+  function updateEditMajorTags() {
+    const tagContainer = document.getElementById("edit_major_tags");
+    tagContainer.innerHTML = "";
+
+    editSelectedMajors.forEach(m => {
+      const tag = document.createElement("div");
+      tag.className = "major-tag";
+      tag.innerHTML = `${m.major_name} <span onclick="removeEditMajor(${m.id})">×</span>`;
+      tagContainer.appendChild(tag);
+    });
+
+    document.getElementById("edit_selected_major_ids").value =
+      editSelectedMajors.map(m => m.id).join(",");
+  }
+
+  function removeEditMajor(id) {
+    editSelectedMajors = editSelectedMajors.filter(m => m.id !== id);
+    updateEditMajorTags();
+    renderMajorDropdownEdit(editMajorsCache);
+  }
+
+  async function openEditProfessor(id, name, majorNames, email, university, description) {
+    editProfID = id;
+
+    document.getElementById("edit_prof_name").value = name;
+    document.getElementById("edit_prof_email").value = email;
+    document.getElementById("edit_prof_university").value = university;
+    document.getElementById("edit_prof_desc").value = description;
+
+    await loadMajorsEdit(majorNames);
+
+    document.getElementById("edit_prof_pic").value = "";
+    openModal("editProfModal");
+  }
+
+  async function saveProfessorUpdate() {
+    const name = document.getElementById("edit_prof_name").value;
+    const email = document.getElementById("edit_prof_email").value;
+    const university = document.getElementById("edit_prof_university").value;
+    const description = document.getElementById("edit_prof_desc").value;
+    const major_ids = editSelectedMajors.map(m => m.id).join(",");
+    const picFile = document.getElementById("edit_prof_pic").files[0];
+
+    const formData = new FormData();
+    formData.append("id", editProfID);
+    formData.append("professor_name", name);
+    formData.append("email", email);
+    formData.append("university", university);
+    formData.append("description", description);
+    formData.append("major_id", major_ids);
+
+    if (picFile) {
+      formData.append("profile_pic", picFile);
+    }
+
+    const res = await fetch("/professors/update", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+    alert(data.message);
+
+    closeModal("editProfModal");
+    loadProfessors();
+  }
+
+  function openDeleteProfessor(id) {
+    deleteProfID = id;
+    openModal("deleteProfModal");
+  }
+
+  async function confirmDeleteProfessor() {
+    const res = await fetch("/professors/delete/" + deleteProfID, {
+      method: "DELETE"
+    });
+
+    const data = await res.json();
+
+    alert(data.message);
+    closeModal("deleteProfModal");
     loadProfessors();
   }
 
