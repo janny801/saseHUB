@@ -290,7 +290,11 @@ app.get("/alumni/all", async (req, res) => {
 app.get("/professors/all", async (req, res) => {
   try {
     const [rows] = await db.execute(
-      "SELECT id, professor_name, tags, bio, email, profile_pic, created_at FROM professors"
+      `SELECT p.id, p.professor_name, m.major_name, p.email, p.university,
+              p.description, p.profile_pic_url
+       FROM professors p
+       LEFT JOIN majors m ON p.major_id = m.id
+       ORDER BY p.id DESC`
     );
 
     return res.json(rows);
@@ -299,6 +303,78 @@ app.get("/professors/all", async (req, res) => {
     return res.status(500).json({ message: "Server error fetching professors" });
   }
 });
+
+
+/* -------------------------------------------------------------
+   GET ALL MAJORS
+------------------------------------------------------------- */
+
+app.get("/majors/all", async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      "SELECT id, major_name FROM majors ORDER BY major_name"
+    );
+
+    return res.json(rows);
+  } catch (err) {
+    console.error("❌ Error fetching majors:", err);
+    return res.status(500).json({ message: "Server error fetching majors" });
+  }
+});
+
+
+/* -------------------------------------------------------------
+   ADD PROFESSOR
+------------------------------------------------------------- */
+
+app.post("/professors/add", async (req, res) => {
+  try {
+    const {
+      professor_name,
+      major_id,
+      email,
+      university,
+      description,
+      profile_pic_base64
+    } = req.body;
+
+    if (!professor_name || !major_id || !email || !university) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    let profile_pic_url = null;
+
+    // Upload image if provided
+    if (profile_pic_base64) {
+      try {
+        const uploadRes = await cloudinary.uploader.upload(profile_pic_base64, {
+          folder: "sasehub_professors",
+        });
+        profile_pic_url = uploadRes.secure_url;
+      } catch (err) {
+        console.error("❌ Cloudinary upload error:", err);
+      }
+    }
+
+    // Insert into MySQL
+    const [result] = await db.execute(
+      `INSERT INTO professors (professor_name, major_id, email, university, description, profile_pic_url)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [professor_name, major_id, email, university, description, profile_pic_url]
+    );
+
+    return res.json({
+      message: "Professor added successfully",
+      inserted_id: result.insertId
+    });
+
+  } catch (err) {
+    console.error("❌ Error adding professor:", err);
+    return res.status(500).json({ message: "Server error adding professor" });
+  }
+});
+
+
 
 /* -------------------------------------------------------------
    START SERVER
