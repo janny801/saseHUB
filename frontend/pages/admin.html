@@ -181,10 +181,6 @@
 
     .close-btn:hover { background: #ff3333; }
 
-    /* ================================== */
-    /*       DROPDOWN MAJORS SECTION     */
-    /* ================================== */
-
     .dropdown-container {
       width: 100%;
       margin: 10px 0;
@@ -223,14 +219,13 @@
       border-bottom: 1px solid rgba(112,192,65,0.2);
       white-space: nowrap;
       overflow: hidden;
-      cursor: pointer; /* click to select */
+      cursor: pointer;
     }
 
     .dropdown-item:last-child {
       border-bottom: none;
     }
 
-    /* selected major = green row */
     .dropdown-item.selected {
       background: #70c041;
       color: #0b0c10;
@@ -265,8 +260,6 @@
       cursor: pointer;
     }
 </style>
-
-
 </head>
 
 <body>
@@ -314,10 +307,6 @@
 
 <div id="dataSection"></div>
 
-<!-- =============================== -->
-<!--        ADD ALUMNI MODAL        -->
-<!-- =============================== -->
-
 <div id="alumniModal" class="modal-bg">
   <div class="modal">
     <h2>Add New Alumni</h2>
@@ -340,10 +329,6 @@
     <button class="btn close-btn" onclick="closeModal('alumniModal')">Cancel</button>
   </div>
 </div>
-
-<!-- =============================== -->
-<!--     ADD PROFESSOR MODAL        -->
-<!-- =============================== -->
 
 <div id="profModal" class="modal-bg">
   <div class="modal">
@@ -382,6 +367,7 @@
 </div>
 
 <script>
+
   function toggleMenu() {
     document.getElementById("dropdownMenu").classList.toggle("show");
   }
@@ -477,7 +463,12 @@
           <td>${p.email}</td>
           <td>${p.university}</td>
           <td>${p.description}</td>
-          <td>${p.profile_pic_url}</td>
+          <td>
+            ${p.profile_pic_url
+              ? `<img src="${p.profile_pic_url}" 
+                      style="width:60px; height:60px; object-fit:cover; border-radius:6px;">`
+              : "No Image"}
+          </td>
         </tr>
       `;
     });
@@ -517,7 +508,6 @@
       const item = document.createElement("div");
       item.className = "dropdown-item";
 
-      // highlight if currently selected
       if (selectedMajors.find(x => x.id === m.id)) {
         item.classList.add("selected");
       }
@@ -525,7 +515,6 @@
       const nameSpan = document.createElement("span");
       nameSpan.textContent = m.major_name.trim();
 
-      // click row to toggle selection
       item.onclick = function() {
         toggleMajorSelection(m);
       };
@@ -545,8 +534,6 @@
     }
 
     updateMajorTags();
-
-    // re-render full list so selected rows get green background
     renderMajorDropdown(majorsCache);
   }
 
@@ -571,13 +558,7 @@
     renderMajorDropdown(majorsCache);
   }
 
-  function fileToBase64(file) {
-    return new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.readAsDataURL(file);
-    });
-  }
+  /* -------------- REMOVE BASE64 COMPLETELY -------------- */
 
   async function saveProfessor() {
     const name = document.getElementById("prof_name").value;
@@ -587,22 +568,20 @@
     const major_ids = selectedMajors.map(m => m.id).join(",");
     const picFile = document.getElementById("prof_pic").files[0];
 
-    let picBase64 = null;
-    if (picFile) picBase64 = await fileToBase64(picFile);
+    const formData = new FormData();
+    formData.append("professor_name", name);
+    formData.append("email", email);
+    formData.append("university", university);
+    formData.append("description", description);
+    formData.append("major_id", major_ids);
 
-    const payload = {
-      professor_name: name,
-      major_id: major_ids,
-      email: email,
-      university: university,
-      description: description,
-      profile_pic_base64: picBase64
-    };
+    if (picFile) {
+      formData.append("profile_pic", picFile);
+    }
 
     const res = await fetch("/professors/add", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: formData
     });
 
     const data = await res.json();
@@ -611,6 +590,7 @@
     closeModal("profModal");
     loadProfessors();
   }
+
 </script>
 
 </body>

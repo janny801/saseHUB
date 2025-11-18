@@ -2,6 +2,7 @@ import express from "express";
 import mysql from "mysql2/promise";
 import cors from "cors";
 import dotenv from "dotenv";
+dotenv.config();
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -18,7 +19,10 @@ cloudinary.config({
 import { google } from "googleapis";
 import fs from "fs";
 
-dotenv.config();
+// NEW → Multer for file uploads
+import multer from "multer";
+const upload = multer({ storage: multer.memoryStorage() });
+
 const app = express();
 
 app.use(cors());
@@ -90,7 +94,7 @@ async function getMemberFromSheet(uh_id) {
       const email = row[2];
       const sheetUHID = row[3];
       const paidStatus = row[4];
-      const totalPoints = row[5];   // ← COLUMN F
+      const totalPoints = row[5];
 
       if (String(sheetUHID) === String(uh_id)) {
         return {
@@ -98,7 +102,7 @@ async function getMemberFromSheet(uh_id) {
           first_name: firstName || null,
           last_name: lastName || null,
           email: email || null,
-          totalPoints: totalPoints || 0,   // ← return points
+          totalPoints: totalPoints || 0,
           paid: paidStatus && paidStatus.toLowerCase() === "paid"
         };
       }
@@ -125,18 +129,13 @@ app.post("/login", async (req, res) => {
   try {
     console.log("🔍 Login attempt UH ID:", uh_id);
 
-    // -----------------------------------------------------
-    // 1️⃣ CHECK MYSQL FIRST — is this user already registered?
-    // -----------------------------------------------------
     const [rows] = await db.execute(
       "SELECT uh_id, first_name, last_name, email, linkedin, admin FROM users WHERE uh_id = ?",
       [uh_id]
     );
 
     if (rows.length > 0) {
-      // ✔ Existing user → SKIP Google Sheet check completely
       console.log("➡ Existing user detected — skipping Google Sheet check!");
-
       const existingUser = rows[0];
 
       return res.json({
@@ -145,9 +144,6 @@ app.post("/login", async (req, res) => {
       });
     }
 
-    // -----------------------------------------------------
-    // 2️⃣ NEW USER → CHECK GOOGLE SHEET
-    // -----------------------------------------------------
     const sheetMember = await getMemberFromSheet(uh_id);
 
     if (!sheetMember) {
@@ -162,9 +158,6 @@ app.post("/login", async (req, res) => {
 
     console.log("✅ Paid NEW member found in sheet:", sheetMember.first_name, sheetMember.last_name);
 
-    // -----------------------------------------------------
-    // 3️⃣ INSERT NEW USER INTO MYSQL USING SHEET DATA
-    // -----------------------------------------------------
     await db.execute(
       "INSERT INTO users (uh_id, first_name, last_name, email, admin) VALUES (?, ?, ?, ?, ?)",
       [
@@ -194,9 +187,8 @@ app.post("/login", async (req, res) => {
   }
 });
 
-
 /* -------------------------------------------------------------
-   GET PROFILE (MySQL info + Google Sheets points)
+   GET PROFILE
 ------------------------------------------------------------- */
 
 app.get("/get-profile", async (req, res) => {
@@ -204,7 +196,6 @@ app.get("/get-profile", async (req, res) => {
   if (!uh_id) return res.status(400).json({ message: "Missing UH ID" });
 
   try {
-    // 1️⃣ Get editable MySQL fields
     const [rows] = await db.execute(
       "SELECT first_name, last_name, email, linkedin, admin FROM users WHERE uh_id = ?",
       [uh_id]
@@ -216,14 +207,12 @@ app.get("/get-profile", async (req, res) => {
 
     const userData = rows[0];
 
-    // 2️⃣ Get points from Google Sheet (using helper)
     const sheetMember = await getMemberFromSheet(uh_id);
 
     const points = sheetMember
       ? Number(sheetMember.totalPoints) || 0
       : 0;
 
-    // 3️⃣ Return merged result
     return res.json({
       user: {
         ...userData,
@@ -304,7 +293,6 @@ app.get("/professors/all", async (req, res) => {
   }
 });
 
-
 /* -------------------------------------------------------------
    GET ALL MAJORS
 ------------------------------------------------------------- */
@@ -322,20 +310,18 @@ app.get("/majors/all", async (req, res) => {
   }
 });
 
-
 /* -------------------------------------------------------------
-   ADD PROFESSOR
+   ADD PROFESSOR — NOW USING MULTER
 ------------------------------------------------------------- */
 
-app.post("/professors/add", async (req, res) => {
+app.post("/professors/add", upload.single("profile_pic"), async (req, res) => {
   try {
     const {
       professor_name,
       major_id,
       email,
       university,
-      description,
-      profile_pic_base64
+      description
     } = req.body;
 
     if (!professor_name || !major_id || !email || !university) {
@@ -344,19 +330,25 @@ app.post("/professors/add", async (req, res) => {
 
     let profile_pic_url = null;
 
-    // Upload image if provided
-    if (profile_pic_base64) {
+    // Upload to Cloudinary if a file was provided
+    if (req.file) {
       try {
-        const uploadRes = await cloudinary.uploader.upload(profile_pic_base64, {
-          folder: "sasehub_professors",
+        const uploaded = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { folder: "sasehub_professors" },
+            (err, result) => {
+              if (err) reject(err);
+              else resolve(result);
+            }
+          ).end(req.file.buffer);
         });
-        profile_pic_url = uploadRes.secure_url;
+
+        profile_pic_url = uploaded.secure_url;
       } catch (err) {
         console.error("❌ Cloudinary upload error:", err);
       }
     }
 
-    // Insert into MySQL
     const [result] = await db.execute(
       `INSERT INTO professors (professor_name, major_id, email, university, description, profile_pic_url)
        VALUES (?, ?, ?, ?, ?, ?)`,
@@ -373,8 +365,6 @@ app.post("/professors/add", async (req, res) => {
     return res.status(500).json({ message: "Server error adding professor" });
   }
 });
-
-
 
 /* -------------------------------------------------------------
    START SERVER
