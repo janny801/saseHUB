@@ -127,36 +127,41 @@
 
   <div class="profile-container">
 
-    <!-- NEW POINTS DISPLAY -->
     <div id="pointsDisplay" class="points-box">
       Loading points...
     </div>
 
     <label for="firstName">First Name</label>
-    <input type="text" id="firstName" placeholder="Enter your first name" />
+    <input type="text" id="firstName" />
 
     <label for="lastName">Last Name</label>
-    <input type="text" id="lastName" placeholder="Enter your last name" />
+    <input type="text" id="lastName" />
 
     <label for="email">Email</label>
-    <input type="email" id="email" placeholder="Enter your email" />
+    <input type="email" id="email" />
 
     <label for="linkedin">LinkedIn</label>
-    <input type="url" id="linkedin" placeholder="Enter your LinkedIn profile URL" />
+    <input type="url" id="linkedin" />
 
     <button onclick="saveProfile()">Save Changes</button>
 
+    <!-- ========================================= -->
+    <!-- SAVED PROFESSORS -->
+    <!-- ========================================= -->
     <div class="saved-section">
       <h2>Saved Professors</h2>
       <ul id="savedProfessors">
-        <li>No saved professors yet</li>
+        <li>Loading...</li>
       </ul>
     </div>
 
+    <!-- ========================================= -->
+    <!-- SAVED INTERNSHIPS -->
+    <!-- ========================================= -->
     <div class="saved-section">
       <h2>Saved Internships</h2>
       <ul id="savedInternships">
-        <li>No saved internships yet</li>
+        <li>Loading...</li>
       </ul>
     </div>
 
@@ -170,6 +175,15 @@
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
+      loadProfile();
+      loadSavedProfessors();
+      loadSavedInternships();
+    });
+
+    /* ============================
+       LOAD PROFILE DATA
+    ============================ */
+    async function loadProfile() {
       try {
         const res = await fetch(`/get-profile?uh_id=${uh_id}`);
         const data = await res.json();
@@ -187,8 +201,11 @@
       } catch (err) {
         console.error("❌ Error loading profile:", err);
       }
-    });
+    }
 
+    /* ============================
+       SAVE PROFILE
+    ============================ */
     async function saveProfile() {
       const profileData = {
         uh_id,
@@ -210,6 +227,59 @@
       } catch (err) {
         console.error("❌ Error saving profile:", err);
         alert("Error updating profile. Please try again.");
+      }
+    }
+
+    /* ============================
+       LOAD SAVED PROFESSORS
+    ============================ */
+    async function loadSavedProfessors() {
+      const list = document.getElementById("savedProfessors");
+
+      try {
+        const res = await fetch(`/saved-professors/${uh_id}`);
+        const professors = await res.json();
+
+        if (!professors.length) {
+          list.innerHTML = "<li>No saved professors yet</li>";
+          return;
+        }
+
+        list.innerHTML = professors
+          .map(
+            p => `<li><strong>${p.professor_name}</strong><br>Majors: ${p.majors}</li>`
+          )
+          .join("");
+      } catch (err) {
+        console.error("❌ Error loading saved professors:", err);
+        list.innerHTML = "<li>Error loading saved professors</li>";
+      }
+    }
+
+    /* ============================
+       LOAD SAVED INTERNSHIPS
+    ============================ */
+    async function loadSavedInternships() {
+      const list = document.getElementById("savedInternships");
+
+      try {
+        const res = await fetch(`/saved-internships/${uh_id}`);
+        const internships = await res.json();
+
+        if (!internships.length) {
+          list.innerHTML = "<li>No saved internships yet</li>";
+          return;
+        }
+
+        list.innerHTML = internships
+          .map(
+            i =>
+              `<li><strong>${i.company}</strong> - ${i.title}</li>`
+          )
+          .join("");
+      } catch (err) {
+        console.error("❌ Error loading saved internships:", err);
+        list.innerHTML = "<li>Error loading saved internships</li>";
       }
     }
   </script>

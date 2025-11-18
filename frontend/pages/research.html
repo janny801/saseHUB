@@ -145,6 +145,7 @@
      ========================== */
   let allProfessors = [];
   let majorsLookup = [];
+  let savedBackendList = [];
 
   async function loadMajorsForFilters() {
     const res = await fetch("/majors/all");
@@ -172,9 +173,19 @@
     });
   }
 
+  async function loadSavedBackend() {
+    const uh_id = localStorage.getItem("uh_id");
+
+    const res = await fetch(`/saved-professors/${uh_id}`);
+    savedBackendList = await res.json();
+  }
+
   async function loadProfessors() {
+    await loadSavedBackend();
+
     const res = await fetch("/professors/all");
     allProfessors = await res.json();
+
     applyFilters();
   }
 
@@ -220,32 +231,29 @@
   }
 
   /* ==========================
-        SAVE FEATURE (LOCAL)
+       BACKEND SAVE / UNSAVE
      ========================== */
-
-  function getSavedList() {
+  async function toggleSaveProfessor(professorId) {
     const uh_id = localStorage.getItem("uh_id");
-    const data = JSON.parse(localStorage.getItem("savedProfessors")) || {};
-    return data[uh_id] || [];
-  }
 
-  function toggleSaveProfessor(professorId) {
-    const uh_id = localStorage.getItem("uh_id");
-    let data = JSON.parse(localStorage.getItem("savedProfessors")) || {};
+    const alreadySaved = savedBackendList.some(p => p.id === professorId);
 
-    if (!data[uh_id]) data[uh_id] = [];
-
-    const alreadySaved = data[uh_id].includes(professorId);
-
-    if (alreadySaved) {
-      data[uh_id] = data[uh_id].filter(id => id !== professorId);
+    if (!alreadySaved) {
+      await fetch("/saved-professors/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uh_id, professor_id: professorId })
+      });
     } else {
-      data[uh_id].push(professorId);
+      await fetch("/saved-professors/remove", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uh_id, professor_id: professorId })
+      });
     }
 
-    localStorage.setItem("savedProfessors", JSON.stringify(data));
-
-    applyFilters(); // re-render
+    await loadSavedBackend();
+    applyFilters();
   }
 
   /* ==========================
@@ -253,12 +261,11 @@
      ========================== */
   function renderProfessors(list) {
     let section = document.getElementById("professorsSection");
-    const savedList = getSavedList();
 
     if (list.length === 0) {
       section.innerHTML = `
         <p style="text-align:center; color:#70c041; margin-top:40px;">
-          No professors are offering research or match your criteria.
+          No professors match your criteria.
         </p>`;
       return;
     }
@@ -266,7 +273,7 @@
     let html = "<h2 style='color:#70c041;text-align:center;'>UH Professors</h2>";
 
     list.forEach(p => {
-      const isSaved = savedList.includes(p.id);
+      const isSaved = savedBackendList.some(sp => sp.id === p.id);
 
       html += `
         <div class="professor-card">
