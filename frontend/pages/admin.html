@@ -73,6 +73,7 @@
     <input id="alumni_linkedin" type="text" placeholder="LinkedIn URL" />
     <input id="alumni_other" type="text" placeholder="Other Link" />
     <input id="alumni_tags" type="text" placeholder="Industry Tags (ex: Tech, Aerospace)" />
+    <textarea id="alumni_description" placeholder="Description/Bio" rows="3"></textarea>
     <!-- NEW: Alumni Majors Multi-Select -->
     <label style="color:#70c041">Major(s)</label>
     <div class="dropdown-container">
@@ -115,6 +116,7 @@
     <input id="edit_alumni_linkedin" type="text" placeholder="LinkedIn URL" />
     <input id="edit_alumni_other" type="text" placeholder="Other Link" />
     <input id="edit_alumni_tags" type="text" placeholder="Industry Tags (ex: Tech, Aerospace)" />
+    <textarea id="edit_alumni_description" placeholder="Description/Bio" rows="3"></textarea>
     <!-- NEW: Edit Alumni Major Selector -->
     <label style="color:#70c041">Major(s)</label>
     <div class="dropdown-container">
@@ -308,6 +310,7 @@
         <th>LinkedIn</th>
         <th>Other Link</th>
         <th>Industries</th>
+        <th>Description</th>
         <th>Majors</th>
         <th>Profile Pic</th>
         <th>Company Img</th>
@@ -326,13 +329,14 @@
           <td>${a.linkedin}</td>
           <td>${a.other_link}</td>
           <td>${a.industries}</td>
+          <td>${a.description || a.alumni_description || a.desc || ""}</td>
           <td>${a.majors || "None"}</td>
           <td>${a.profile_pic ? `<img src="${a.profile_pic}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;">` : "None"}</td>
           <td>${a.company_img ? `<img src="${a.company_img}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;">` : "None"}</td>
           <td style="position:relative;">
             <button class="kebab-btn" onclick="toggleKebabMenu(event, 'al-${a.id}')">⋮</button>
             <div id="kebab-al-${a.id}" class="kebab-menu">
-              <div onclick="openEditAlumni(${a.id}, \`${a.full_name}\`, \`${a.company}\`, \`${a.role_title}\`, \`${a.email}\`, \`${a.linkedin}\`, \`${a.other_link}\`, \`${a.industries}\`, \`${a.majors || ""}\`)">
+              <div onclick="openEditAlumni(${a.id}, \`${a.full_name}\`, \`${a.company}\`, \`${a.role_title}\`, \`${a.email}\`, \`${a.linkedin}\`, \`${a.other_link}\`, \`${a.industries}\`, \`${a.description || ""}\`, \`${a.majors || ""}\`)">
                 Edit
               </div>
               <div onclick="openDeleteAlumni(${a.id})">Delete</div>
@@ -360,6 +364,7 @@
     formData.append("linkedin", document.getElementById("alumni_linkedin").value);
     formData.append("other_link", document.getElementById("alumni_other").value);
     formData.append("industries", document.getElementById("alumni_tags").value);
+    formData.append("description", document.getElementById("alumni_description").value);
     formData.append("major_ids", document.getElementById("alumni_selected_major_ids").value);
 
     if (document.getElementById("alumni_profile_pic").files[0]) {
@@ -385,7 +390,7 @@
   /*     EDIT ALUMNI (OPEN)    */
   /* ========================= */
 
-  function openEditAlumni(id, name, company, role, email, linkedin, other, tags, majors) {
+  function openEditAlumni(id, name, company, role, email, linkedin, other, tags, description, majors) {
     editAlumniID = id;
 
     document.getElementById("edit_alumni_fullname").value = name;
@@ -395,6 +400,7 @@
     document.getElementById("edit_alumni_linkedin").value = linkedin;
     document.getElementById("edit_alumni_other").value = other;
     document.getElementById("edit_alumni_tags").value = tags;
+    document.getElementById("edit_alumni_description").value = description;
 
     document.getElementById("edit_alumni_company_img").value = "";
     document.getElementById("edit_alumni_profile_pic").value = "";
@@ -418,6 +424,7 @@
     formData.append("linkedin", document.getElementById("edit_alumni_linkedin").value);
     formData.append("other_link", document.getElementById("edit_alumni_other").value);
     formData.append("industries", document.getElementById("edit_alumni_tags").value);
+    formData.append("description", document.getElementById("edit_alumni_description").value);
     formData.append("major_ids", document.getElementById("edit_alumni_selected_major_ids").value);
 
     if (document.getElementById("edit_alumni_profile_pic").files[0]) {

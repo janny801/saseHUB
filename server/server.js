@@ -273,6 +273,7 @@ app.get("/alumni/all", async (req, res) => {
         a.linkedin,
         a.other_link,
         a.industries,
+        a.description,
         a.profile_pic,
         a.company_img,
         GROUP_CONCAT(m.major_name ORDER BY m.major_name SEPARATOR ', ') AS majors,
@@ -644,6 +645,7 @@ app.post("/alumni/add",
         linkedin,
         other_link,
         industries,
+        description,
         major_ids
       } = req.body;
 
@@ -683,8 +685,8 @@ app.post("/alumni/add",
 
       const [result] = await db.execute(
         `INSERT INTO alumni 
-          (full_name, company, role_title, email, linkedin, other_link, industries, profile_pic, company_img)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          (full_name, company, role_title, email, linkedin, other_link, industries, description, profile_pic, company_img)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           full_name,
           company,
@@ -693,6 +695,7 @@ app.post("/alumni/add",
           linkedin,
           other_link,
           industries,
+          description,
           profile_pic_url,
           company_img_url
         ]
@@ -742,6 +745,7 @@ app.post("/alumni/update",
         linkedin,
         other_link,
         industries,
+        description,
         major_ids
       } = req.body;
 
@@ -789,7 +793,8 @@ app.post("/alumni/update",
           email = ?, 
           linkedin = ?, 
           other_link = ?, 
-          industries = ?
+          industries = ?, 
+          description = ?
       `;
 
       const values = [
@@ -799,7 +804,8 @@ app.post("/alumni/update",
         email,
         linkedin,
         other_link,
-        industries
+        industries,
+        description
       ];
 
       if (profile_pic_url) {
