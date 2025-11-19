@@ -287,6 +287,14 @@
     }
     updateCollegeTags();
     applyFilters();
+    const items = document.querySelectorAll("#college_list .dropdown-item");
+    items.forEach(it =>
+    {
+        if(it.textContent.trim() === name.trim())
+        {
+            it.classList.toggle("selected");
+        }
+    });
   }
 
   function toggleMajorSelect2(name) {
@@ -297,6 +305,14 @@
     }
     updateMajorTags2();
     applyFilters();
+    const items2 = document.querySelectorAll("#major_list2 .dropdown-item");
+    items2.forEach(it =>
+    {
+        if(it.textContent.trim() === name.trim())
+        {
+            it.classList.toggle("selected");
+        }
+    });
   }
 
   function updateCollegeTags() {
