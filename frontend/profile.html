@@ -16,6 +16,90 @@
     padding: 40px 20px;
   }
 
+
+  /* ===== Header Layout ===== */
+.simple-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  border-bottom: 2px solid #70c041;
+  position: relative;
+}
+
+/* Aligns header-right content vertically */
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Logo style */
+.sase-logo {
+  height: 60px;
+  width: auto;
+  margin-bottom: 10px;
+}
+
+/* Header title color & sizing */
+.simple-header h1 {
+  color: #70c041;
+  font-size: 2em;
+  margin: 0;
+  font-weight: 700;
+}
+
+/* ===== Dropdown Menu + Hamburger ===== */
+.menu-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.hamburger {
+  background-color: #70c041;
+  color: #0b0c10;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 1.1em;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  margin-top: 10px;
+  background-color: #132235;
+  border: 1px solid #70c041;
+  border-radius: 6px;
+  min-width: 150px;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.dropdown a {
+  display: block;
+  padding: 10px;
+  color: #f5f5f5;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.dropdown a:hover {
+  background-color: #66b3ff;
+  color: #0b0c10;
+}
+
+/* When hamburger clicked */
+.show {
+  display: block;
+}
+  
+
   h1 {
     text-align: center;
     color: #70c041;
@@ -155,7 +239,23 @@
 </head>
 
 <body>
-  <h1>Your Profile</h1>
+
+  <header class="simple-header">
+  <img src="images/saselogo.webp" class="sase-logo" />
+
+  <div class="header-right">
+    <h1>Your Profile</h1>
+
+    <div class="menu-container">
+      <button class="hamburger" onclick="toggleMenu()">☰</button>
+      <div id="dropdownMenu" class="dropdown">
+        <a href="profile.html">Edit Profile</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </div>
+</header>
+
 
   <div class="profile-container">
 
@@ -235,6 +335,22 @@
         console.error("❌ Error loading profile:", err);
       }
     }
+
+    function toggleMenu() {
+  document.getElementById("dropdownMenu").classList.toggle("show");
+}
+
+window.onclick = function (event) {
+  if (!event.target.matches(".hamburger")) {
+    const menu = document.getElementById("dropdownMenu");
+    if (menu) menu.classList.remove("show");
+  }
+};
+
+  function logout() {
+    localStorage.clear();
+    window.location.href = "/login.html";
+  }
 
     async function saveProfile() {
       const profileData = {
