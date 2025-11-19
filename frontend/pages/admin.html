@@ -73,6 +73,21 @@
     <input id="alumni_linkedin" type="text" placeholder="LinkedIn URL" />
     <input id="alumni_other" type="text" placeholder="Other Link" />
     <input id="alumni_tags" type="text" placeholder="Industry Tags (ex: Tech, Aerospace)" />
+    <!-- NEW: Alumni Majors Multi-Select -->
+    <label style="color:#70c041">Major(s)</label>
+    <div class="dropdown-container">
+      <input 
+        id="alumni_major_search"
+        type="text"
+        placeholder="Search or select majors..."
+        onclick="toggleAlumniMajorDropdown()"
+        oninput="filterAlumniMajors()"
+      />
+      <div id="alumni_major_tags"></div>
+      <div id="alumni_major_list" class="dropdown-list"></div>
+    </div>
+
+    <input type="hidden" id="alumni_selected_major_ids" />
 
     <button class="btn" onclick="saveAlumni()">Save Alumni</button>
     <button class="btn close-btn" onclick="closeModal('alumniModal')">Cancel</button>
@@ -99,6 +114,21 @@
     <input id="edit_alumni_email" type="email" placeholder="Email" />
     <input id="edit_alumni_linkedin" type="text" placeholder="LinkedIn URL" />
     <input id="edit_alumni_other" type="text" placeholder="Other Link" />
+    <!-- NEW: Edit Alumni Major Selector -->
+    <label style="color:#70c041">Major(s)</label>
+    <div class="dropdown-container">
+      <input
+        id="edit_alumni_major_search"
+        type="text"
+        placeholder="Search or select majors..."
+        onclick="toggleAlumniMajorDropdownEdit()"
+        oninput="filterAlumniMajorsEdit()"
+      />
+      <div id="edit_alumni_major_tags"></div>
+      <div id="edit_alumni_major_list" class="dropdown-list"></div>
+    </div>
+
+    <input type="hidden" id="edit_alumni_selected_major_ids" />
     <input id="edit_alumni_tags" type="text" placeholder="Industry Tags" />
 
     <button class="btn" onclick="saveAlumniUpdate()">Save Changes</button>
@@ -243,7 +273,15 @@
 
   function openModal(id) {
     document.getElementById(id).style.display = "flex";
+    if (id === "alumniModal")
+    {
+        loadAlumniMajors();
+    }
     if (id === "profModal") loadMajors();
+    if (id === "editAlumniModal")
+    {
+        loadAlumniMajorsEdit();
+    }
   }
 
   function closeModal(id) {
@@ -270,6 +308,7 @@
         <th>LinkedIn</th>
         <th>Other Link</th>
         <th>Industries</th>
+        <th>Majors</th>
         <th>Profile Pic</th>
         <th>Company Img</th>
         <th>Actions</th>
@@ -287,6 +326,7 @@
           <td>${a.linkedin}</td>
           <td>${a.other_link}</td>
           <td>${a.industries}</td>
+          <td>${a.majors || "None"}</td>
           <td>${a.profile_pic ? `<img src="${a.profile_pic}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;">` : "None"}</td>
           <td>${a.company_img ? `<img src="${a.company_img}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;">` : "None"}</td>
           <td style="position:relative;">
@@ -809,7 +849,186 @@
     document.querySelectorAll(".kebab-menu").forEach(m => (m.style.display = "none"));
   });
 
-</script>
 
+
+
+  /* ============================
+        ALUMNI MAJOR SELECT
+     ============================ */
+
+  let alumniMajorsCache = [];
+  let alumniSelectedMajors = [];
+
+  async function loadAlumniMajors() {
+    const res = await fetch("/majors/all");
+    alumniMajorsCache = await res.json();
+    renderAlumniMajorDropdown(alumniMajorsCache);
+  }
+
+  function toggleAlumniMajorDropdown() {
+    const list = document.getElementById("alumni_major_list");
+    list.style.display = list.style.display === "block" ? "none" : "block";
+  }
+
+  function filterAlumniMajors() {
+    const query = document.getElementById("alumni_major_search").value.toLowerCase();
+    const filtered = alumniMajorsCache.filter(m =>
+      m.major_name.toLowerCase().includes(query)
+    );
+    renderAlumniMajorDropdown(filtered);
+  }
+
+  function renderAlumniMajorDropdown(list) {
+    const container = document.getElementById("alumni_major_list");
+    container.innerHTML = "";
+    container.style.display = "block";
+
+    list.forEach(m => {
+      const item = document.createElement("div");
+      item.className = "dropdown-item";
+
+      if (alumniSelectedMajors.find(x => x.id === m.id)) {
+        item.classList.add("selected");
+      }
+
+      const span = document.createElement("span");
+      span.textContent = m.major_name;
+
+      item.onclick = () => toggleAlumniMajor(m);
+
+      item.appendChild(span);
+      container.appendChild(item);
+    });
+  }
+
+  function toggleAlumniMajor(major) {
+    const exists = alumniSelectedMajors.find(m => m.id === major.id);
+
+    if (exists) {
+      alumniSelectedMajors = alumniSelectedMajors.filter(m => m.id !== major.id);
+    } else {
+      alumniSelectedMajors.push(major);
+    }
+
+    updateAlumniMajorTags();
+    renderAlumniMajorDropdown(alumniMajorsCache);
+  }
+
+  function updateAlumniMajorTags() {
+    const box = document.getElementById("alumni_major_tags");
+    box.innerHTML = "";
+
+    alumniSelectedMajors.forEach(m => {
+      const tag = document.createElement("div");
+      tag.className = "major-tag";
+      tag.innerHTML = `${m.major_name} <span onclick="removeAlumniMajor(${m.id})">×</span>`;
+      box.appendChild(tag);
+    });
+
+    document.getElementById("alumni_selected_major_ids").value =
+      alumniSelectedMajors.map(m => m.id).join(",");
+  }
+
+  function removeAlumniMajor(id) {
+    alumniSelectedMajors = alumniSelectedMajors.filter(m => m.id !== id);
+    updateAlumniMajorTags();
+    renderAlumniMajorDropdown(alumniMajorsCache);
+  }
+
+  /* ====== EDIT VERSION ====== */
+
+  let editAlumniMajorsCache = [];
+  let editAlumniSelectedMajors = [];
+
+  async function loadAlumniMajorsEdit(initialMajors) {
+    const res = await fetch("/majors/all");
+    editAlumniMajorsCache = await res.json();
+
+    editAlumniSelectedMajors = [];
+
+    if (initialMajors) {
+      const names = initialMajors.split(",").map(s => s.trim());
+      names.forEach(n => {
+        const match = editAlumniMajorsCache.find(
+          m => m.major_name.trim().toLowerCase() === n.toLowerCase()
+        );
+        if (match) editAlumniSelectedMajors.push(match);
+      });
+    }
+
+    renderAlumniMajorDropdownEdit(editAlumniMajorsCache);
+    updateAlumniMajorTagsEdit();
+  }
+
+  function toggleAlumniMajorDropdownEdit() {
+    const list = document.getElementById("edit_alumni_major_list");
+    list.style.display = list.style.display === "block" ? "none" : "block";
+  }
+
+  function filterAlumniMajorsEdit() {
+    const q = document.getElementById("edit_alumni_major_search").value.toLowerCase();
+    const filtered = editAlumniMajorsCache.filter(m =>
+      m.major_name.toLowerCase().includes(q)
+    );
+    renderAlumniMajorDropdownEdit(filtered);
+  }
+
+  function renderAlumniMajorDropdownEdit(list) {
+    const container = document.getElementById("edit_alumni_major_list");
+    container.innerHTML = "";
+    container.style.display = "block";
+
+    list.forEach(m => {
+      const item = document.createElement("div");
+      item.className = "dropdown-item";
+
+      if (editAlumniSelectedMajors.find(x => x.id === m.id)) {
+        item.classList.add("selected");
+      }
+
+      const span = document.createElement("span");
+      span.textContent = m.major_name;
+
+      item.onclick = () => toggleEditAlumniMajor(m);
+
+      item.appendChild(span);
+      container.appendChild(item);
+    });
+  }
+
+  function toggleEditAlumniMajor(major) {
+    const exists = editAlumniSelectedMajors.find(m => m.id === major.id);
+
+    if (exists) {
+      editAlumniSelectedMajors = editAlumniSelectedMajors.filter(m => m.id !== major.id);
+    } else {
+      editAlumniSelectedMajors.push(major);
+    }
+
+    updateAlumniMajorTagsEdit();
+    renderAlumniMajorDropdownEdit(editAlumniMajorsCache);
+  }
+
+  function updateAlumniMajorTagsEdit() {
+    const container = document.getElementById("edit_alumni_major_tags");
+    container.innerHTML = "";
+
+    editAlumniSelectedMajors.forEach(m => {
+      const tag = document.createElement("div");
+      tag.className = "major-tag";
+      tag.innerHTML = `${m.major_name} <span onclick="removeEditAlumniMajor(${m.id})">×</span>`;
+      container.appendChild(tag);
+    });
+
+    document.getElementById("edit_alumni_selected_major_ids").value =
+      editAlumniSelectedMajors.map(m => m.id).join(",");
+  }
+
+  function removeEditAlumniMajor(id) {
+    editAlumniSelectedMajors = editAlumniSelectedMajors.filter(m => m.id !== id);
+    updateAlumniMajorTagsEdit();
+    renderAlumniMajorDropdownEdit(editAlumniMajorsCache);
+  }
+</script>
 </body>
 </html>

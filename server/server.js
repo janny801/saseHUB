@@ -263,9 +263,27 @@ app.post("/update-profile", async (req, res) => {
 
 app.get("/alumni/all", async (req, res) => {
   try {
-    const [rows] = await db.execute(
-      "SELECT id, full_name, company, role_title, email, linkedin, other_link, industries, profile_pic, company_img, created_at FROM alumni"
-    );
+    const [rows] = await db.execute(`
+      SELECT 
+        a.id,
+        a.full_name,
+        a.company,
+        a.role_title,
+        a.email,
+        a.linkedin,
+        a.other_link,
+        a.industries,
+        a.profile_pic,
+        a.company_img,
+        GROUP_CONCAT(m.major_name ORDER BY m.major_name SEPARATOR ', ') AS majors,
+        GROUP_CONCAT(m.id ORDER BY m.major_name SEPARATOR ',') AS major_ids,
+        a.created_at
+      FROM alumni a
+      LEFT JOIN alumni_majors am ON a.id = am.alumni_id
+      LEFT JOIN majors m ON am.major_id = m.id
+      GROUP BY a.id
+      ORDER BY a.id DESC
+    `);
 
     return res.json(rows);
   } catch (err) {
@@ -625,7 +643,8 @@ app.post("/alumni/add",
         email,
         linkedin,
         other_link,
-        industries
+        industries,
+        major_ids
       } = req.body;
 
       if (!full_name || !company || !role_title || !email) {
@@ -679,6 +698,17 @@ app.post("/alumni/add",
         ]
       );
 
+      const alumniId = result.insertId;
+      if (major_ids) {
+          const list = major_ids.split(",").map(v => v.trim()).filter(v => v !== "");
+          for (const mid of list) {
+              await db.execute(
+                  "INSERT INTO alumni_majors (alumni_id, major_id) VALUES (?, ?)",
+                  [alumniId, mid]
+              );
+          }
+      }
+
       console.log(`🎓 Alumni added → ID: ${result.insertId}, Name: ${full_name}`);
 
       return res.json({ message: "Alumni added successfully!" });
@@ -711,7 +741,8 @@ app.post("/alumni/update",
         email,
         linkedin,
         other_link,
-        industries
+        industries,
+        major_ids
       } = req.body;
 
       if (!id) {
@@ -785,6 +816,17 @@ app.post("/alumni/update",
       values.push(id);
 
       await db.execute(query, values);
+
+      if (major_ids) {
+          const list = major_ids.split(",").map(v => v.trim()).filter(v => v !== "");
+          await db.execute("DELETE FROM alumni_majors WHERE alumni_id = ?", [id]);
+          for (const mid of list) {
+              await db.execute(
+                  "INSERT INTO alumni_majors (alumni_id, major_id) VALUES (?, ?)",
+                  [id, mid]
+              );
+          }
+      }
 
       console.log(`🛠 Alumni updated → ID: ${id}, Name: ${full_name}`);
 
