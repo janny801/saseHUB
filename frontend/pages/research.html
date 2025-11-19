@@ -129,6 +129,8 @@
   .dropdown-container {
     position: relative;
     width: 340px;
+    min-width: 340px;
+    max-width: 340px;
     flex-shrink: 0;
   }
   .dropdown-list {
@@ -197,9 +199,10 @@
 </div>
 
 <!-- Search + Filter Section -->
-<div class="filter-bar">
+<div class="search-wrapper">
   <input id="searchInput" type="text" placeholder="Search professors (name, major, university, etc.)" oninput="applyFilters()" />
-  
+</div>
+<div class="filter-bar">
   <div class="dropdown-container" id="collegeDropdown">
     <div class="dropdown-input-wrapper">
       <input
@@ -568,6 +571,30 @@
 .dropdown-list {
     z-index: 999;
 }
+#college_tags,
+#major_tags2 {
+    max-width: 340px;
+    min-width: 340px;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+  .search-wrapper {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto 10px auto;
+    display: flex;
+    justify-content: center;
+  }
+
+  .search-wrapper input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #70c041;
+    background: #0f141a;
+    color: white;
+  }
 </style>
 
 </body>
