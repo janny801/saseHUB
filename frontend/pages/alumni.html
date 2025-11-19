@@ -406,7 +406,13 @@
           <img src="${a.profile_pic || '../images/saselogo.webp'}" />
 
           <div class="alumni-info">
-            <h3>${a.full_name}</h3>
+            <h3>
+              ${a.full_name}
+              <img 
+                src="${a.company_img || '../images/saselogo.webp'}" 
+                style="vertical-align:middle;margin-left:10px;height:40px;width:auto;border:none;object-fit:contain;"
+              />
+            </h3>
             <p><strong>Company:</strong> ${a.company}</p>
             <p><strong>Role:</strong> ${a.role_title}</p>
             <p><strong>Email:</strong> ${a.email}</p>
