@@ -114,6 +114,7 @@
     <input id="edit_alumni_email" type="email" placeholder="Email" />
     <input id="edit_alumni_linkedin" type="text" placeholder="LinkedIn URL" />
     <input id="edit_alumni_other" type="text" placeholder="Other Link" />
+    <input id="edit_alumni_tags" type="text" placeholder="Industry Tags (ex: Tech, Aerospace)" />
     <!-- NEW: Edit Alumni Major Selector -->
     <label style="color:#70c041">Major(s)</label>
     <div class="dropdown-container">
@@ -129,7 +130,6 @@
     </div>
 
     <input type="hidden" id="edit_alumni_selected_major_ids" />
-    <input id="edit_alumni_tags" type="text" placeholder="Industry Tags" />
 
     <button class="btn" onclick="saveAlumniUpdate()">Save Changes</button>
     <button class="btn close-btn" onclick="closeModal('editAlumniModal')">Cancel</button>
@@ -332,7 +332,7 @@
           <td style="position:relative;">
             <button class="kebab-btn" onclick="toggleKebabMenu(event, 'al-${a.id}')">⋮</button>
             <div id="kebab-al-${a.id}" class="kebab-menu">
-              <div onclick="openEditAlumni(${a.id}, \`${a.full_name}\`, \`${a.company}\`, \`${a.role_title}\`, \`${a.email}\`, \`${a.linkedin}\`, \`${a.other_link}\`, \`${a.industries}\`)">
+              <div onclick="openEditAlumni(${a.id}, \`${a.full_name}\`, \`${a.company}\`, \`${a.role_title}\`, \`${a.email}\`, \`${a.linkedin}\`, \`${a.other_link}\`, \`${a.industries}\`, \`${a.majors || ""}\`)">
                 Edit
               </div>
               <div onclick="openDeleteAlumni(${a.id})">Delete</div>
@@ -360,6 +360,7 @@
     formData.append("linkedin", document.getElementById("alumni_linkedin").value);
     formData.append("other_link", document.getElementById("alumni_other").value);
     formData.append("industries", document.getElementById("alumni_tags").value);
+    formData.append("major_ids", document.getElementById("alumni_selected_major_ids").value);
 
     if (document.getElementById("alumni_profile_pic").files[0]) {
       formData.append("profile_pic", document.getElementById("alumni_profile_pic").files[0]);
@@ -384,7 +385,7 @@
   /*     EDIT ALUMNI (OPEN)    */
   /* ========================= */
 
-  function openEditAlumni(id, name, company, role, email, linkedin, other, tags) {
+  function openEditAlumni(id, name, company, role, email, linkedin, other, tags, majors) {
     editAlumniID = id;
 
     document.getElementById("edit_alumni_fullname").value = name;
@@ -398,6 +399,7 @@
     document.getElementById("edit_alumni_company_img").value = "";
     document.getElementById("edit_alumni_profile_pic").value = "";
 
+    loadAlumniMajorsEdit(majors);
     openModal("editAlumniModal");
   }
 
@@ -416,6 +418,7 @@
     formData.append("linkedin", document.getElementById("edit_alumni_linkedin").value);
     formData.append("other_link", document.getElementById("edit_alumni_other").value);
     formData.append("industries", document.getElementById("edit_alumni_tags").value);
+    formData.append("major_ids", document.getElementById("edit_alumni_selected_major_ids").value);
 
     if (document.getElementById("edit_alumni_profile_pic").files[0]) {
       formData.append("profile_pic", document.getElementById("edit_alumni_profile_pic").files[0]);

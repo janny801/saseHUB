@@ -817,9 +817,11 @@ app.post("/alumni/update",
 
       await db.execute(query, values);
 
+      /* --- Sync majors on update --- */
+      await db.execute("DELETE FROM alumni_majors WHERE alumni_id = ?", [id]);
+
       if (major_ids) {
           const list = major_ids.split(",").map(v => v.trim()).filter(v => v !== "");
-          await db.execute("DELETE FROM alumni_majors WHERE alumni_id = ?", [id]);
           for (const mid of list) {
               await db.execute(
                   "INSERT INTO alumni_majors (alumni_id, major_id) VALUES (?, ?)",
@@ -830,7 +832,39 @@ app.post("/alumni/update",
 
       console.log(`🛠 Alumni updated → ID: ${id}, Name: ${full_name}`);
 
-      return res.json({ message: "Alumni updated successfully!" });
+      // REMOVED: return res.json({ message: "Alumni updated successfully!" });
+
+      /* ---------------------------------------------------------
+         FETCH UPDATED ALUMNI INCLUDING MAJORS FOR FRONTEND
+      --------------------------------------------------------- */
+      const [updatedRows] = await db.execute(
+        `
+        SELECT 
+          a.id,
+          a.full_name,
+          a.company,
+          a.role_title,
+          a.email,
+          a.linkedin,
+          a.other_link,
+          a.industries,
+          a.profile_pic,
+          a.company_img,
+          GROUP_CONCAT(m.major_name ORDER BY m.major_name SEPARATOR ', ') AS majors,
+          GROUP_CONCAT(m.id ORDER BY m.major_name SEPARATOR ',') AS major_ids
+        FROM alumni a
+        LEFT JOIN alumni_majors am ON a.id = am.alumni_id
+        LEFT JOIN majors m ON am.major_id = m.id
+        WHERE a.id = ?
+        GROUP BY a.id
+        `,
+        [id]
+      );
+
+      return res.json({
+        message: "Alumni updated successfully!",
+        updated: updatedRows[0] || null
+      });
 
     } catch (err) {
       console.error("❌ Error updating alumni:", err);
