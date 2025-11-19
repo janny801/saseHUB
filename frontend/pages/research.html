@@ -213,8 +213,8 @@
       />
       <button class="dropdown-arrow" onclick="toggleCollegeDropdown()">▼</button>
     </div>
-    <div id="college_tags"></div>
     <div id="college_list" class="dropdown-list"></div>
+    <div id="college_tags"></div>
   </div>
 
   <div class="dropdown-container" id="majorDropdown">
@@ -227,8 +227,8 @@
       />
       <button class="dropdown-arrow" onclick="toggleMajorDropdown2()">▼</button>
     </div>
-    <div id="major_tags2"></div>
     <div id="major_list2" class="dropdown-list"></div>
+    <div id="major_tags2"></div>
   </div>
 </div>
 <div class="filters-divider"></div>
@@ -571,13 +571,14 @@
 .dropdown-list {
     z-index: 999;
 }
+/* Tag containers for college/major filters */
 #college_tags,
 #major_tags2 {
+    display: block;
+    margin-top: 8px;
     max-width: 340px;
     min-width: 340px;
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
+    white-space: wrap;
 }
   .search-wrapper {
     width: 100%;
