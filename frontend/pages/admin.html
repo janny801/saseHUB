@@ -90,6 +90,20 @@
 
     <input type="hidden" id="alumni_selected_major_ids" />
 
+    <label style="color:#70c041">Goal(s)</label>
+    <div class="dropdown-container">
+      <input
+        id="alumni_goal_search"
+        type="text"
+        placeholder="Search or select goals..."
+        onclick="toggleAlumniGoalDropdown()"
+        oninput="filterAlumniGoals()"
+      />
+      <div id="alumni_goal_tags"></div>
+      <div id="alumni_goal_list" class="dropdown-list"></div>
+    </div>
+    <input type="hidden" id="alumni_selected_goal_ids" />
+
     <button class="btn" onclick="saveAlumni()">Save Alumni</button>
     <button class="btn close-btn" onclick="closeModal('alumniModal')">Cancel</button>
   </div>
@@ -132,6 +146,20 @@
     </div>
 
     <input type="hidden" id="edit_alumni_selected_major_ids" />
+
+    <label style="color:#70c041">Goal(s)</label>
+    <div class="dropdown-container">
+      <input
+        id="edit_alumni_goal_search"
+        type="text"
+        placeholder="Search or select goals..."
+        onclick="toggleAlumniGoalDropdownEdit()"
+        oninput="filterAlumniGoalsEdit()"
+      />
+      <div id="edit_alumni_goal_tags"></div>
+      <div id="edit_alumni_goal_list" class="dropdown-list"></div>
+    </div>
+    <input type="hidden" id="edit_alumni_selected_goal_ids" />
 
     <button class="btn" onclick="saveAlumniUpdate()">Save Changes</button>
     <button class="btn close-btn" onclick="closeModal('editAlumniModal')">Cancel</button>
@@ -278,11 +306,13 @@
     if (id === "alumniModal")
     {
         loadAlumniMajors();
+        loadAlumniGoals();
     }
     if (id === "profModal") loadMajors();
     if (id === "editAlumniModal")
     {
         loadAlumniMajorsEdit();
+        loadAlumniGoalsEdit();
     }
   }
 
@@ -312,6 +342,7 @@
         <th>Industries</th>
         <th>Description</th>
         <th>Majors</th>
+        <th>Goals</th>
         <th>Profile Pic</th>
         <th>Company Img</th>
         <th>Actions</th>
@@ -331,6 +362,7 @@
           <td>${a.industries}</td>
           <td>${a.description || a.alumni_description || a.desc || ""}</td>
           <td>${a.majors || "None"}</td>
+          <td>${a.goals || "None"}</td>
           <td>${a.profile_pic ? `<img src="${a.profile_pic}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;">` : "None"}</td>
           <td>${a.company_img ? `<img src="${a.company_img}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;">` : "None"}</td>
           <td style="position:relative;">
@@ -959,6 +991,178 @@
   }
 
   /* ====== EDIT VERSION ====== */
+
+  // ===== ALUMNI GOAL SELECT =====
+
+  let alumniGoalsCache = [];
+  let alumniSelectedGoals = [];
+
+  async function loadAlumniGoals() {
+    const res = await fetch("/goals/all");
+    alumniGoalsCache = await res.json();
+    renderAlumniGoalDropdown(alumniGoalsCache);
+  }
+
+  function toggleAlumniGoalDropdown() {
+    const list = document.getElementById("alumni_goal_list");
+    list.style.display = list.style.display === "block" ? "none" : "block";
+  }
+
+  function filterAlumniGoals() {
+    const q = document.getElementById("alumni_goal_search").value.toLowerCase();
+    const filtered = alumniGoalsCache.filter(g =>
+      g.goal_name.toLowerCase().includes(q)
+    );
+    renderAlumniGoalDropdown(filtered);
+  }
+
+  function renderAlumniGoalDropdown(list) {
+    const container = document.getElementById("alumni_goal_list");
+    container.innerHTML = "";
+    container.style.display = "block";
+
+    list.forEach(g => {
+      const item = document.createElement("div");
+      item.className = "dropdown-item";
+
+      if (alumniSelectedGoals.find(x => x.id === g.id)) {
+        item.classList.add("selected");
+      }
+
+      item.onclick = () => toggleAlumniGoal(g);
+      item.textContent = g.goal_name;
+
+      container.appendChild(item);
+    });
+  }
+
+  function toggleAlumniGoal(goal) {
+    const exists = alumniSelectedGoals.find(g => g.id === goal.id);
+
+    if (exists) {
+      alumniSelectedGoals = alumniSelectedGoals.filter(g => g.id !== goal.id);
+    } else {
+      alumniSelectedGoals.push(goal);
+    }
+
+    updateAlumniGoalTags();
+    renderAlumniGoalDropdown(alumniGoalsCache);
+  }
+
+  function updateAlumniGoalTags() {
+    const box = document.getElementById("alumni_goal_tags");
+    box.innerHTML = "";
+
+    alumniSelectedGoals.forEach(g => {
+      const tag = document.createElement("div");
+      tag.className = "major-tag";
+      tag.innerHTML = `${g.goal_name} <span onclick="removeAlumniGoal(${g.id})">×</span>`;
+      box.appendChild(tag);
+    });
+
+    document.getElementById("alumni_selected_goal_ids").value =
+      alumniSelectedGoals.map(g => g.id).join(",");
+  }
+
+  function removeAlumniGoal(id) {
+    alumniSelectedGoals = alumniSelectedGoals.filter(g => g.id !== id);
+    updateAlumniGoalTags();
+    renderAlumniGoalDropdown(alumniGoalsCache);
+  }
+
+  // ===== EDIT VERSION =====
+
+  let editAlumniGoalsCache = [];
+  let editAlumniSelectedGoals = [];
+
+  async function loadAlumniGoalsEdit(initialGoals) {
+    const res = await fetch("/goals/all");
+    editAlumniGoalsCache = await res.json();
+
+    editAlumniSelectedGoals = [];
+
+    if (initialGoals) {
+      const names = initialGoals.split(",").map(s => s.trim());
+      names.forEach(n => {
+        const match = editAlumniGoalsCache.find(
+          g => g.goal_name.trim().toLowerCase() === n.toLowerCase()
+        );
+        if (match && !editAlumniSelectedGoals.find(x => x.id === match.id)) {
+          editAlumniSelectedGoals.push(match);
+        }
+      });
+    }
+
+    renderAlumniGoalDropdownEdit(editAlumniGoalsCache);
+    updateAlumniGoalTagsEdit();
+  }
+
+  function toggleAlumniGoalDropdownEdit() {
+    const list = document.getElementById("edit_alumni_goal_list");
+    list.style.display = list.style.display === "block" ? "none" : "block";
+  }
+
+  function filterAlumniGoalsEdit() {
+    const q = document.getElementById("edit_alumni_goal_search").value.toLowerCase();
+    const filtered = editAlumniGoalsCache.filter(g =>
+      g.goal_name.toLowerCase().includes(q)
+    );
+    renderAlumniGoalDropdownEdit(filtered);
+  }
+
+  function renderAlumniGoalDropdownEdit(list) {
+    const container = document.getElementById("edit_alumni_goal_list");
+    container.innerHTML = "";
+    container.style.display = "block";
+
+    list.forEach(g => {
+      const item = document.createElement("div");
+      item.className = "dropdown-item";
+
+      if (editAlumniSelectedGoals.find(x => x.id === g.id)) {
+        item.classList.add("selected");
+      }
+
+      item.onclick = () => toggleEditAlumniGoal(g);
+      item.textContent = g.goal_name;
+
+      container.appendChild(item);
+    });
+  }
+
+  function toggleEditAlumniGoal(goal) {
+    const exists = editAlumniSelectedGoals.find(g => g.id === goal.id);
+
+    if (exists) {
+      editAlumniSelectedGoals = editAlumniSelectedGoals.filter(g => g.id !== goal.id);
+    } else {
+      editAlumniSelectedGoals.push(goal);
+    }
+
+    updateAlumniGoalTagsEdit();
+    renderAlumniGoalDropdownEdit(editAlumniGoalsCache);
+  }
+
+  function updateAlumniGoalTagsEdit() {
+    const box = document.getElementById("edit_alumni_goal_tags");
+    box.innerHTML = "";
+
+    editAlumniSelectedGoals.forEach(g => {
+      const tag = document.createElement("div");
+      tag.className = "major-tag";
+      tag.innerHTML = `${g.goal_name} <span onclick="removeEditAlumniGoal(${g.id})">×</span>`;
+      box.appendChild(tag);
+    });
+
+    document.getElementById("edit_alumni_selected_goal_ids").value =
+      editAlumniSelectedGoals.map(g => g.id).join(",");
+  }
+
+  function removeEditAlumniGoal(id) {
+    editAlumniSelectedGoals = editAlumniSelectedGoals.filter(g => g.id !== id);
+    updateAlumniGoalTagsEdit();
+    renderAlumniGoalDropdownEdit(editAlumniGoalsCache);
+  }
 
   let editAlumniMajorsCache = [];
   let editAlumniSelectedMajors = [];

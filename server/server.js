@@ -278,10 +278,14 @@ app.get("/alumni/all", async (req, res) => {
         a.company_img,
         GROUP_CONCAT(m.major_name ORDER BY m.major_name SEPARATOR ', ') AS majors,
         GROUP_CONCAT(m.id ORDER BY m.major_name SEPARATOR ',') AS major_ids,
+        GROUP_CONCAT(g.goal_name ORDER BY g.goal_name SEPARATOR ', ') AS goals,
+        GROUP_CONCAT(g.id ORDER BY g.goal_name SEPARATOR ',') AS goal_ids,
         a.created_at
       FROM alumni a
       LEFT JOIN alumni_majors am ON a.id = am.alumni_id
       LEFT JOIN majors m ON am.major_id = m.id
+      LEFT JOIN alumni_goals ag ON a.id = ag.alumni_id
+      LEFT JOIN goals g ON ag.goal_id = g.id
       GROUP BY a.id
       ORDER BY a.id DESC
     `);
@@ -335,6 +339,21 @@ app.get("/majors/all", async (req, res) => {
   } catch (err) {
     console.error("❌ Error fetching majors:", err);
     return res.status(500).json({ message: "Server error fetching majors" });
+  }
+});
+
+/* -------------------------------------------------------------
+   GET ALL GOALS
+------------------------------------------------------------- */
+app.get("/goals/all", async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      "SELECT id, goal_name FROM goals ORDER BY goal_name"
+    );
+    return res.json(rows);
+  } catch (err) {
+    console.error("❌ Error fetching goals:", err);
+    return res.status(500).json({ message: "Server error fetching goals" });
   }
 });
 
@@ -711,6 +730,15 @@ app.post("/alumni/add",
               );
           }
       }
+      if (req.body.goal_ids) {
+        const goalList = req.body.goal_ids.split(",").map(v => v.trim()).filter(v => v !== "");
+        for (const gid of goalList) {
+          await db.execute(
+            "INSERT INTO alumni_goals (alumni_id, goal_id) VALUES (?, ?)",
+            [alumniId, gid]
+          );
+        }
+      }
 
       console.log(`🎓 Alumni added → ID: ${result.insertId}, Name: ${full_name}`);
 
@@ -836,6 +864,19 @@ app.post("/alumni/update",
           }
       }
 
+      /* --- Sync goals on update --- */
+      await db.execute("DELETE FROM alumni_goals WHERE alumni_id = ?", [id]);
+
+      if (req.body.goal_ids) {
+        const goalList = req.body.goal_ids.split(",").map(v => v.trim()).filter(v => v !== "");
+        for (const gid of goalList) {
+          await db.execute(
+            "INSERT INTO alumni_goals (alumni_id, goal_id) VALUES (?, ?)",
+            [id, gid]
+          );
+        }
+      }
+
       console.log(`🛠 Alumni updated → ID: ${id}, Name: ${full_name}`);
 
       // REMOVED: return res.json({ message: "Alumni updated successfully!" });
@@ -857,10 +898,14 @@ app.post("/alumni/update",
           a.profile_pic,
           a.company_img,
           GROUP_CONCAT(m.major_name ORDER BY m.major_name SEPARATOR ', ') AS majors,
-          GROUP_CONCAT(m.id ORDER BY m.major_name SEPARATOR ',') AS major_ids
+          GROUP_CONCAT(m.id ORDER BY m.major_name SEPARATOR ',') AS major_ids,
+          GROUP_CONCAT(g.goal_name ORDER BY g.goal_name SEPARATOR ', ') AS goals,
+          GROUP_CONCAT(g.id ORDER BY g.goal_name SEPARATOR ',') AS goal_ids
         FROM alumni a
         LEFT JOIN alumni_majors am ON a.id = am.alumni_id
         LEFT JOIN majors m ON am.major_id = m.id
+        LEFT JOIN alumni_goals ag ON a.id = ag.alumni_id
+        LEFT JOIN goals g ON ag.goal_id = g.id
         WHERE a.id = ?
         GROUP BY a.id
         `,
