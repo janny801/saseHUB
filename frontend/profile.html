@@ -477,7 +477,12 @@ window.onclick = function (event) {
                   />
 
                   <div style="flex:1;">
-                    <strong>${a.full_name}</strong><br>
+                    <strong>${a.full_name}</strong>
+                    <img 
+                      src="${a.company_img || ''}"
+                      style="width:40px; height:auto; margin-left:10px; border-radius:4px; vertical-align:middle;"
+                    />
+                    <br>
                     <span>Company: ${a.company}</span><br>
                     <span>Role: ${a.role_title}</span><br>
                     <span>Email: ${a.email}</span><br>
