@@ -401,10 +401,23 @@
     document.getElementById("edit_alumni_other").value = other;
     document.getElementById("edit_alumni_tags").value = tags;
     document.getElementById("edit_alumni_description").value = description;
+    document.getElementById("edit_alumni_major_search").value = majors;
 
     document.getElementById("edit_alumni_company_img").value = "";
     document.getElementById("edit_alumni_profile_pic").value = "";
 
+    editAlumniSelectedMajors = [];
+    if (majors) {
+        const names = majors.split(",").map(s => s.trim());
+        names.forEach(n => {
+            const match = editAlumniMajorsCache.find(
+                m => m.major_name.trim().toLowerCase() === n.toLowerCase()
+            );
+            if (match && !editAlumniSelectedMajors.find(x => x.id === match.id)) {
+                editAlumniSelectedMajors.push(match);
+            }
+        });
+    }
     loadAlumniMajorsEdit(majors);
     openModal("editAlumniModal");
   }
@@ -953,18 +966,7 @@
   async function loadAlumniMajorsEdit(initialMajors) {
     const res = await fetch("/majors/all");
     editAlumniMajorsCache = await res.json();
-
-    editAlumniSelectedMajors = [];
-
-    if (initialMajors) {
-      const names = initialMajors.split(",").map(s => s.trim());
-      names.forEach(n => {
-        const match = editAlumniMajorsCache.find(
-          m => m.major_name.trim().toLowerCase() === n.toLowerCase()
-        );
-        if (match) editAlumniSelectedMajors.push(match);
-      });
-    }
+    editAlumniSelectedMajors = editAlumniSelectedMajors || [];
 
     renderAlumniMajorDropdownEdit(editAlumniMajorsCache);
     updateAlumniMajorTagsEdit();
@@ -1022,6 +1024,8 @@
   function updateAlumniMajorTagsEdit() {
     const container = document.getElementById("edit_alumni_major_tags");
     container.innerHTML = "";
+    document.getElementById("edit_alumni_major_search").value =
+        editAlumniSelectedMajors.map(m => m.major_name).join(", ");
 
     editAlumniSelectedMajors.forEach(m => {
       const tag = document.createElement("div");
