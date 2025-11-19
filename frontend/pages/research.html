@@ -80,6 +80,20 @@
     flex: 1;
   }
 
+  /* highlight green when selected or typed in */
+  .filter-bar input:focus {
+    border-color: #70c041 !important;
+    box-shadow: 0 0 6px rgba(112,192,65,0.6);
+    outline: none;
+    background-color: #0f141a;
+    color: #70c041;
+  }
+  .filter-bar input.filled {
+    border-color: #70c041 !important;
+    color: #70c041;
+    font-weight: bold;
+  }
+
   /* Save button stays on right */
   .save-btn {
     background: #70c041;
@@ -97,6 +111,53 @@
     background: #333;
     color: #70c041;
     cursor: default;
+  }
+
+  /* CUSTOM MULTISELECT DROPDOWN */
+  /* Removed old multi-select styles */
+
+  /* Admin-style dropdown-container styles */
+  .dropdown-container {
+    position: relative;
+    width: 260px;
+  }
+  .dropdown-list {
+    display: none;
+    background: #0f141a;
+    border: 1px solid #70c041;
+    border-radius: 8px;
+    position: absolute;
+    width: 100%;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 200;
+  }
+  .dropdown-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #1d2a21;
+  }
+  .dropdown-item:hover {
+    background: #162017;
+  }
+  .dropdown-item.selected {
+    background: #70c041;
+    color: #0b0c10;
+    font-weight: bold;
+  }
+  .major-tag {
+    display: inline-block;
+    background: #70c041;
+    color: #0b0c10;
+    padding: 5px 10px;
+    border-radius: 12px;
+    margin: 4px 4px 8px 0;
+    font-weight: bold;
+  }
+  .major-tag span {
+    margin-left: 6px;
+    cursor: pointer;
+    font-weight: bold;
   }
 </style>
 
@@ -128,16 +189,118 @@
 <!-- Search + Filter Section -->
 <div class="filter-bar">
   <input id="searchInput" type="text" placeholder="Search professors (name, major, university, etc.)" oninput="applyFilters()" />
-  <input list="collegeOptions" id="collegeFilter" placeholder="Filter by College" oninput="applyFilters()" />
-  <datalist id="collegeOptions"></datalist>
+  
+  <div class="dropdown-container" id="collegeDropdown">
+    <input
+      id="college_search"
+      type="text"
+      placeholder="Filter by College"
+      onclick="toggleCollegeDropdown()"
+      oninput="filterColleges()"
+    />
+    <div id="college_tags"></div>
+    <div id="college_list" class="dropdown-list"></div>
+  </div>
 
-  <input list="majorOptions" id="majorFilter" placeholder="Filter by Major" oninput="applyFilters()" />
-  <datalist id="majorOptions"></datalist>
+  <div class="dropdown-container" id="majorDropdown">
+    <input
+      id="major_search2"
+      type="text"
+      placeholder="Filter by Major"
+      onclick="toggleMajorDropdown2()"
+      oninput="filterMajors2()"
+    />
+    <div id="major_tags2"></div>
+    <div id="major_list2" class="dropdown-list"></div>
+  </div>
 </div>
 
 <div id="professorsSection" class="professor-list"></div>
 
 <script>
+  let selectedColleges = [];
+  let selectedMajors = [];
+
+  function toggleCollegeDropdown() {
+    const list = document.getElementById("college_list");
+    list.style.display = list.style.display === "block" ? "none" : "block";
+  }
+
+  function toggleMajorDropdown2() {
+    const list = document.getElementById("major_list2");
+    list.style.display = list.style.display === "block" ? "none" : "block";
+  }
+
+  function filterColleges() {
+    const q = document.getElementById("college_search").value.toLowerCase();
+    const list = document.getElementById("college_list");
+    Array.from(list.children).forEach(item => {
+      item.style.display = item.textContent.toLowerCase().includes(q) ? "block" : "none";
+    });
+  }
+
+  function filterMajors2() {
+    const q = document.getElementById("major_search2").value.toLowerCase();
+    const list = document.getElementById("major_list2");
+    Array.from(list.children).forEach(item => {
+      item.style.display = item.textContent.toLowerCase().includes(q) ? "block" : "none";
+    });
+  }
+
+  function toggleCollegeSelect(name) {
+    if (selectedColleges.includes(name)) {
+      selectedColleges = selectedColleges.filter(x => x !== name);
+    } else {
+      selectedColleges.push(name);
+    }
+    updateCollegeTags();
+    applyFilters();
+  }
+
+  function toggleMajorSelect2(name) {
+    if (selectedMajors.includes(name)) {
+      selectedMajors = selectedMajors.filter(x => x !== name);
+    } else {
+      selectedMajors.push(name);
+    }
+    updateMajorTags2();
+    applyFilters();
+  }
+
+  function updateCollegeTags() {
+    const box = document.getElementById("college_tags");
+    box.innerHTML = "";
+    selectedColleges.forEach(c => {
+      const tag = document.createElement("div");
+      tag.className = "major-tag";
+      tag.innerHTML = `${c} <span onclick="removeCollege('${c}')">×</span>`;
+      box.appendChild(tag);
+    });
+  }
+
+  function updateMajorTags2() {
+    const box = document.getElementById("major_tags2");
+    box.innerHTML = "";
+    selectedMajors.forEach(m => {
+      const tag = document.createElement("div");
+      tag.className = "major-tag";
+      tag.innerHTML = `${m} <span onclick="removeMajor2('${m}')">×</span>`;
+      box.appendChild(tag);
+    });
+  }
+
+  function removeCollege(name) {
+    selectedColleges = selectedColleges.filter(x => x !== name);
+    updateCollegeTags();
+    applyFilters();
+  }
+
+  function removeMajor2(name) {
+    selectedMajors = selectedMajors.filter(x => x !== name);
+    updateMajorTags2();
+    applyFilters();
+  }
+
   function toggleMenu() {
     document.getElementById("dropdownMenu").classList.toggle("show");
   }
@@ -166,22 +329,29 @@
 
     majorsLookup = majors;
 
-    const collegeOptions = document.getElementById("collegeOptions");
-    const majorOptions = document.getElementById("majorOptions");
+    const collegeListBox = document.getElementById("college_list");
+    const majorListBox = document.getElementById("major_list2");
+
+    collegeListBox.innerHTML = "";
+    majorListBox.innerHTML = "";
 
     const collegeSet = new Set();
 
     majors.forEach(m => {
-      const opt = document.createElement("option");
-      opt.value = m.major_name;
-      majorOptions.appendChild(opt);
-
       if (m.college_name && !collegeSet.has(m.college_name)) {
         collegeSet.add(m.college_name);
-        const opt2 = document.createElement("option");
-        opt2.value = m.college_name;
-        collegeOptions.appendChild(opt2);
+        const d = document.createElement("div");
+        d.className = "dropdown-item";
+        d.textContent = m.college_name;
+        d.onclick = () => toggleCollegeSelect(m.college_name);
+        collegeListBox.appendChild(d);
       }
+
+      const mdiv = document.createElement("div");
+      mdiv.className = "dropdown-item";
+      mdiv.textContent = m.major_name;
+      mdiv.onclick = () => toggleMajorSelect2(m.major_name);
+      majorListBox.appendChild(mdiv);
     });
   }
 
@@ -206,8 +376,11 @@
      ========================== */
   function applyFilters() {
     const searchText = document.getElementById("searchInput").value.toLowerCase();
-    const selectedMajor = document.getElementById("majorFilter").value;
-    const selectedCollege = document.getElementById("collegeFilter").value;
+    const selectedMajor = selectedMajors;
+    const selectedCollege = selectedColleges;
+
+    document.getElementById("major_search2").classList.toggle("filled", selectedMajor.length > 0);
+    document.getElementById("college_search").classList.toggle("filled", selectedCollege.length > 0);
 
     let results = allProfessors;
 
@@ -227,23 +400,23 @@
       )
     );
 
-    if (selectedMajor) {
+    if (selectedMajors.length > 0) {
       results = results.filter(p =>
-        p.majors && p.majors.toLowerCase().includes(selectedMajor.toLowerCase())
+        p.majors &&
+        selectedMajors.some(m => p.majors.toLowerCase().includes(m.toLowerCase()))
       );
     }
 
-    if (selectedCollege) {
+    if (selectedColleges.length > 0) {
       results = results.filter(p => {
         if (!p.majors) return false;
         const profMajors = p.majors.split(",");
-        for (const maj of profMajors) {
+        return profMajors.some(maj => {
           const found = majorsLookup.find(
             m => m.major_name.trim().toLowerCase() === maj.trim().toLowerCase()
           );
-          if (found && found.college_name === selectedCollege) return true;
-        }
-        return false;
+          return found && selectedColleges.includes(found.college_name);
+        });
       });
     }
 
