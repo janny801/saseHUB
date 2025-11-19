@@ -128,12 +128,11 @@
 <!-- Search + Filter Section -->
 <div class="filter-bar">
   <input id="searchInput" type="text" placeholder="Search professors (name, major, university, etc.)" oninput="applyFilters()" />
-  <select id="collegeFilter" onchange="applyFilters()">
-    <option value="">Filter by College</option>
-  </select>
-  <select id="majorFilter" onchange="applyFilters()">
-    <option value="">Filter by Major</option>
-  </select>
+  <input list="collegeOptions" id="collegeFilter" placeholder="Filter by College" oninput="applyFilters()" />
+  <datalist id="collegeOptions"></datalist>
+
+  <input list="majorOptions" id="majorFilter" placeholder="Filter by Major" oninput="applyFilters()" />
+  <datalist id="majorOptions"></datalist>
 </div>
 
 <div id="professorsSection" class="professor-list"></div>
@@ -167,22 +166,21 @@
 
     majorsLookup = majors;
 
+    const collegeOptions = document.getElementById("collegeOptions");
+    const majorOptions = document.getElementById("majorOptions");
+
     const collegeSet = new Set();
-    const majorSelect = document.getElementById("majorFilter");
-    const collegeSelect = document.getElementById("collegeFilter");
 
     majors.forEach(m => {
       const opt = document.createElement("option");
       opt.value = m.major_name;
-      opt.textContent = m.major_name;
-      majorSelect.appendChild(opt);
+      majorOptions.appendChild(opt);
 
       if (m.college_name && !collegeSet.has(m.college_name)) {
         collegeSet.add(m.college_name);
         const opt2 = document.createElement("option");
         opt2.value = m.college_name;
-        opt2.textContent = m.college_name;
-        collegeSelect.appendChild(opt2);
+        collegeOptions.appendChild(opt2);
       }
     });
   }
@@ -218,7 +216,15 @@
       (p.majors && p.majors.toLowerCase().includes(searchText)) ||
       p.university.toLowerCase().includes(searchText) ||
       (p.description && p.description.toLowerCase().includes(searchText)) ||
-      p.email.toLowerCase().includes(searchText)
+      p.email.toLowerCase().includes(searchText) ||
+      majorsLookup.some(m =>
+        m.major_name.toLowerCase().includes(searchText) &&
+        p.majors && p.majors.toLowerCase().includes(m.major_name.toLowerCase())
+      ) ||
+      majorsLookup.some(m =>
+        m.college_name.toLowerCase().includes(searchText) &&
+        p.majors && p.majors.toLowerCase().includes(m.major_name.toLowerCase())
+      )
     );
 
     if (selectedMajor) {
