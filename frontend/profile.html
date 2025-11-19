@@ -192,6 +192,13 @@
         <li>Loading...</li>
       </ul>
     </div>
+    <!-- SAVED ALUMNI -->
+    <div class="saved-section">
+      <h2>Saved Alumni</h2>
+      <ul id="savedAlumni">
+        <li>Loading...</li>
+      </ul>
+    </div>
 
     <a href="index.html" class="back-btn">← Back to Dashboard</a>
   </div>
@@ -206,6 +213,7 @@
       loadProfile();
       loadSavedProfessors();
       loadSavedInternships();
+      loadSavedAlumni(); 
     });
 
     async function loadProfile() {
@@ -321,6 +329,73 @@
         loadSavedProfessors();
       } catch (err) {
         console.error("❌ Error unsaving professor:", err);
+      }
+    }
+
+    /* ============================
+       LOAD SAVED ALUMNI
+============================ */
+    async function loadSavedAlumni() {
+      const list = document.getElementById("savedAlumni");
+
+      try {
+        const res = await fetch(`/saved-alumni/${uh_id}`);
+        const alumni = await res.json();
+
+        if (!alumni.length) {
+          list.innerHTML = "<li>No saved alumni yet</li>";
+          return;
+        }
+
+        list.innerHTML = alumni
+          .map(
+            a => `
+              <li style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+                
+                <div style="display:flex; align-items:flex-start; gap:12px; width:100%;">
+                  <img 
+                    src="${a.profile_pic || 'images/default_alumni.png'}"
+                    style="width:60px;height:60px;border-radius:8px;border:1px solid #70c041;object-fit:cover;"
+                  />
+
+                  <div style="flex:1;">
+                    <strong>${a.full_name}</strong><br>
+                    <span>Company: ${a.company}</span><br>
+                    <span>Role: ${a.role_title}</span><br>
+                    <span>Email: ${a.email}</span><br>
+                    <span>Industries: ${a.industries || "None"}</span>
+                  </div>
+                </div>
+
+                <button class="unsave-btn" onclick="confirmUnsaveAlumni(${a.id})">
+                  Unsave
+                </button>
+              </li>
+            `
+          )
+          .join("");
+      } catch (err) {
+        console.error("❌ Error loading saved alumni:", err);
+        list.innerHTML = "<li>Error loading saved alumni</li>";
+      }
+    }
+
+    function confirmUnsaveAlumni(id) {
+      const ok = confirm("Unsave this alumni?");
+      if (ok) unsaveAlumni(id);
+    }
+
+    async function unsaveAlumni(alumni_id) {
+      try {
+        await fetch("/saved-alumni/remove", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uh_id, alumni_id })
+        });
+
+        loadSavedAlumni();
+      } catch (err) {
+        console.error("❌ Error unsaving alumni:", err);
       }
     }
 

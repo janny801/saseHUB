@@ -932,6 +932,88 @@ app.get("/saved-alumni/:uh_id", async (req, res) => {
   }
 });
 
+app.post("/saved-alumni/save", async (req, res) => {
+  try {
+    const { uh_id, alumni_id } = req.body;
+
+    if (!uh_id || !alumni_id) {
+      return res.status(400).json({ message: "Missing uh_id or alumni_id" });
+    }
+
+    const [existing] = await db.execute(
+      "SELECT * FROM saved_alumni WHERE uh_id = ? AND alumni_id = ?",
+      [uh_id, alumni_id]
+    );
+
+    if (existing.length > 0) {
+      return res.json({ message: "Alumni already saved" });
+    }
+
+    await db.execute(
+      "INSERT INTO saved_alumni (uh_id, alumni_id) VALUES (?, ?)",
+      [uh_id, alumni_id]
+    );
+
+    return res.json({ message: "Alumni saved successfully" });
+
+  } catch (err) {
+    console.error("❌ Error saving alumni:", err);
+    return res.status(500).json({ message: "Server error saving alumni" });
+  }
+});
+
+app.delete("/saved-alumni/remove", async (req, res) => {
+  try {
+    const { uh_id, alumni_id } = req.body;
+
+    if (!uh_id || !alumni_id) {
+      return res.status(400).json({ message: "Missing uh_id or alumni_id" });
+    }
+
+    await db.execute(
+      "DELETE FROM saved_alumni WHERE uh_id = ? AND alumni_id = ?",
+      [uh_id, alumni_id]
+    );
+
+    return res.json({ message: "Alumni unsaved successfully" });
+
+  } catch (err) {
+    console.error("❌ Error unsaving alumni:", err);
+    return res.status(500).json({ message: "Server error unsaving alumni" });
+  }
+});
+
+app.get("/saved-alumni/:uh_id", async (req, res) => {
+  try {
+    const { uh_id } = req.params;
+
+    const [rows] = await db.execute(
+      `
+      SELECT 
+        a.id,
+        a.full_name,
+        a.company,
+        a.role_title,
+        a.email,
+        a.linkedin,
+        a.other_link,
+        a.industries,
+        a.profile_pic,
+        a.company_img
+      FROM saved_alumni sa
+      JOIN alumni a ON sa.alumni_id = a.id
+      WHERE sa.uh_id = ?
+      `,
+      [uh_id]
+    );
+
+    return res.json(rows);
+
+  } catch (err) {
+    console.error("❌ Error fetching saved alumni:", err);
+    return res.status(500).json({ message: "Server error fetching saved alumni" });
+  }
+});
 
 /* -------------------------------------------------------------
    START SERVER
