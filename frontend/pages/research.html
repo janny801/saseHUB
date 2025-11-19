@@ -201,25 +201,29 @@
   <input id="searchInput" type="text" placeholder="Search professors (name, major, university, etc.)" oninput="applyFilters()" />
   
   <div class="dropdown-container" id="collegeDropdown">
-    <input
-      id="college_search"
-      type="text"
-      placeholder="Filter by College"
-      onclick="toggleCollegeDropdown()"
-      oninput="filterColleges()"
-    />
+    <div class="dropdown-input-wrapper">
+      <input
+        id="college_search"
+        type="text"
+        placeholder="Filter by College"
+        oninput="filterColleges()"
+      />
+      <button class="dropdown-arrow" onclick="toggleCollegeDropdown()">▼</button>
+    </div>
     <div id="college_tags"></div>
     <div id="college_list" class="dropdown-list"></div>
   </div>
 
   <div class="dropdown-container" id="majorDropdown">
-    <input
-      id="major_search2"
-      type="text"
-      placeholder="Filter by Major"
-      onclick="toggleMajorDropdown2()"
-      oninput="filterMajors2()"
-    />
+    <div class="dropdown-input-wrapper">
+      <input
+        id="major_search2"
+        type="text"
+        placeholder="Filter by Major"
+        oninput="filterMajors2()"
+      />
+      <button class="dropdown-arrow" onclick="toggleMajorDropdown2()">▼</button>
+    </div>
     <div id="major_tags2"></div>
     <div id="major_list2" class="dropdown-list"></div>
   </div>
@@ -233,13 +237,25 @@
   let selectedMajors = [];
 
   function toggleCollegeDropdown() {
+    const col = document.getElementById("college_list");
+    const maj = document.getElementById("major_list2");
+    maj.style.display = "none";
+    col.style.display = col.style.display === "block" ? "none" : "block";
+  }
+  function autoOpenCollege() {
     const list = document.getElementById("college_list");
-    list.style.display = list.style.display === "block" ? "none" : "block";
+    list.style.display = "block";
   }
 
   function toggleMajorDropdown2() {
+    const col = document.getElementById("college_list");
+    const maj = document.getElementById("major_list2");
+    col.style.display = "none";
+    maj.style.display = maj.style.display === "block" ? "none" : "block";
+  }
+  function autoOpenMajor2() {
     const list = document.getElementById("major_list2");
-    list.style.display = list.style.display === "block" ? "none" : "block";
+    list.style.display = "block";
   }
 
   function filterColleges() {
@@ -248,6 +264,7 @@
     Array.from(list.children).forEach(item => {
       item.style.display = item.textContent.toLowerCase().includes(q) ? "block" : "none";
     });
+    document.getElementById("college_list").style.display = "block";
   }
 
   function filterMajors2() {
@@ -256,6 +273,7 @@
     Array.from(list.children).forEach(item => {
       item.style.display = item.textContent.toLowerCase().includes(q) ? "block" : "none";
     });
+    document.getElementById("major_list2").style.display = "block";
   }
 
   function toggleCollegeSelect(name) {
@@ -321,6 +339,17 @@
       if (menu) menu.classList.remove("show");
     }
   };
+  document.addEventListener("click", function(e) {
+    const collegeBox = document.getElementById("collegeDropdown");
+    const majorBox = document.getElementById("majorDropdown");
+
+    if (!collegeBox.contains(e.target)) {
+        document.getElementById("college_list").style.display = "none";
+    }
+    if (!majorBox.contains(e.target)) {
+        document.getElementById("major_list2").style.display = "none";
+    }
+  });
 
   function logout() {
     localStorage.clear();
@@ -507,6 +536,39 @@
   loadMajorsForFilters();
   loadProfessors();
 </script>
+
+<style>
+.dropdown-input-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+.dropdown-input-wrapper input {
+    flex: 1;
+}
+.dropdown-arrow {
+    background: #0f141a;
+    color: #70c041;
+    border: 1px solid #70c041;
+    border-left: none;
+    padding: 8px 10px;
+    cursor: pointer;
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.dropdown-arrow:hover {
+    background: #1a2318;
+}
+.dropdown-container {
+    position: relative;
+}
+.dropdown-list {
+    z-index: 999;
+}
+</style>
 
 </body>
 </html>
