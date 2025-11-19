@@ -102,6 +102,100 @@
     color: #70c041;
     cursor: default;
   }
+
+  .dropdown-container {
+    position: relative;
+    width: 340px;
+    min-width: 340px;
+    max-width: 340px;
+    flex-shrink: 0;
+  }
+
+  .dropdown-input-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+
+  .dropdown-input-wrapper input {
+    flex: 1;
+  }
+
+  .dropdown-arrow {
+    background: #0f141a;
+    color: #70c041;
+    border: 1px solid #70c041;
+    border-left: none;
+    padding: 8px 10px;
+    cursor: pointer;
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dropdown-list {
+    display: none;
+    background: #0f141a;
+    border: 1px solid #70c041;
+    border-radius: 8px;
+    position: absolute;
+    width: 100%;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 200;
+  }
+
+  .dropdown-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #1d2a21;
+  }
+
+  .dropdown-item:hover {
+    background: #162017;
+  }
+
+  .dropdown-item.selected {
+    background: #70c041;
+    color: #0b0c10;
+    font-weight: bold;
+  }
+
+  .major-tag {
+    display: inline-block;
+    background: #70c041;
+    color: #0b0c10;
+    padding: 5px 10px;
+    border-radius: 12px;
+    margin: 4px 4px 8px 0;
+    font-weight: bold;
+  }
+
+  .major-tag span {
+    margin-left: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+    .search-wrapper {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto 10px auto;
+    display: flex;
+    justify-content: center;
+  }
+
+  .search-wrapper input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #70c041;
+    background: #0f141a;
+    color: white;
+  }
+
 </style>
 
 </head>
@@ -129,11 +223,24 @@
 </div>
 
 <!-- Search + Filter Section -->
+
+<div class="search-wrapper">
+  <input id="searchInput" type="text" placeholder="Search alumni (name, major, company, etc.)" oninput="applyFilters()" />
+</div>
 <div class="filter-bar">
-  <input id="searchInput" type="text" placeholder="Search alumni (name, company, industry, etc.)" oninput="applyFilters()" />
-  <select id="industryFilter" onchange="applyFilters()">
-    <option value="">Filter by Industry</option>
-  </select>
+  <div class="dropdown-container" id="majorDropdown">
+    <div class="dropdown-input-wrapper">
+      <input
+        id="major_search2"
+        type="text"
+        placeholder="Filter by Major"
+        oninput="filterMajors2()"
+      />
+      <button class="dropdown-arrow" onclick="toggleMajorDropdown2()">▼</button>
+    </div>
+    <div id="major_list2" class="dropdown-list"></div>
+    <div id="major_tags2"></div>
+  </div>
 </div>
 
 <div class="filters-divider"></div>
@@ -159,6 +266,8 @@
   let allAlumni = [];
   let savedAlumni = [];
   let industryList = [];
+
+  let selectedMajors = [];
 
   /* ======================
         LOAD SAVED ALUMNI
@@ -199,6 +308,22 @@
     industryList = Array.from(set);
   }
 
+  async function loadMajorsForFilters() {
+    const res = await fetch("/majors/all");
+    const majors = await res.json();
+
+    const majorListBox = document.getElementById("major_list2");
+    majorListBox.innerHTML = "";
+
+    majors.forEach(m => {
+      const mdiv = document.createElement("div");
+      mdiv.className = "dropdown-item";
+      mdiv.textContent = m.major_name;
+      mdiv.onclick = () => toggleMajorSelect2(m.major_name);
+      majorListBox.appendChild(mdiv);
+    });
+  }
+
   /* ======================
           LOAD ALUMNI
      ====================== */
@@ -211,7 +336,7 @@
 
   function applyFilters() {
     const searchText = document.getElementById("searchInput").value.toLowerCase();
-    const industryFilter = document.getElementById("industryFilter").value;
+    const selectedMajor = selectedMajors;
 
     let results = allAlumni;
 
@@ -219,13 +344,13 @@
       a.full_name.toLowerCase().includes(searchText) ||
       a.company.toLowerCase().includes(searchText) ||
       a.role_title.toLowerCase().includes(searchText) ||
-      (a.industries && a.industries.toLowerCase().includes(searchText))
+      (a.majors && a.majors.toLowerCase().includes(searchText))
     );
 
-    if (industryFilter) {
+    if (selectedMajors.length > 0) {
       results = results.filter(a =>
-        a.industries &&
-        a.industries.toLowerCase().includes(industryFilter.toLowerCase())
+        a.majors &&
+        selectedMajors.some(m => a.majors.toLowerCase().includes(m.toLowerCase()))
       );
     }
 
@@ -301,7 +426,94 @@
     section.innerHTML = html;
   }
 
-  loadIndustries();
+  function toggleMajorDropdown2() {
+    const list = document.getElementById("major_list2");
+    if (list.style.display === "block") {
+      list.style.display = "none";
+    } else {
+      list.style.display = "block";
+    }
+  }
+
+  function autoOpenMajor2() {
+    const list = document.getElementById("major_list2");
+    list.style.display = "block";
+  }
+
+  function filterMajors2() {
+    const input = document.getElementById("major_search2");
+    const filter = input.value.toLowerCase();
+    const list = document.getElementById("major_list2");
+    const items = list.getElementsByClassName("dropdown-item");
+
+    let visibleCount = 0;
+    for (let i = 0; i < items.length; i++) {
+      const txtValue = items[i].textContent || items[i].innerText;
+      if (txtValue.toLowerCase().indexOf(filter) > -1) {
+        items[i].style.display = "";
+        visibleCount++;
+      } else {
+        items[i].style.display = "none";
+      }
+    }
+
+    if (visibleCount > 0) {
+      list.style.display = "block";
+    } else {
+      list.style.display = "none";
+    }
+  }
+
+  function toggleMajorSelect2(major) {
+    const index = selectedMajors.indexOf(major);
+    if (index === -1) {
+      selectedMajors.push(major);
+    } else {
+      selectedMajors.splice(index, 1);
+    }
+    updateMajorTags2();
+    applyFilters();
+  }
+
+  function updateMajorTags2() {
+    const container = document.getElementById("major_tags2");
+    container.innerHTML = "";
+
+    selectedMajors.forEach(m => {
+      const tag = document.createElement("span");
+      tag.className = "major-tag";
+      tag.textContent = m;
+
+      const removeSpan = document.createElement("span");
+      removeSpan.textContent = "×";
+      removeSpan.onclick = () => removeMajor2(m);
+      tag.appendChild(removeSpan);
+
+      container.appendChild(tag);
+    });
+
+    // Update dropdown item styles
+    const list = document.getElementById("major_list2");
+    const items = list.getElementsByClassName("dropdown-item");
+    for (let i = 0; i < items.length; i++) {
+      if (selectedMajors.includes(items[i].textContent)) {
+        items[i].classList.add("selected");
+      } else {
+        items[i].classList.remove("selected");
+      }
+    }
+  }
+
+  function removeMajor2(major) {
+    const index = selectedMajors.indexOf(major);
+    if (index !== -1) {
+      selectedMajors.splice(index, 1);
+      updateMajorTags2();
+      applyFilters();
+    }
+  }
+
+  loadMajorsForFilters();
   loadAlumni();
 </script>
 
