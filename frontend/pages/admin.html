@@ -899,21 +899,6 @@
     loadProfessors();
   }
 
-  /* ========================= */
-  /*       KEBAB MENU          */
-  /* ========================= */
-
-  function toggleKebabMenu(event, id) {
-    event.stopPropagation();
-    document.querySelectorAll(".kebab-menu").forEach(m => (m.style.display = "none"));
-    document.getElementById("kebab-" + id).style.display = "block";
-  }
-
-  document.body.addEventListener("click", () => {
-    document.querySelectorAll(".kebab-menu").forEach(m => (m.style.display = "none"));
-  });
-
-
 
 
   /* ============================
