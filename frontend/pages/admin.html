@@ -405,6 +405,7 @@
     formData.append("industries", document.getElementById("alumni_tags").value);
     formData.append("description", document.getElementById("alumni_description").value);
     formData.append("major_ids", document.getElementById("alumni_selected_major_ids").value);
+    formData.append("goal_ids", document.getElementById("alumni_selected_goal_ids").value);
 
     if (document.getElementById("alumni_profile_pic").files[0]) {
       formData.append("profile_pic", document.getElementById("alumni_profile_pic").files[0]);
@@ -478,6 +479,7 @@
     formData.append("industries", document.getElementById("edit_alumni_tags").value);
     formData.append("description", document.getElementById("edit_alumni_description").value);
     formData.append("major_ids", document.getElementById("edit_alumni_selected_major_ids").value);
+    formData.append("goal_ids", document.getElementById("edit_alumni_selected_goal_ids").value);
 
     if (document.getElementById("edit_alumni_profile_pic").files[0]) {
       formData.append("profile_pic", document.getElementById("edit_alumni_profile_pic").files[0]);
@@ -1099,6 +1101,9 @@
         }
       });
     }
+      document.getElementById("edit_alumni_goal_search").value =
+      editAlumniSelectedGoals.map(g => g.goal_name).join(", ");
+
 
     renderAlumniGoalDropdownEdit(editAlumniGoalsCache);
     updateAlumniGoalTagsEdit();
@@ -1153,6 +1158,10 @@
   function updateAlumniGoalTagsEdit() {
     const box = document.getElementById("edit_alumni_goal_tags");
     box.innerHTML = "";
+
+     document.getElementById("edit_alumni_goal_search").value =
+    editAlumniSelectedGoals.map(g => g.goal_name).join(", ");
+
 
     editAlumniSelectedGoals.forEach(g => {
       const tag = document.createElement("div");
