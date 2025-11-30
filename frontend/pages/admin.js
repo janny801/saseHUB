@@ -37,17 +37,11 @@
 
   function openModal(id) {
     document.getElementById(id).style.display = "flex";
-    if (id === "alumniModal")
-    {
-        loadAlumniMajors();
-        loadAlumniGoals();
+    if (id === "alumniModal") {
+      loadAlumniMajors();
+      loadAlumniGoals();
     }
     if (id === "profModal") loadMajors();
-    if (id === "editAlumniModal")
-    {
-        loadAlumniMajorsEdit();
-        loadAlumniGoalsEdit();
-    }
   }
 
   function closeModal(id) {
@@ -102,8 +96,7 @@
           <td style="position:relative;">
             <button class="kebab-btn" onclick="toggleKebabMenu(event, 'al-${a.id}')">⋮</button>
             <div id="kebab-al-${a.id}" class="kebab-menu">
-              <div onclick="openEditAlumni(${a.id}, \`${a.full_name}\`, \`${a.company}\`, \`${a.role_title}\`, \`${a.email}\`, \`${a.linkedin}\`, \`${a.other_link}\`, \`${a.industries}\`, \`${a.description || ""}\`, \`${a.majors || ""}\`)">
-                Edit
+                <div onclick="openEditAlumni(${a.id}, \`${a.full_name}\`, \`${a.company}\`, \`${a.role_title}\`, \`${a.email}\`, \`${a.linkedin}\`, \`${a.other_link}\`, \`${a.industries}\`, \`${a.description || ""}\`, \`${a.majors || ""}\`, \`${a.goals || ""}\`)">                Edit
               </div>
               <div onclick="openDeleteAlumni(${a.id})">Delete</div>
             </div>
@@ -157,7 +150,7 @@
   /*     EDIT ALUMNI (OPEN)    */
   /* ========================= */
 
-  function openEditAlumni(id, name, company, role, email, linkedin, other, tags, description, majors) {
+  function openEditAlumni(id, name, company, role, email, linkedin, other, tags, description, majors, goals) {
     editAlumniID = id;
 
     document.getElementById("edit_alumni_fullname").value = name;
@@ -169,23 +162,13 @@
     document.getElementById("edit_alumni_tags").value = tags;
     document.getElementById("edit_alumni_description").value = description;
     document.getElementById("edit_alumni_major_search").value = majors;
+    document.getElementById("edit_alumni_goal_search").value = goals;
 
     document.getElementById("edit_alumni_company_img").value = "";
     document.getElementById("edit_alumni_profile_pic").value = "";
 
-    editAlumniSelectedMajors = [];
-    if (majors) {
-        const names = majors.split(",").map(s => s.trim());
-        names.forEach(n => {
-            const match = editAlumniMajorsCache.find(
-                m => m.major_name.trim().toLowerCase() === n.toLowerCase()
-            );
-            if (match && !editAlumniSelectedMajors.find(x => x.id === match.id)) {
-                editAlumniSelectedMajors.push(match);
-            }
-        });
-    }
     loadAlumniMajorsEdit(majors);
+    loadAlumniGoalsEdit(goals);
     openModal("editAlumniModal");
   }
 
@@ -896,13 +879,28 @@
   let editAlumniSelectedMajors = [];
 
   async function loadAlumniMajorsEdit(initialMajors) {
-    const res = await fetch("/majors/all");
-    editAlumniMajorsCache = await res.json();
-    editAlumniSelectedMajors = editAlumniSelectedMajors || [];
+      const res = await fetch("/majors/all");
+      editAlumniMajorsCache = await res.json();
 
-    renderAlumniMajorDropdownEdit(editAlumniMajorsCache);
-    updateAlumniMajorTagsEdit();
+      editAlumniSelectedMajors = [];
+
+      if (initialMajors) {
+          const names = initialMajors.split(",").map(s => s.trim());
+          names.forEach(n => {
+              const match = editAlumniMajorsCache.find(
+                  m => m.major_name.trim().toLowerCase() === n.toLowerCase()
+              );
+              if (match) editAlumniSelectedMajors.push(match);
+          });
+      }
+
+      document.getElementById("edit_alumni_major_search").value =
+          editAlumniSelectedMajors.map(m => m.major_name).join(", ");
+
+      renderAlumniMajorDropdownEdit(editAlumniMajorsCache);
+      updateAlumniMajorTagsEdit();
   }
+
 
   function toggleAlumniMajorDropdownEdit() {
     const list = document.getElementById("edit_alumni_major_list");
