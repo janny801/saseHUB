@@ -13,6 +13,11 @@ body {
   overflow: hidden;
 }
 
+/* Specific to the split-view used in Research/Alumni and now Profile */
+.research-layout {
+  flex-direction: row !important;
+}
+
 /* ===== Sidebar ===== */
 .sidebar {
   width: 280px;
@@ -83,7 +88,7 @@ body {
 
 .logout-item {
   margin-top: auto;
-  color: #ff9b9b;
+  color: #ff9b9b !important;
 }
 
 .sidebar-footer {
@@ -117,7 +122,7 @@ body {
   margin-top: 10px;
 }
 
-/* ===== Calendar Card ===== */
+/* ===== Dashboard Specific Cards ===== */
 .calendar-card {
   background: white;
   border-radius: 30px;
@@ -145,8 +150,129 @@ body {
   border: 1px solid #e2e8f0;
 }
 
-.calendar-wrapper iframe {
-  display: block;
+/* ===== PROFILE PAGE STYLES ===== */
+.profile-main-section {
+  flex: 1;
+  padding: 40px;
+  background-color: #f3f6f3;
+  overflow-y: auto;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
+  align-items: start;
+}
+
+.profile-card {
+  background: white;
+  border-radius: 25px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.profile-card h3 {
+  color: #4b5320;
+  margin-top: 0;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f3f6f3;
+  padding-bottom: 10px;
+}
+
+.points-badge {
+  background: #eef5e9;
+  color: #4b6b03;
+  padding: 15px;
+  border-radius: 12px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 25px;
+  border: 1px solid #d4e8c8;
+  font-size: 1.1rem;
+}
+
+.input-group { 
+  margin-bottom: 20px; 
+}
+
+.input-group label { 
+  display: block; 
+  color: #4b5320; 
+  margin-bottom: 8px; 
+  font-weight: bold; 
+  font-size: 0.9rem; 
+}
+
+.input-group input { 
+  width: 100%; 
+  padding: 12px; 
+  border: 1px solid #e2e8f0; 
+  border-radius: 10px; 
+  background: #f8fafc;
+  box-sizing: border-box;
+}
+
+.save-profile-btn { 
+  width: 100%; 
+  background: #4b6b03; 
+  color: white; 
+  padding: 15px; 
+  border-radius: 12px; 
+  border: none; 
+  font-weight: bold; 
+  cursor: pointer; 
+  transition: background 0.3s;
+}
+
+.save-profile-btn:hover {
+  background: #70c041;
+}
+
+/* Resource List Styling in Profile */
+.resource-section { margin-bottom: 30px; }
+
+.resource-list { 
+  list-style: none; 
+  padding: 0; 
+  margin: 0;
+}
+
+.resource-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.resource-item:last-child {
+  border-bottom: none;
+}
+
+.mini-unsave { 
+  background: none; 
+  border: none; 
+  color: #ff4d4d; 
+  cursor: pointer; 
+  font-size: 1rem;
+  padding: 8px;
+  transition: transform 0.2s;
+}
+
+.mini-unsave:hover {
+  transform: scale(1.2);
+}
+
+.status-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #edf2f7;
+  color: #4a5568;
+  margin-top: 5px;
 }
 
 /* ===== Mobile Responsiveness ===== */
@@ -170,5 +296,9 @@ body {
   .nav-item .icon {
     margin-right: 0;
     font-size: 1.5em;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
   }
 }
