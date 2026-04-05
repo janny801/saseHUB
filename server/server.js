@@ -95,6 +95,7 @@ async function getMemberFromSheet(uh_id) {
       const lastName = row[1];
       const email = row[2];
       const sheetUHID = row[3];
+      // row[4] is the new Cougar Card UID (Skipped)
       const paidStatus = row[5];
       const totalPoints = row[6];
 
