@@ -4,23 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SASE UH Member Hub</title>
+  
+  <script>
+    if (localStorage.getItem("loggedIn") !== "true") {
+      window.location.href = "login.html";
+    }
+  </script>
+
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-  <script>
-    const loggedIn = localStorage.getItem("loggedIn");
-    const loginTime = localStorage.getItem("loginTime");
-    const oneHour = 60 * 60 * 1000;
-
-    if (!loggedIn || !loginTime || Date.now() - parseInt(loginTime) > oneHour) {
-      localStorage.removeItem("loggedIn");
-      localStorage.removeItem("loginTime");
-      localStorage.removeItem("admin");
-      localStorage.removeItem("uh_id");
-      window.location.href = "/login.html";
-    }
-  </script>
-</head>
+  </head>
 
 <body>
 
@@ -109,10 +103,7 @@
     });
 
     function logout() {
-      localStorage.removeItem("loggedIn");
-      localStorage.removeItem("loginTime");
-      localStorage.removeItem("admin");
-      localStorage.removeItem("uh_id");
+      localStorage.clear(); 
       window.location.href = "/login.html";
     }
   </script>

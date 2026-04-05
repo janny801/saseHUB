@@ -1,4 +1,14 @@
 // ---------------------------------------------------------
+// SESSION CLEARING
+// ---------------------------------------------------------
+// If the user is on the login page, we clear all session data 
+// to ensure they must type their UHID every time.
+if (window.location.pathname.includes("login.html")) {
+    console.log("Login page detected: Clearing local session data.");
+    localStorage.clear();
+}
+
+// ---------------------------------------------------------
 // LOGIN FUNCTION
 // ---------------------------------------------------------
 async function handleLogin(event) {
@@ -21,7 +31,9 @@ async function handleLogin(event) {
         }
 
         const user = data.user;
+        console.log("Login successful for UHID:", user.uh_id);
 
+        // Save session data
         localStorage.setItem("loggedIn", "true");
         localStorage.setItem("loginTime", Date.now().toString());
         localStorage.setItem("uh_id", user.uh_id);
@@ -48,7 +60,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const adminBtn = document.getElementById("adminBtn");
 
     if (adminBtn) {
-        // Updated to 'flex' to match the new sidebar layout styling
         if (isAdmin === "1") {
             adminBtn.style.display = "flex";
         } else {
@@ -61,14 +72,8 @@ document.addEventListener("DOMContentLoaded", () => {
 // LOGOUT FUNCTION
 // ---------------------------------------------------------
 function logout() {
-    localStorage.removeItem("loggedIn");
-    localStorage.removeItem("loginTime");
-    localStorage.removeItem("admin");
-    localStorage.removeItem("uh_id");
-    localStorage.removeItem("first_name");
-    localStorage.removeItem("last_name");
-    localStorage.removeItem("email");
-    localStorage.removeItem("linkedin");
+    console.log("Logging out: Clearing data.");
+    localStorage.clear();
     window.location.href = "/login.html";
 }
 
