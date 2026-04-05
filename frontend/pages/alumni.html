@@ -4,525 +4,126 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Alumni Network - SASE UH</title>
-
-  <link rel="stylesheet" href="../pages/pagestyle.css" />
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="pagestyle.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
   <script>
     const loggedIn = localStorage.getItem("loggedIn");
-    const loginTime = localStorage.getItem("loginTime");
-    const oneHour = 3600000;
-    if (!loggedIn || !loginTime || Date.now() - loginTime > oneHour) {
-      localStorage.clear();
-      window.location.href = "/login.html";
-    }
+    if (loggedIn !== "true") { window.location.href = "../login.html"; }
   </script>
-
-<style>
-  .alumni-card {
-    background: transparent;
-    border: none;
-    padding: 20px 5px;
-    margin-bottom: 30px;
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-    justify-content: space-between;
-    border-radius: 0;
-    border-bottom: 1px solid #70c041;
-    padding-bottom: 25px;
-  }
-
-  .alumni-card:last-child {
-    border-bottom: none;
-  }
-
-  .alumni-card img {
-    width: 90px;
-    height: 90px;
-    object-fit: cover;
-    border-radius: 10px;
-    border: 1px solid #70c041;
-  }
-
-  .alumni-info {
-    flex: 1;
-    max-width: 100%;
-  }
-
-  .alumni-info h3 {
-    margin: 0;
-    color: #70c041;
-  }
-
-  .alumni-list {
-    max-width: 900px;
-    margin: 30px auto;
-  }
-
-  .filter-bar {
-    max-width: 900px;
-    margin: 20px auto;
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-  }
-
-  .filters-divider {
-    width: 100%;
-    max-width: 900px;
-    margin: 10px auto 25px auto;
-    border-bottom: 2px solid #70c041;
-    opacity: 0.6;
-  }
-
-  .filter-bar input,
-  .filter-bar select {
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #70c041;
-    background: #0f141a;
-    color: white;
-    flex: 1;
-  }
-
-  .save-btn {
-    background: #70c041;
-    color: black;
-    padding: 10px 15px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    height: fit-content;
-    white-space: nowrap;
-  }
-
-  .save-btn.saved {
-    background: #333;
-    color: #70c041;
-    cursor: default;
-  }
-
-  .dropdown-container {
-    position: relative;
-    width: 340px;
-    min-width: 340px;
-    max-width: 340px;
-    flex-shrink: 0;
-  }
-
-  .dropdown-input-wrapper {
-    display: flex;
-    align-items: center;
-    position: relative;
-  }
-
-  .dropdown-input-wrapper input {
-    flex: 1;
-  }
-
-  .dropdown-arrow {
-    background: #0f141a;
-    color: #70c041;
-    border: 1px solid #70c041;
-    border-left: none;
-    padding: 8px 10px;
-    cursor: pointer;
-    border-radius: 0 6px 6px 0;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .dropdown-list {
-    display: none;
-    background: #0f141a;
-    border: 1px solid #70c041;
-    border-radius: 8px;
-    position: absolute;
-    width: 100%;
-    max-height: 220px;
-    overflow-y: auto;
-    z-index: 200;
-  }
-
-  .dropdown-item {
-    padding: 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #1d2a21;
-  }
-
-  .dropdown-item:hover {
-    background: #162017;
-  }
-
-  .dropdown-item.selected {
-    background: #70c041;
-    color: #0b0c10;
-    font-weight: bold;
-  }
-
-  .major-tag {
-    display: inline-block;
-    background: #70c041;
-    color: #0b0c10;
-    padding: 5px 10px;
-    border-radius: 12px;
-    margin: 4px 4px 8px 0;
-    font-weight: bold;
-  }
-
-  .major-tag span {
-    margin-left: 6px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-
-    .search-wrapper {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto 10px auto;
-    display: flex;
-    justify-content: center;
-  }
-
-  .search-wrapper input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid #70c041;
-    background: #0f141a;
-    color: white;
-  }
-
-</style>
-
 </head>
 
 <body>
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="../images/saselogo.webp" alt="SASE Logo" />
+      </div>
+      <nav class="nav-menu">
+        <a href="../index.html" class="nav-item">
+          <i class="fa-solid fa-house icon"></i> Home
+        </a>
+        <a href="research.html" class="nav-item">
+          <i class="fa-solid fa-flask icon"></i> Undergrad Research
+        </a>
+        <a href="resources.html" class="nav-item">
+          <i class="fa-solid fa-book icon"></i> Professional Resources
+        </a>
+        <a href="internships.html" class="nav-item">
+          <i class="fa-solid fa-table-list icon"></i> Internship Database
+        </a>
+        <a href="alumni.html" class="nav-item active">
+          <i class="fa-solid fa-user-group icon"></i> Alumni Network
+        </a>
+        <div class="nav-divider"></div>
+        <a href="../profile.html" class="nav-item">
+          <i class="fa-solid fa-user icon"></i> Profile
+        </a>
+        <a href="#" onclick="logout()" class="nav-item logout-item">
+          <i class="fa-solid fa-right-from-bracket icon"></i> Logout
+        </a>
+      </nav>
+      <footer class="sidebar-footer">
+        <p>© 2026 SASE UH</p>
+      </footer>
+    </aside>
 
-<header class="simple-header">
-  <img src="../images/saselogo.webp" class="sase-logo" />
-  <h1>Alumni Network</h1>
+    <main class="main-content research-layout">
+      <div class="research-table-section">
+        <header class="content-header">
+          <h1>Alumni Network</h1>
+        </header>
 
-  <div class="menu-container">
-    <button class="hamburger" onclick="toggleMenu()">☰</button>
-    <div id="dropdownMenu" class="dropdown">
-      <a href="../profile.html">View/Edit Profile</a>
-      <a href="#" onclick="logout()">Logout</a>
-    </div>
-  </div>
-</header>
-
-<div class="page-container">
-  <h2>Connect With Alumni</h2>
-  <p>Find alumni by industry, company, skills, and more.</p>
-
-  <a href="../index.html" class="back-btn">← Back to Dashboard</a>
-</div>
-
-<!-- Search + Filter Section -->
-
-<div class="search-wrapper">
-  <input id="searchInput" type="text" placeholder="Search alumni (name, major, company, etc.)" oninput="applyFilters()" />
-</div>
-<div class="filter-bar">
-  <div class="dropdown-container" id="majorDropdown">
-    <div class="dropdown-input-wrapper">
-      <input
-        id="major_search2"
-        type="text"
-        placeholder="Filter by Major"
-        oninput="filterMajors2()"
-      />
-      <button class="dropdown-arrow" onclick="toggleMajorDropdown2()">▼</button>
-    </div>
-    <div id="major_list2" class="dropdown-list"></div>
-    <div id="major_tags2"></div>
-  </div>
-</div>
-
-<div class="filters-divider"></div>
-
-<div id="alumniSection" class="alumni-list"></div>
-
-<script>
-  function toggleMenu() {
-    document.getElementById("dropdownMenu").classList.toggle("show");
-  }
-  window.onclick = function(event) {
-    if (!event.target.matches('.hamburger')) {
-      const menu = document.getElementById("dropdownMenu");
-      if (menu) menu.classList.remove("show");
-    }
-  };
-
-  function logout() {
-    localStorage.clear();
-    window.location.href = "/login.html";
-  }
-
-  let allAlumni = [];
-  let savedAlumni = [];
-  let industryList = [];
-
-  let selectedMajors = [];
-
-  /* ======================
-        LOAD SAVED ALUMNI
-     ====================== */
-  async function loadSavedAlumni() {
-    const uh_id = localStorage.getItem("uh_id");
-
-    try {
-      const res = await fetch(`/saved-alumni/${uh_id}`);
-      savedAlumni = await res.json();
-    } catch (err) {
-      savedAlumni = [];
-    }
-  }
-
-  async function loadIndustries() {
-    const res = await fetch("/alumni/all");
-    const data = await res.json();
-
-    const set = new Set();
-    data.forEach(a => {
-      if (a.industries) {
-        a.industries.split(",").forEach(tag => {
-          const clean = tag.trim();
-          if (clean.length > 0) set.add(clean);
-        });
-      }
-    });
-
-    const select = document.getElementById("industryFilter");
-    set.forEach(ind => {
-      const opt = document.createElement("option");
-      opt.value = ind;
-      opt.textContent = ind;
-      select.appendChild(opt);
-    });
-
-    industryList = Array.from(set);
-  }
-
-  async function loadMajorsForFilters() {
-    const res = await fetch("/majors/all");
-    const majors = await res.json();
-
-    const majorListBox = document.getElementById("major_list2");
-    majorListBox.innerHTML = "";
-
-    majors.forEach(m => {
-      const mdiv = document.createElement("div");
-      mdiv.className = "dropdown-item";
-      mdiv.textContent = m.major_name;
-      mdiv.onclick = () => toggleMajorSelect2(m.major_name);
-      majorListBox.appendChild(mdiv);
-    });
-  }
-
-  /* ======================
-          LOAD ALUMNI
-     ====================== */
-  async function loadAlumni() {
-    await loadSavedAlumni();
-    const res = await fetch("/alumni/all");
-    allAlumni = await res.json();
-    applyFilters();
-  }
-
-  function applyFilters() {
-    const searchText = document.getElementById("searchInput").value.toLowerCase();
-    const selectedMajor = selectedMajors;
-
-    let results = allAlumni;
-
-    results = results.filter(a =>
-      a.full_name.toLowerCase().includes(searchText) ||
-      a.company.toLowerCase().includes(searchText) ||
-      a.role_title.toLowerCase().includes(searchText) ||
-      (a.majors && a.majors.toLowerCase().includes(searchText))
-    );
-
-    if (selectedMajors.length > 0) {
-      results = results.filter(a =>
-        a.majors &&
-        selectedMajors.some(m => a.majors.toLowerCase().includes(m.toLowerCase()))
-      );
-    }
-
-    renderAlumni(results);
-  }
-
-  /* ======================
-        SAVE / UNSAVE
-     ====================== */
-  async function toggleSaveAlumni(alumniId) {
-    const uh_id = localStorage.getItem("uh_id");
-    const alreadySaved = savedAlumni.some(a => a.id === alumniId);
-
-    if (!alreadySaved) {
-      await fetch("/saved-alumni/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uh_id, alumni_id: alumniId })
-      });
-    } else {
-      await fetch("/saved-alumni/remove", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uh_id, alumni_id: alumniId })
-      });
-    }
-
-    await loadSavedAlumni();
-    applyFilters();
-  }
-
-  /* ======================
-         RENDER
-     ====================== */
-  function renderAlumni(list) {
-    let section = document.getElementById("alumniSection");
-
-    if (list.length === 0) {
-      section.innerHTML = `
-        <p style="text-align:center; color:#70c041; margin-top:40px;">
-          No alumni match your criteria.
-        </p>`;
-      return;
-    }
-
-    let html = "<h2 style='color:#70c041;text-align:center;'>SASE Alumni</h2>";
-
-    list.forEach(a => {
-      const isSaved = savedAlumni.some(sa => sa.id === a.id);
-
-      html += `
-        <div class="alumni-card">
-          <img src="${a.profile_pic || '../images/saselogo.webp'}" />
-
-          <div class="alumni-info">
-            <h3>
-              ${a.full_name}
-              <img 
-                src="${a.company_img || '../images/saselogo.webp'}" 
-                style="vertical-align:middle;margin-left:10px;height:40px;width:auto;border:none;object-fit:contain;"
-              />
-            </h3>
-            <p><strong>Company:</strong> ${a.company}</p>
-            <p><strong>Role:</strong> ${a.role_title}</p>
-            <p><strong>Email:</strong> ${a.email}</p>
-            <p><strong>Industries:</strong> ${a.industries || "None"}</p>
-            <p><strong>Description:</strong> ${a.description || "None"}</p>
+        <section class="research-controls">
+          <div class="search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="alumniSearch" placeholder="Search by name, company, or role..." onkeyup="applyFilters()">
           </div>
+          
+          <div class="filter-group">
+            <div class="filter-pill-container">
+              <button class="filter-pill" onclick="toggleFilter(event, 'major')">
+                <i class="fa-solid fa-filter"></i> Major
+              </button>
+              <div id="majorMenu" class="filter-dropdown"></div>
+            </div>
+          </div>
+        </section>
 
-          <button 
-            class="save-btn ${isSaved ? "saved" : ""}"
-            onclick="toggleSaveAlumni(${a.id})"
-          >
-            ${isSaved ? "Saved ✓" : "Save"}
-          </button>
+        <div class="database-container">
+          <table class="intern-table" id="alumniTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Majors</th>
+              </tr>
+            </thead>
+            <tbody id="alumniTableBody">
+              </tbody>
+          </table>
         </div>
-      `;
-    });
+      </div>
 
-    section.innerHTML = html;
-  }
+      <aside class="prof-profile-sidebar" id="alumniSidebar">
+        <div class="sidebar-controls">
+            <div class="nav-arrows">
+                <i class="fa-solid fa-chevron-left" onclick="navAlumni(-1)" style="cursor:pointer; margin-right:15px;"></i>
+                <i class="fa-solid fa-chevron-right" onclick="navAlumni(1)" style="cursor:pointer;"></i>
+            </div>
+            <div class="action-btns">
+                <button class="bookmark-btn" id="sidebarSaveBtn"><i class="fa-regular fa-bookmark"></i></button>
+                <i class="fa-solid fa-xmark close-sidebar" onclick="closeSidebar()" style="cursor:pointer; font-size:1.5rem; margin-left:15px;"></i>
+            </div>
+        </div>
+        
+        <div id="sidebarContent" class="sidebar-scroll">
+            <div class="prof-avatar">
+                <img id="sideImg" src="../images/saselogo.webp" alt="Alumni">
+            </div>
+            <h2 id="sideName">Select an Alumni</h2>
+            <p id="sideRole" class="side-subtitle">Software Engineer @ Company</p>
+            
+            <div class="social-links">
+                <a id="sideEmail" href="#"><i class="fa-solid fa-envelope"></i></a>
+                <a id="sideLinkedin" href="#" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+                <a id="sideOther" href="#" target="_blank"><i class="fa-solid fa-globe"></i></a>
+            </div>
 
-  function toggleMajorDropdown2() {
-    const list = document.getElementById("major_list2");
-    if (list.style.display === "block") {
-      list.style.display = "none";
-    } else {
-      list.style.display = "block";
-    }
-  }
+            <div class="about-section">
+                <h3>Biography</h3>
+                <p id="sideDesc">Click an alumni in the table to view their career journey.</p>
+                
+                <h3 style="margin-top:20px;">Industries</h3>
+                <p id="sideIndustries">N/A</p>
+            </div>
+        </div>
+      </aside>
+    </main>
+  </div>
 
-  function autoOpenMajor2() {
-    const list = document.getElementById("major_list2");
-    list.style.display = "block";
-  }
-
-  function filterMajors2() {
-    const input = document.getElementById("major_search2");
-    const filter = input.value.toLowerCase();
-    const list = document.getElementById("major_list2");
-    const items = list.getElementsByClassName("dropdown-item");
-
-    let visibleCount = 0;
-    for (let i = 0; i < items.length; i++) {
-      const txtValue = items[i].textContent || items[i].innerText;
-      if (txtValue.toLowerCase().indexOf(filter) > -1) {
-        items[i].style.display = "";
-        visibleCount++;
-      } else {
-        items[i].style.display = "none";
-      }
-    }
-
-    if (visibleCount > 0) {
-      list.style.display = "block";
-    } else {
-      list.style.display = "none";
-    }
-  }
-
-  function toggleMajorSelect2(major) {
-    const index = selectedMajors.indexOf(major);
-    if (index === -1) {
-      selectedMajors.push(major);
-    } else {
-      selectedMajors.splice(index, 1);
-    }
-    updateMajorTags2();
-    applyFilters();
-  }
-
-  function updateMajorTags2() {
-    const container = document.getElementById("major_tags2");
-    container.innerHTML = "";
-
-    selectedMajors.forEach(m => {
-      const tag = document.createElement("span");
-      tag.className = "major-tag";
-      tag.textContent = m;
-
-      const removeSpan = document.createElement("span");
-      removeSpan.textContent = "×";
-      removeSpan.onclick = () => removeMajor2(m);
-      tag.appendChild(removeSpan);
-
-      container.appendChild(tag);
-    });
-
-    // Update dropdown item styles
-    const list = document.getElementById("major_list2");
-    const items = list.getElementsByClassName("dropdown-item");
-    for (let i = 0; i < items.length; i++) {
-      if (selectedMajors.includes(items[i].textContent)) {
-        items[i].classList.add("selected");
-      } else {
-        items[i].classList.remove("selected");
-      }
-    }
-  }
-
-  function removeMajor2(major) {
-    const index = selectedMajors.indexOf(major);
-    if (index !== -1) {
-      selectedMajors.splice(index, 1);
-      updateMajorTags2();
-      applyFilters();
-    }
-  }
-
-  loadMajorsForFilters();
-  loadAlumni();
-</script>
-
+  <script src="alumni.js"></script>
 </body>
 </html>
