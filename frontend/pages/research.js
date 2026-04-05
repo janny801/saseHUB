@@ -1,21 +1,70 @@
 let allProfessors = [];
 let filteredProfessors = [];
 let savedProfessors = [];
+let selectedColleges = [];
+let selectedMajors = [];
 let currentProfId = null;
+let majorsLookup = [];
 
 async function init() {
     const uh_id = localStorage.getItem("uh_id");
     
-    const [profRes, savedRes] = await Promise.all([
+    // Fetch Data
+    const [profRes, savedRes, majorRes] = await Promise.all([
         fetch("/professors/all"),
-        fetch(`/saved-professors/${uh_id}`)
+        fetch(`/saved-professors/${uh_id}`),
+        fetch("/majors/all")
     ]);
 
     allProfessors = await profRes.json();
     filteredProfessors = [...allProfessors];
     savedProfessors = await savedRes.json();
+    majorsLookup = await majorRes.json();
 
+    setupFilterMenus();
     renderTable(filteredProfessors);
+}
+
+function setupFilterMenus() {
+    const collegeMenu = document.getElementById("collegeMenu");
+    const majorMenu = document.getElementById("majorMenu");
+
+    // Get unique colleges from lookup
+    const colleges = [...new Set(majorsLookup.map(m => m.college_name))].sort();
+    collegeMenu.innerHTML = colleges.map(c => `
+        <div class="filter-option" onclick="toggleSelection('college', '${c}', event)">${c}</div>
+    `).join('');
+
+    // Map all majors
+    const majorNames = majorsLookup.map(m => m.major_name).sort();
+    majorMenu.innerHTML = majorNames.map(m => `
+        <div class="filter-option" onclick="toggleSelection('major', '${m}', event)">${m}</div>
+    `).join('');
+}
+
+function toggleFilter(event, type) {
+    event.stopPropagation();
+    const menu = document.getElementById(`${type}Menu`);
+    const otherMenu = document.getElementById(type === 'college' ? 'majorMenu' : 'collegeMenu');
+    
+    otherMenu.classList.remove("show");
+    menu.classList.toggle("show");
+}
+
+function toggleSelection(type, value, event) {
+    event.stopPropagation();
+    const list = type === 'college' ? selectedColleges : selectedMajors;
+    const index = list.indexOf(value);
+
+    if (index > -1) {
+        list.splice(index, 1);
+        event.target.classList.remove("selected");
+    } else {
+        list.push(value);
+        event.target.classList.add("selected");
+    }
+
+    applyFilters();
 }
 
 function renderTable(list) {
@@ -54,8 +103,9 @@ function viewProfessor(id, event) {
     const rows = document.querySelectorAll("#profTableBody tr");
     rows.forEach(row => row.classList.remove("selected-prof"));
     
-    const selectedRow = document.getElementById(`row-${id}`);
-    if (selectedRow) selectedRow.classList.add("selected-prof");
+    // Ensure we highlight correctly whether triggered by click or nav
+    const targetRow = event ? event.currentTarget : document.getElementById(`row-${id}`);
+    if (targetRow) targetRow.classList.add("selected-prof");
 }
 
 function navProfessor(direction) {
@@ -64,7 +114,7 @@ function navProfessor(direction) {
 
     if (nextIndex >= 0 && nextIndex < filteredProfessors.length) {
         const nextProf = filteredProfessors[nextIndex];
-        viewProfessor(nextProf.id);
+        viewProfessor(nextProf.id, null);
         const nextRow = document.getElementById(`row-${nextProf.id}`);
         if (nextRow) nextRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
@@ -98,17 +148,37 @@ async function toggleSave(professorId) {
 
 function applyFilters() {
     const q = document.getElementById("profSearch").value.toLowerCase();
-    filteredProfessors = allProfessors.filter(p => 
-        p.professor_name.toLowerCase().includes(q) || 
-        (p.majors && p.majors.toLowerCase().includes(q)) ||
-        (p.university && p.university.toLowerCase().includes(q))
-    );
+    
+    filteredProfessors = allProfessors.filter(p => {
+        // 1. Search Query Match
+        const matchesSearch = p.professor_name.toLowerCase().includes(q) || 
+                             (p.majors && p.majors.toLowerCase().includes(q)) ||
+                             (p.university && p.university.toLowerCase().includes(q));
+        
+        // 2. Major Filter Match
+        const matchesMajor = selectedMajors.length === 0 || 
+                             (p.majors && selectedMajors.some(m => p.majors.toLowerCase().includes(m.toLowerCase())));
+
+        // 3. College Filter Match
+        const matchesCollege = selectedColleges.length === 0 || (p.majors && p.majors.split(',').some(profMaj => {
+            const majorInfo = majorsLookup.find(m => m.major_name.trim().toLowerCase() === profMaj.trim().toLowerCase());
+            return majorInfo && selectedColleges.includes(majorInfo.college_name);
+        }));
+
+        return matchesSearch && matchesMajor && matchesCollege;
+    });
+    
     renderTable(filteredProfessors);
     
     if (currentProfId && !filteredProfessors.some(p => p.id === currentProfId)) {
         closeSidebar();
     }
 }
+
+// Close dropdowns when clicking anywhere else
+window.addEventListener('click', () => {
+    document.querySelectorAll('.filter-dropdown').forEach(menu => menu.classList.remove('show'));
+});
 
 function logout() {
     localStorage.clear();
