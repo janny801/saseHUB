@@ -2,7 +2,7 @@
 body {
   margin: 0;
   font-family: "Trebuchet MS", sans-serif;
-  background-color: #f0f2f5; /* Light grey background from design */
+  background-color: #f0f2f5; 
   color: #1a2b48;
 }
 
@@ -16,7 +16,7 @@ body {
 /* ===== Sidebar ===== */
 .sidebar {
   width: 280px;
-  background-color: #4b5320; /* Olive green from design */
+  background-color: #4b5320; 
   color: white;
   display: flex;
   flex-direction: column;
@@ -31,7 +31,7 @@ body {
 
 .sidebar-logo img {
   width: 180px;
-  filter: brightness(0) invert(1); /* Makes logo white to match theme */
+  filter: brightness(0) invert(1); 
 }
 
 .nav-menu {
@@ -54,7 +54,9 @@ body {
 
 .nav-item .icon {
   margin-right: 15px;
-  font-size: 1.2em;
+  font-size: 1.1em;
+  width: 20px;
+  text-align: center;
 }
 
 .nav-item:hover {
@@ -67,6 +69,10 @@ body {
   background-color: white;
   color: #4b5320;
   font-weight: bold;
+}
+
+.nav-item.active .icon {
+  color: #4b5320;
 }
 
 .nav-divider {
