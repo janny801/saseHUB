@@ -4,46 +4,112 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Internship Database - SASE UH</title>
-
-  <link rel="stylesheet" href="../pages/pagestyle.css" />
+  
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="pagestyle.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
   <script>
     const loggedIn = localStorage.getItem("loggedIn");
-    const loginTime = localStorage.getItem("loginTime");
-    if (!loggedIn || !loginTime || Date.now() - loginTime > 3600000) {
-      localStorage.clear();
-      window.location.href = "/login.html";
+    if (loggedIn !== "true") {
+      window.location.href = "../login.html";
     }
   </script>
 </head>
 
 <body>
 
-<header class="simple-header">
-  <img src="../images/saselogo.webp" class="sase-logo" />
-  <h1>Internship Database</h1>
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="../images/saselogo.webp" alt="SASE Logo" />
+      </div>
+      
+      <nav class="nav-menu">
+        <a href="../index.html" class="nav-item">
+          <i class="fa-solid fa-house icon"></i> Home
+        </a>
+        <a href="research.html" class="nav-item">
+          <i class="fa-solid fa-flask icon"></i> Undergrad Research
+        </a>
+        <a href="resources.html" class="nav-item">
+          <i class="fa-solid fa-book icon"></i> Professional Resources
+        </a>
+        <a href="internships.html" class="nav-item active">
+          <i class="fa-solid fa-table-list icon"></i> Internship Database
+        </a>
+        <a href="alumni.html" class="nav-item">
+          <i class="fa-solid fa-user-group icon"></i> Alumni Network
+        </a>
 
-  <div class="menu-container">
-    <button class="hamburger" onclick="toggleMenu()">☰</button>
-    <div id="dropdownMenu" class="dropdown">
-      <a href="../profile.html">View/Edit Profile</a>
-      <a href="#" onclick="logout()">Logout</a>
-    </div>
+        <div class="nav-divider"></div>
+
+        <a href="../profile.html" class="nav-item">
+          <i class="fa-solid fa-user icon"></i> Profile
+        </a>
+        <a href="#" onclick="logout()" class="nav-item logout-item">
+          <i class="fa-solid fa-right-from-bracket icon"></i> Logout
+        </a>
+      </nav>
+
+      <footer class="sidebar-footer">
+        <p>© 2026 SASE UH</p>
+      </footer>
+    </aside>
+
+    <main class="main-content">
+      <header class="content-header">
+        <h1>Internship Database</h1>
+        <p>Explore opportunities and save them to your personal tracker.</p>
+      </header>
+
+      <section class="database-controls">
+        <div class="search-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="internshipSearch" placeholder="Search by company, role, or keyword..." onkeyup="filterInternships()">
+        </div>
+      </section>
+
+      <div class="database-container">
+        <table class="intern-table" id="internTable">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Role</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="internTableBody">
+            <tr>
+              <td colspan="5" style="text-align:center; padding: 40px; color: #718096;">
+                Loading internship data...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
   </div>
-</header>
 
-<div class="page-container">
-  <h2>Explore Internship Opportunities</h2>
-  <p>This page will list internships, applications, deadlines, and tracking tools.</p>
+  <script>
+    function logout() {
+      localStorage.clear();
+      window.location.href = "../login.html";
+    }
 
-  <a href="../index.html" class="back-btn">← Back to Dashboard</a>
-</div>
+    function filterInternships() {
+      const input = document.getElementById("internshipSearch").value.toLowerCase();
+      const table = document.getElementById("internTable");
+      const tr = table.getElementsByTagName("tr");
 
-<script>
-  function toggleMenu(){document.getElementById("dropdownMenu").classList.toggle("show")}
-  window.onclick=function(e){if(!e.target.matches('.hamburger'))document.getElementById("dropdownMenu").classList.remove("show")}
-  function logout(){localStorage.clear();window.location.href="/login.html";}
-</script>
+      for (let i = 1; i < tr.length; i++) {
+        const rowText = tr[i].textContent.toLowerCase();
+        tr[i].style.display = rowText.includes(input) ? "" : "none";
+      }
+    }
+  </script>
 
 </body>
 </html>

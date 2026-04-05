@@ -186,3 +186,144 @@ body {
   .resources-grid { grid-template-columns: 1fr; }
   .modal-content { padding: 30px; width: 95%; }
 }
+
+/* =============================================================
+   INTERNSHIP DATABASE STYLES
+   ============================================================= */
+
+/* Search & Filter Controls */
+.database-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  max-width: 1100px;
+}
+
+.search-wrapper {
+  position: relative;
+  flex-grow: 1;
+}
+
+.search-wrapper i {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #718096;
+}
+
+.search-wrapper input {
+  width: 100%;
+  padding: 12px 15px 12px 45px;
+  border-radius: 15px;
+  border: 1px solid #e2e8f0;
+  font-size: 1rem;
+  background-color: white;
+  transition: border-color 0.2s;
+  color: #00204a;
+}
+
+.search-wrapper input:focus {
+  outline: none;
+  border-color: #70c041;
+  box-shadow: 0 0 0 3px rgba(112, 192, 65, 0.1);
+}
+
+.filter-group {
+  display: flex;
+  gap: 15px;
+}
+
+.filter-group select {
+  padding: 12px 15px;
+  border-radius: 15px;
+  border: 1px solid #e2e8f0;
+  background-color: white;
+  color: #00204a;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Internship Table Styling */
+.database-container {
+  background: white;
+  border-radius: 30px;
+  padding: 20px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  max-width: 1100px;
+  overflow: hidden;
+}
+
+.intern-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.intern-table th {
+  padding: 15px 20px;
+  background-color: #f8fafc;
+  color: #718096;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.intern-table td {
+  padding: 18px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1a2b48;
+  font-size: 0.95rem;
+}
+
+.intern-table tr:last-child td {
+  border-bottom: none;
+}
+
+.intern-table tr:hover {
+  background-color: #f3f6f3; /* Subtle green highlight on hover */
+}
+
+/* Status Badge Styles */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.status-open { background-color: #dcfce7; color: #166534; }
+.status-closed { background-color: #fee2e2; color: #991b1b; }
+
+/* Apply Button */
+.apply-btn {
+  background-color: #00204a;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: background-color 0.2s;
+}
+
+.apply-btn:hover {
+  background-color: #70c041;
+}
+
+/* Responsive Table */
+@media (max-width: 768px) {
+  .database-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .intern-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
