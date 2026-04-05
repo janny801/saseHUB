@@ -46,7 +46,7 @@ export default async function handler(req, res) {
       const lastName = row[1];
       const email = row[2];
       const sheetUHID = row[3];
-      const paidStatus = row[4];
+      const paidStatus = row[5];
 
       if (String(sheetUHID) === String(uh_id)) {
         if (!paidStatus || paidStatus.toLowerCase() !== "paid") {
