@@ -14,47 +14,63 @@ async function handleLogin(event) {
         });
 
         const data = await res.json();
-        alert(data.message);
-
-        if (data.message === "Login successful") {
-
-            const user = data.user;
-
-            localStorage.setItem("loggedIn", "true");
-            localStorage.setItem("loginTime", Date.now().toString());   // ⭐ FIXED
-            localStorage.setItem("uh_id", user.uh_id);
-
-            localStorage.setItem("admin", user.admin);  // 0 or 1
-
-            localStorage.setItem("first_name", user.first_name || "");
-            localStorage.setItem("last_name", user.last_name || "");
-            localStorage.setItem("email", user.email || "");
-            localStorage.setItem("linkedin", user.linkedin || "");
-
-            window.location.href = "index.html";
+        
+        if (data.message !== "Login successful") {
+            alert(data.message);
+            return;
         }
+
+        const user = data.user;
+
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("loginTime", Date.now().toString());
+        localStorage.setItem("uh_id", user.uh_id);
+        localStorage.setItem("admin", user.admin);  // 0 or 1
+
+        localStorage.setItem("first_name", user.first_name || "");
+        localStorage.setItem("last_name", user.last_name || "");
+        localStorage.setItem("email", user.email || "");
+        localStorage.setItem("linkedin", user.linkedin || "");
+
+        window.location.href = "index.html";
+        
     } catch (err) {
         console.error("Login error:", err);
         alert("Login failed.");
     }
 }
+
 // ---------------------------------------------------------
 // SHOW ADMIN BUTTON ON INDEX.HTML
 // ---------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
     const isAdmin = localStorage.getItem("admin");
+    const adminBtn = document.getElementById("adminBtn");
 
-    //console.log("Admin status:", isAdmin); // Debug helper
-
-    // If admin == 1, show the admin button (on index.html)
-    if (isAdmin === "1") {
-        const adminBtn = document.getElementById("adminBtn");
-        if (adminBtn) {
-            adminBtn.style.display = "inline-block";
+    if (adminBtn) {
+        // Updated to 'flex' to match the new sidebar layout styling
+        if (isAdmin === "1") {
+            adminBtn.style.display = "flex";
+        } else {
+            adminBtn.style.display = "none";
         }
     }
 });
 
+// ---------------------------------------------------------
+// LOGOUT FUNCTION
+// ---------------------------------------------------------
+function logout() {
+    localStorage.removeItem("loggedIn");
+    localStorage.removeItem("loginTime");
+    localStorage.removeItem("admin");
+    localStorage.removeItem("uh_id");
+    localStorage.removeItem("first_name");
+    localStorage.removeItem("last_name");
+    localStorage.removeItem("email");
+    localStorage.removeItem("linkedin");
+    window.location.href = "/login.html";
+}
 
 // ---------------------------------------------------------
 // LOAD PROFILE DATA (profile.html)
@@ -68,17 +84,21 @@ async function loadProfile() {
         const data = await res.json();
 
         if (data.user) {
-            document.getElementById("profile-first").value = data.user.first_name || "";
-            document.getElementById("profile-last").value = data.user.last_name || "";
-            document.getElementById("profile-email").value = data.user.email || "";
-            document.getElementById("profile-linkedin").value = data.user.linkedin || "";
+            const fName = document.getElementById("profile-first");
+            const lName = document.getElementById("profile-last");
+            const email = document.getElementById("profile-email");
+            const lkd = document.getElementById("profile-linkedin");
+
+            if(fName) fName.value = data.user.first_name || "";
+            if(lName) lName.value = data.user.last_name || "";
+            if(email) email.value = data.user.email || "";
+            if(lkd) lkd.value = data.user.linkedin || "";
         }
 
     } catch (err) {
         console.error("❌ Error loading profile:", err);
     }
 }
-
 
 // ---------------------------------------------------------
 // UPDATE PROFILE (profile.html)
