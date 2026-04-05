@@ -13,7 +13,6 @@ body {
   overflow: hidden;
 }
 
-/* Specific to the split-view used in Research/Alumni and now Profile */
 .research-layout {
   flex-direction: row !important;
 }
@@ -122,34 +121,6 @@ body {
   margin-top: 10px;
 }
 
-/* ===== Dashboard Specific Cards ===== */
-.calendar-card {
-  background: white;
-  border-radius: 30px;
-  padding: 30px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-}
-
-.card-header {
-  margin-bottom: 20px;
-}
-
-.card-header h2 {
-  margin: 0;
-  color: #4b5320;
-}
-
-.card-header p {
-  color: #718096;
-  font-size: 0.95em;
-}
-
-.calendar-wrapper {
-  border-radius: 20px;
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
-}
-
 /* ===== PROFILE PAGE STYLES ===== */
 .profile-main-section {
   flex: 1;
@@ -159,11 +130,13 @@ body {
 }
 
 .profile-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 30px;
   margin-top: 20px;
-  align-items: start;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .profile-card {
@@ -230,8 +203,8 @@ body {
   background: #70c041;
 }
 
-/* Resource List Styling in Profile */
-.resource-section { margin-bottom: 30px; }
+/* Detailed Resource Items */
+.resource-section { margin-bottom: 40px; }
 
 .resource-list { 
   list-style: none; 
@@ -241,38 +214,85 @@ body {
 
 .resource-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid #f1f5f9;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 25px 0;
+  border-bottom: 1px solid #eef5e9;
 }
 
 .resource-item:last-child {
   border-bottom: none;
 }
 
-.mini-unsave { 
-  background: none; 
-  border: none; 
-  color: #ff4d4d; 
-  cursor: pointer; 
-  font-size: 1rem;
-  padding: 8px;
-  transition: transform 0.2s;
+.item-avatar {
+  width: 75px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1.5px solid #70c041;
+  flex-shrink: 0;
 }
 
-.mini-unsave:hover {
-  transform: scale(1.2);
+.item-info {
+  flex-grow: 1;
+}
+
+.item-info strong {
+  font-size: 1.15rem;
+  color: #1a2b48;
+}
+
+.item-info p {
+  margin: 5px 0;
+  color: #4a5568;
+}
+
+.item-detail {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #718096;
+  /* Truncate text after 3 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+}
+
+.item-detail-label {
+  font-weight: bold;
+  color: #4b5320;
 }
 
 .status-badge {
   display: inline-block;
   font-size: 0.75rem;
-  padding: 2px 8px;
-  border-radius: 10px;
-  background: #edf2f7;
-  color: #4a5568;
-  margin-top: 5px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: #eef5e9;
+  color: #4b6b03;
+  margin-top: 8px;
+  font-weight: bold;
+}
+
+/* Bookmark Unsave Button using Font Awesome */
+.bookmark-unsave-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.bookmark-unsave-btn i {
+  font-size: 1.3rem;
+  color: #00204a;
+}
+
+.bookmark-unsave-btn:hover i {
+  color: #ff4d4d;
+  transform: scale(1.15);
 }
 
 /* ===== Mobile Responsiveness ===== */
@@ -296,9 +316,5 @@ body {
   .nav-item .icon {
     margin-right: 0;
     font-size: 1.5em;
-  }
-
-  .profile-grid {
-    grid-template-columns: 1fr;
   }
 }

@@ -74,13 +74,14 @@ async function loadSavedInternships() {
 
         list.innerHTML = internships.map(i => `
             <li class="resource-item">
-                <div>
-                    <strong>${i.company}</strong><br>
-                    <small>${i.internship_title || i.title}</small>
+                <img src="${i.company_img || 'images/saselogo.webp'}" class="item-avatar" alt="Company Logo">
+                <div class="item-info">
+                    <strong>${i.internship_title || i.title}</strong><br>
+                    <p>${i.company}</p>
                     <span class="status-badge">${i.status || 'Saved'}</span>
                 </div>
-                <button class="mini-unsave" onclick="unsaveInternship(${i.id})">
-                    <i class="fa-solid fa-trash"></i>
+                <button class="bookmark-unsave-btn" onclick="unsaveInternship(${i.id})">
+                    <i class="fa-solid fa-bookmark"></i>
                 </button>
             </li>
         `).join("");
@@ -102,12 +103,16 @@ async function loadSavedProfessors() {
 
         list.innerHTML = profs.map(p => `
             <li class="resource-item">
-                <div>
+                <img src="${p.profile_pic_url || 'images/saselogo.webp'}" class="item-avatar" alt="Professor">
+                <div class="item-info">
                     <strong>${p.professor_name}</strong><br>
-                    <small>${p.email || 'No email listed'}</small>
+                    <p>${p.email || 'No email listed'}</p>
+                    <div class="item-detail">
+                        <span class="item-detail-label">Bio:</span> ${p.description || "No description provided."}
+                    </div>
                 </div>
-                <button class="mini-unsave" onclick="unsaveProfessor(${p.id})">
-                    <i class="fa-solid fa-trash"></i>
+                <button class="bookmark-unsave-btn" onclick="unsaveProfessor(${p.id})">
+                    <i class="fa-solid fa-bookmark"></i>
                 </button>
             </li>
         `).join("");
@@ -129,12 +134,16 @@ async function loadSavedAlumni() {
 
         list.innerHTML = alumni.map(a => `
             <li class="resource-item">
-                <div>
+                <img src="${a.profile_pic || 'images/saselogo.webp'}" class="item-avatar" alt="Alumni">
+                <div class="item-info">
                     <strong>${a.full_name}</strong><br>
-                    <small>${a.company || 'Unknown Company'}</small>
+                    <p>${a.role_title || ''} @ ${a.company || 'Unknown Company'}</p>
+                    <div class="item-detail">
+                        <span class="item-detail-label">Industries:</span> ${a.industries || "None listed"}
+                    </div>
                 </div>
-                <button class="mini-unsave" onclick="unsaveAlumni(${a.id})">
-                    <i class="fa-solid fa-trash"></i>
+                <button class="bookmark-unsave-btn" onclick="unsaveAlumni(${a.id})">
+                    <i class="fa-solid fa-bookmark"></i>
                 </button>
             </li>
         `).join("");
