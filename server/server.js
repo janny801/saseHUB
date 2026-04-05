@@ -73,7 +73,7 @@ const sheetsClient = new google.auth.GoogleAuth({
 });
 
 const SHEET_ID = "12RRoG2vbwhmkEkcdeF4Fd8PiMx5k04Sj_suPOdIbZxM";
-const SHEET_RANGE = "Total Points Overview!A:F";
+const SHEET_RANGE = "Total Points Overview!A:G";// updated for new nfc uid
 
 async function getMemberFromSheet(uh_id) {
   try {
@@ -95,8 +95,8 @@ async function getMemberFromSheet(uh_id) {
       const lastName = row[1];
       const email = row[2];
       const sheetUHID = row[3];
-      const paidStatus = row[4];
-      const totalPoints = row[5];
+      const paidStatus = row[5];
+      const totalPoints = row[6];
 
       if (String(sheetUHID) === String(uh_id)) {
         return {
