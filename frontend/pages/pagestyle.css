@@ -328,6 +328,7 @@ body {
   }
 }
 
+
 /* =============================================================
    RESEARCH - SPLIT VIEW & FILTERS
    ============================================================= */
@@ -367,21 +368,55 @@ body {
   display: flex;
 }
 
-/* Filter Controls & Dropdowns */
+/* Filter Controls & Search Bar Layout */
 .research-controls {
   display: flex;
+  justify-content: space-between; /* Pushes Search to left, Filters to right */
   align-items: center;
-  gap: 15px;
+  gap: 20px;
   margin-bottom: 25px;
+  width: 100%;
 }
 
+.search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 600px; /* Keeps search bar a reasonable size */
+}
+
+.search-wrapper i {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #718096;
+  pointer-events: none;
+}
+
+.search-wrapper input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border-radius: 25px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-wrapper input:focus {
+  border-color: #70c041;
+}
+
+/* Filter Pills */
 .filter-group {
   display: flex;
-  gap: 10px;
+  gap: 12px;
+  position: relative;
 }
 
 .filter-pill-container {
-  position: relative; /* Anchor for the dropdowns */
+  position: relative;
 }
 
 .filter-pill {
@@ -396,6 +431,7 @@ body {
   align-items: center;
   gap: 5px;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .filter-pill:hover {
@@ -406,8 +442,8 @@ body {
 .filter-dropdown {
   display: none;
   position: absolute;
-  top: 40px;
-  left: 0;
+  top: 45px;
+  right: 0; /* Aligns dropdown to right of pill to stay on-screen */
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
