@@ -105,7 +105,7 @@ function renderAlumniTable(data) {
         <tr>
           <td>
             <img src="${a.profile_pic || '../images/saselogo.webp'}" 
-                 style="width:45px; height:45px; border-radius:50%; object-fit:cover;">
+                 style="width:50px; height:50px; border-radius:8px; object-fit:cover; border:1px solid #eef5e9;">
           </td>
           <td>${a.full_name}</td>
           <td>${a.company}</td>
