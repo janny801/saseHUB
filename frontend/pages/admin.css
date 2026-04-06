@@ -1,306 +1,294 @@
-    body {
-      background-color: #0b0c10;
-      color: #f5f5f5;
-      font-family: "Trebuchet MS", sans-serif;
-      margin: 0;
-      padding: 0;
-    }
+/* =============================================================
+   ADMIN PORTAL SPECIFIC STYLES
+   ============================================================= */
 
-    .page-title {
-      color: #70c041;
-      font-size: 1.8em;
-      margin: 0;
-    }
+/* Admin Action Grid - Main Dashboard View */
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
+}
 
-    .simple-header {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-      border-bottom: 2px solid #70c041;
-    }
+.admin-action-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
 
-    .sase-logo {
-      width: 140px;
-      margin-right: 15px;
-    }
+/* Modals Overlay */
+.modal-bg {
+  display: none; /* Controlled by JS openModal/closeModal */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 32, 74, 0.6); /* SASE Dark Blue tint */
+  backdrop-filter: blur(4px);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
 
-    .menu-container {
-      position: absolute;
-      top: 25px;
-      right: 25px;
-    }
+/* Modal Box */
+.modal {
+  background: white;
+  width: 95%;
+  max-width: 600px;
+  border-radius: 25px;
+  padding: 35px;
+  max-height: 85vh; /* Limits modal height on screen */
+  overflow-y: auto; /* Enables scrolling for the modal itself */
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
 
-    .hamburger {
-      background-color: #70c041;
-      border: none;
-      border-radius: 5px;
-      padding: 10px 14px;
-      cursor: pointer;
-      color: #0b0c10;
-      font-size: 18px;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
+.modal h2 {
+  color: #4b5320;
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+  border-bottom: 2px solid #f3f6f3;
+  padding-bottom: 10px;
+}
 
-    .hamburger:hover {
-      background-color: #66b3ff;
-      color: white;
-    }
+/* Modal Form Elements */
+.admin-label {
+  display: block;
+  color: #70c041;
+  font-weight: bold;
+  margin-bottom: 8px;
+  margin-top: 15px;
+  font-size: 0.9rem;
+}
 
-    .dropdown {
-      display: none;
-      position: absolute;
-      top: 45px;
-      right: 0;
-      background-color: #0f1722;
-      border: 1px solid #70c041;
-      border-radius: 6px;
-      min-width: 160px;
-      z-index: 5;
-      box-shadow: 0 0 10px rgba(112,192,65,0.3);
-    }
+.admin-input, 
+.modal input[type="text"], 
+.modal input[type="email"], 
+.modal input[type="url"], 
+.modal textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  font-family: inherit;
+  font-size: 1rem;
+  box-sizing: border-box; 
+}
 
-    .dropdown a {
-      color: #f5f5f5;
-      padding: 12px 16px;
-      text-decoration: none;
-      display: block;
-    }
+.modal input:focus, 
+.modal textarea:focus {
+  border-color: #70c041;
+  outline: none;
+  background: white;
+}
 
-    .dropdown a:hover {
-      background-color: #66b3ff;
-    }
+/* Modal Footer Buttons */
+.modal-footer {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 15px;
+  margin-top: 25px;
+  padding-bottom: 10px;
+}
 
-    .show {
-      display: block;
-    }
+.close-btn, .btn-cancel {
+  background: #f1f5f9;
+  color: #64748b;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
 
-    .admin-wrapper {
-      max-width: 900px;
-      margin: 40px auto;
-      background: #0f1722;
-      padding: 25px;
-      border: 2px solid #70c041;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(112,192,65,0.3);
-      text-align: center;
-    }
+.close-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
 
-    .admin-buttons { margin-top: 25px; }
+/* Multi-Select Dropdown Container */
+.dropdown-container {
+  width: 100%;
+  margin-bottom: 20px;
+  position: relative;
+}
 
-    .btn {
-      background: #70c041;
-      color: #0b0c10;
-      padding: 10px 18px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      margin: 8px;
-      transition: background 0.3s;
-    }
+/* DROPDOWN FIX: Changed from absolute to relative to push content down */
+.dropdown-list {
+  display: none; 
+  position: relative; 
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  width: 100%;
+  max-height: 220px; 
+  overflow-y: auto; 
+  z-index: 100;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  margin-top: 5px;
+}
 
-    .btn-blue {
-        display: inline-block;
-        margin-top: 25px;
-        background-color: #66b3ff;
-        color: white;
-        padding: 10px 15px;
-        text-decoration: none;
-        border-radius: 6px;
-        font-weight: bold;
-        transition: background 0.3s;
-    }
+/* Custom Scrollbar for Dropdowns */
+.dropdown-list::-webkit-scrollbar {
+  width: 6px;
+}
+.dropdown-list::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+.dropdown-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+.dropdown-list::-webkit-scrollbar-thumb:hover {
+  background: #70c041;
+}
 
-    .btn-blue:hover {
-        background-color: #70c041;
-        color: #0b0c10;
-    }
+.dropdown-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #4a5568;
+  border-bottom: 1px solid #f1f5f9;
+}
 
-    .btn:hover {
-      background: #66b3ff;
-      color: white;
-    }
+.dropdown-item:hover {
+  background: #f3f6f3;
+  color: #4b5320;
+}
 
-    #dataSection {
-      max-width: 1100px;
-      margin: 40px auto;
-      padding: 20px;
-    }
+.dropdown-item.selected {
+  background: #70c041;
+  color: white !important;
+  font-weight: bold;
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background: #0f1722;
-      border: 2px solid #70c041;
-    }
+/* Selected Tags (Majors/Goals) */
+.major-tag, .goal-tag {
+  display: inline-flex;
+  align-items: center;
+  background: #eef5e9;
+  color: #4b6b03;
+  padding: 6px 12px;
+  border-radius: 20px;
+  margin: 5px 5px 0 0;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border: 1px solid #d4e8c8;
+}
 
-    th, td {
-      border: 1px solid #70c041;
-      padding: 10px;
-      font-size: 0.9em;
-    }
+.major-tag span, .goal-tag span {
+  margin-left: 8px;
+  cursor: pointer;
+  color: #ef4444;
+}
 
-    th {
-      background: #122030;
-      color: #70c041;
-    }
+/* Data Display Section */
+#dataSection {
+  width: 100%;
+  overflow-x: auto;
+  background: white;
+  border-radius: 25px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  margin-top: 30px;
+}
 
-    .modal-bg {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-    }
+#dataSection h2, #dataSection h3 {
+  color: #4b5320;
+  margin-bottom: 20px;
+  text-align: left !important;
+}
 
-    .modal {
-      background: #0f1722;
-      border: 2px solid #70c041;
-      border-radius: 10px;
-      padding: 20px;
-      width: 420px;
-      text-align: left;
-      box-shadow: 0 0 10px rgba(112,192,65,0.3);
-    }
+/* Data Display Table Styling */
+.admin-table, table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
 
-    .modal input,
-    .modal textarea {
-      width: 90%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 2px solid #66b3ff;
-      border-radius: 6px;
-      background: #0b0c10;
-      color: #f5f5f5;
-    }
+.admin-table th, table th {
+  text-align: left;
+  background: #f8fafc;
+  padding: 15px;
+  color: #4b6b03;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  border-bottom: 2px solid #eef5e9;
+}
 
-    .close-btn {
-      background: #ff4f4f;
-      color: white;
-    }
+.admin-table td, table td {
+  padding: 15px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1a2b48;
+  font-size: 0.95rem;
+}
 
-    .close-btn:hover { background: #ff3333; }
+/* Kebab Menu (Row Actions) */
+.kebab-container {
+  position: relative;
+  display: inline-block;
+}
 
-    .dropdown-container {
-      width: 100%;
-      margin: 10px 0;
-      text-align: left;
-      position: relative;
-    }
+.kebab-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #94a3b8;
+  padding: 5px 10px;
+}
 
-    #major_search,
-    #edit_major_search {
-      width: 90%;
-      background: #0b0c10;
-      border: 2px solid #66b3ff;
-      border-radius: 6px;
-      padding: 10px;
-      color: #f5f5f5;
-    }
+.kebab-btn:hover {
+  color: #70c041;
+}
 
-    .dropdown-list {
-      background: #0f1722;
-      border: 2px solid #70c041;
-      border-radius: 6px;
-      max-height: 180px;
-      overflow-y: auto;
-      display: none;
-      width: 100%;
-      margin-top: 5px;
-      padding: 0;
-      box-shadow: 0 0 10px rgba(112,192,65,0.3);
-      z-index: 9999;
-    }
+.kebab-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 35px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  min-width: 140px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  z-index: 500;
+}
 
-    .dropdown-item {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      padding: 6px 10px;
-      border-bottom: 1px solid rgba(112,192,65,0.2);
-      white-space: nowrap;
-      overflow: hidden;
-      cursor: pointer;
-    }
+.kebab-menu div {
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #4a5568;
+  text-align: left;
+}
 
-    .dropdown-item:last-child {
-      border-bottom: none;
-    }
+.kebab-menu div:hover {
+  background: #f3f6f3;
+  color: #70c041;
+}
 
-    .dropdown-item.selected {
-      background: #70c041;
-      color: #0b0c10;
-    }
+.show {
+  display: block !important;
+}
 
-    .dropdown-item span {
-      flex-grow: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-size: 0.9em;
-      display: inline-block;
-      white-space: nowrap;
-    }
-
-    #major_tags,
-    #edit_major_tags {
-      margin-top: 10px;
-    }
-
-    .major-tag {
-      display: inline-flex;
-      background: #70c041;
-      color: #0b0c10;
-      padding: 6px 12px;
-      border-radius: 14px;
-      margin: 4px;
-      font-size: 0.85em;
-      font-weight: bold;
-    }
-
-    .major-tag span {
-      margin-left: 8px;
-      cursor: pointer;
-    }
-
-    /* kebab menu for actions */
-    .kebab-btn {
-      background: transparent;
-      border: none;
-      color: #f5f5f5;
-      cursor: pointer;
-      font-size: 18px;
-      padding: 4px 8px;
-    }
-
-    .kebab-menu {
-      display: none;
-      position: absolute;
-      right: 5px;
-      top: 25px;
-      background: #0f1722;
-      border: 1px solid #70c041;
-      border-radius: 6px;
-      min-width: 120px;
-      z-index: 50;
-      box-shadow: 0 0 10px rgba(112,192,65,0.3);
-    }
-
-    .kebab-menu div {
-      padding: 8px 12px;
-      cursor: pointer;
-      font-size: 0.9em;
-    }
-
-    .kebab-menu div:hover {
-      background: #66b3ff;
-      color: white;
-    }
+@media (max-width: 768px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+  .modal {
+    padding: 20px;
+    width: 90%;
+  }
+  .modal-footer {
+    grid-template-columns: 1fr;
+  }
+}

@@ -3,280 +3,217 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="admin.css">
   <title>SASE Admin Portal</title>
-  <style>
-    /* Allow scrolling inside Alumni add/edit modals */
-    .modal {
-        max-height: 80vh;   /* keeps modal on screen */
-        overflow-y: auto;   /* enables vertical scrolling */
-    }
-  </style>
+  
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="pagestyle.css" />
+  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <script>
+    const loggedIn = localStorage.getItem("loggedIn");
+    if (loggedIn !== "true") { window.location.href = "../login.html"; }
+  </script>
 </head>
 
 <body>
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="../images/saselogo.webp" alt="SASE Logo" />
+      </div>
+      <nav class="nav-menu">
+        <a href="../index.html" class="nav-item"><i class="fa-solid fa-house icon"></i> Home</a>
+        <a href="research.html" class="nav-item"><i class="fa-solid fa-flask icon"></i> Undergrad Research</a>
+        <a href="resources.html" class="nav-item"><i class="fa-solid fa-book icon"></i> Professional Resources</a>
+        <a href="internships.html" class="nav-item"><i class="fa-solid fa-table-list icon"></i> Internship Database</a>
+        <a href="alumni.html" class="nav-item"><i class="fa-solid fa-user-group icon"></i> Alumni Network</a>
+        <div class="nav-divider"></div>
+        <a href="admin.html" class="nav-item active"><i class="fa-solid fa-lock icon"></i> Admin Portal</a>
+        <a href="../profile.html" class="nav-item"><i class="fa-solid fa-user icon"></i> Profile</a>
+        <a href="#" onclick="logout()" class="nav-item logout-item"><i class="fa-solid fa-right-from-bracket icon"></i> Logout</a>
+      </nav>
+      <footer class="sidebar-footer"><p>© 2026 SASE UH</p></footer>
+    </aside>
 
-<script src="admin.js"></script>
+    <main class="main-content">
+      <header class="content-header">
+        <h1>Admin Portal</h1>
+        <p>Manage alumni, professors, and organization data.</p>
+      </header>
 
-<header class="simple-header">
-  <img src="../images/saselogo.webp" class="sase-logo" />
-  <h1 class="page-title">SASE Admin Portal</h1>
+      <div class="admin-grid">
+        <section class="profile-card">
+          <h3><i class="fa-solid fa-plus-circle"></i> Quick Actions</h3>
+          <div class="admin-action-btns">
+            <button class="save-profile-btn" onclick="openModal('alumniModal')">➕ Add Alumni</button>
+            <button class="save-profile-btn" style="background:#00204a;" onclick="openModal('profModal')">➕ Add Professor</button>
+          </div>
+        </section>
 
-  <div class="menu-container">
-    <button class="hamburger" onclick="toggleMenu()">☰</button>
-    <div id="dropdownMenu" class="dropdown">
-      <a href="../profile.html">View/Edit Profile</a>
-      <a href="#" onclick="logout()">Logout</a>
+        <section class="profile-card">
+          <h3><i class="fa-solid fa-database"></i> Database Management</h3>
+          <div class="admin-action-btns">
+            <button class="filter-pill" style="width:100%; justify-content:center; padding:12px; margin-bottom:10px;" onclick="loadAlumni()">📄 View All Alumni</button>
+            <button class="filter-pill" style="width:100%; justify-content:center; padding:12px;" onclick="loadProfessors()">📄 View All Professors</button>
+          </div>
+        </section>
+      </div>
+
+      <div id="dataSection" style="display:none;"></div>
+    </main>
+  </div>
+
+  <div id="alumniModal" class="modal-bg">
+    <div class="modal">
+      <h2>Add New Alumni</h2>
+      <label class="admin-label">Company Image</label>
+      <input id="alumni_company_img" type="file" accept="image/*" />
+      <label class="admin-label">Profile Picture</label>
+      <input id="alumni_profile_pic" type="file" accept="image/*" />
+      <input id="alumni_fullname" type="text" placeholder="Full Name" />
+      <input id="alumni_company" type="text" placeholder="Company" />
+      <input id="alumni_role" type="text" placeholder="Current Role Type" />
+      <input id="alumni_email" type="email" placeholder="Email" />
+      <input id="alumni_linkedin" type="text" placeholder="LinkedIn URL" />
+      <input id="alumni_other" type="text" placeholder="Other Link" />
+      <input id="alumni_tags" type="text" placeholder="Industry Tags (ex: Tech, Aerospace)" />
+      <textarea id="alumni_description" placeholder="Description/Bio" rows="3"></textarea>
+      
+      <label class="admin-label">Major(s)</label>
+      <div class="dropdown-container">
+        <input id="alumni_major_search" type="text" placeholder="Search majors..." onclick="toggleAlumniMajorDropdown()" oninput="filterAlumniMajors()" />
+        <div id="alumni_major_tags"></div>
+        <div id="alumni_major_list" class="dropdown-list"></div>
+      </div>
+      <input type="hidden" id="alumni_selected_major_ids" />
+
+      <label class="admin-label">Goal(s)</label>
+      <div class="dropdown-container">
+        <input id="alumni_goal_search" type="text" placeholder="Search goals..." onclick="toggleAlumniGoalDropdown()" oninput="filterAlumniGoals()" />
+        <div id="alumni_goal_tags"></div>
+        <div id="alumni_goal_list" class="dropdown-list"></div>
+      </div>
+      <input type="hidden" id="alumni_selected_goal_ids" />
+
+      <div class="modal-footer">
+        <button class="save-profile-btn" onclick="saveAlumni()">Save Alumni</button>
+        <button class="btn-cancel" onclick="closeModal('alumniModal')">Cancel</button>
+      </div>
     </div>
   </div>
-</header>
 
-<div class="admin-wrapper">
+  <div id="editAlumniModal" class="modal-bg">
+    <div class="modal">
+      <h2>Edit Alumni</h2>
+      <label class="admin-label">Company Image (optional)</label>
+      <input id="edit_alumni_company_img" type="file" accept="image/*" />
+      <label class="admin-label">Profile Picture (optional)</label>
+      <input id="edit_alumni_profile_pic" type="file" accept="image/*" />
+      <input id="edit_alumni_fullname" type="text" placeholder="Full Name" />
+      <input id="edit_alumni_company" type="text" placeholder="Company" />
+      <input id="edit_alumni_role" type="text" placeholder="Current Role Type" />
+      <input id="edit_alumni_email" type="email" placeholder="Email" />
+      <input id="edit_alumni_linkedin" type="text" placeholder="LinkedIn URL" />
+      <input id="edit_alumni_other" type="text" placeholder="Other Link" />
+      <input id="edit_alumni_tags" type="text" placeholder="Industry Tags" />
+      <textarea id="edit_alumni_description" placeholder="Description/Bio" rows="3"></textarea>
+      
+      <label class="admin-label">Major(s)</label>
+      <div class="dropdown-container">
+        <input id="edit_alumni_major_search" type="text" placeholder="Search majors..." onclick="toggleAlumniMajorDropdownEdit()" oninput="filterAlumniMajorsEdit()" />
+        <div id="edit_alumni_major_tags"></div>
+        <div id="edit_alumni_major_list" class="dropdown-list"></div>
+      </div>
+      <input type="hidden" id="edit_alumni_selected_major_ids" />
 
-  <a href="../index.html" class="btn-blue">⬅ Back to Main Page</a>
+      <label class="admin-label">Goal(s)</label>
+      <div class="dropdown-container">
+        <input id="edit_alumni_goal_search" type="text" placeholder="Search goals..." onclick="toggleAlumniGoalDropdownEdit()" oninput="filterAlumniGoalsEdit()" />
+        <div id="edit_alumni_goal_tags"></div>
+        <div id="edit_alumni_goal_list" class="dropdown-list"></div>
+      </div>
+      <input type="hidden" id="edit_alumni_selected_goal_ids" />
 
-  <p style="margin-top:20px;">Manage alumni, professors, and member data.</p>
-
-  <div class="admin-buttons">
-    <button class="btn" onclick="openModal('alumniModal')">➕ Add New Alumni</button>
-    <button class="btn" onclick="openModal('profModal')">➕ Add New Professor</button>
-  </div>
-
-  <hr style="margin-top:25px; border:1px solid #70c041;">
-
-  <div class="admin-buttons">
-    <button class="btn" onclick="loadAlumni()">📄 View All Alumni</button>
-    <button class="btn" onclick="loadProfessors()">📄 View All Professors</button>
-  </div>
-
-</div>
-
-<div id="dataSection"></div>
-
-<!-- =============================== -->
-<!--        ADD ALUMNI MODAL        -->
-<!-- =============================== -->
-
-<div id="alumniModal" class="modal-bg">
-  <div class="modal">
-    <h2>Add New Alumni</h2>
-
-    <label style="color:#70c041">Company Image</label>
-    <input id="alumni_company_img" type="file" accept="image/*" />
-
-    <label style="color:#70c041">Profile Picture</label>
-    <input id="alumni_profile_pic" type="file" accept="image/*" />
-
-    <input id="alumni_fullname" type="text" placeholder="Full Name" />
-    <input id="alumni_company" type="text" placeholder="Company" />
-    <input id="alumni_role" type="text" placeholder="Current Role Type" />
-    <input id="alumni_email" type="email" placeholder="Email" />
-    <input id="alumni_linkedin" type="text" placeholder="LinkedIn URL" />
-    <input id="alumni_other" type="text" placeholder="Other Link" />
-    <input id="alumni_tags" type="text" placeholder="Industry Tags (ex: Tech, Aerospace)" />
-    <textarea id="alumni_description" placeholder="Description/Bio" rows="3"></textarea>
-    <!-- NEW: Alumni Majors Multi-Select -->
-    <label style="color:#70c041">Major(s)</label>
-    <div class="dropdown-container">
-      <input 
-        id="alumni_major_search"
-        type="text"
-        placeholder="Search or select majors..."
-        onclick="toggleAlumniMajorDropdown()"
-        oninput="filterAlumniMajors()"
-      />
-      <div id="alumni_major_tags"></div>
-      <div id="alumni_major_list" class="dropdown-list"></div>
+      <div class="modal-footer">
+        <button class="save-profile-btn" onclick="saveAlumniUpdate()">Save Changes</button>
+        <button class="btn-cancel" onclick="closeModal('editAlumniModal')">Cancel</button>
+      </div>
     </div>
+  </div>
 
-    <input type="hidden" id="alumni_selected_major_ids" />
+  <div id="profModal" class="modal-bg">
+    <div class="modal">
+      <h2>Add New Professor</h2>
+      <label class="admin-label">Profile Picture</label>
+      <input id="prof_pic" type="file" accept="image/*" />
+      <input id="prof_name" type="text" placeholder="Professor Name" />
+      <input id="prof_email" type="email" placeholder="Email" />
+      <input id="prof_university" type="text" placeholder="University" />
+      <textarea id="prof_desc" placeholder="Description/Bio" rows="3"></textarea>
+      
+      <label class="admin-label">Major(s)</label>
+      <div class="dropdown-container">
+        <input id="major_search" type="text" placeholder="Search majors..." onclick="toggleMajorDropdown()" oninput="filterMajors()" />
+        <div id="major_tags"></div>
+        <div id="major_list" class="dropdown-list"></div>
+      </div>
+      <input type="hidden" id="selected_major_ids" />
 
-    <label style="color:#70c041">Goal(s)</label>
-    <div class="dropdown-container">
-      <input
-        id="alumni_goal_search"
-        type="text"
-        placeholder="Search or select goals..."
-        onclick="toggleAlumniGoalDropdown()"
-        oninput="filterAlumniGoals()"
-      />
-      <div id="alumni_goal_tags"></div>
-      <div id="alumni_goal_list" class="dropdown-list"></div>
+      <div class="modal-footer">
+        <button class="save-profile-btn" onclick="saveProfessor()">Save Professor</button>
+        <button class="btn-cancel" onclick="closeModal('profModal')">Cancel</button>
+      </div>
     </div>
-    <input type="hidden" id="alumni_selected_goal_ids" />
-
-    <button class="btn" onclick="saveAlumni()">Save Alumni</button>
-    <button class="btn close-btn" onclick="closeModal('alumniModal')">Cancel</button>
   </div>
-</div>
 
-<!-- =============================== -->
-<!--     EDIT ALUMNI MODAL          -->
-<!-- =============================== -->
+  <div id="editProfModal" class="modal-bg">
+    <div class="modal">
+      <h2>Edit Professor</h2>
+      <label class="admin-label">Profile Picture (optional)</label>
+      <input id="edit_prof_pic" type="file" accept="image/*" />
+      <input id="edit_prof_name" type="text" placeholder="Professor Name" />
+      <input id="edit_prof_email" type="email" placeholder="Email" />
+      <input id="edit_prof_university" type="text" placeholder="University" />
+      <textarea id="edit_prof_desc" placeholder="Description/Bio" rows="3"></textarea>
+      
+      <label class="admin-label">Major(s)</label>
+      <div class="dropdown-container">
+        <input id="edit_major_search" type="text" placeholder="Search majors..." onclick="toggleMajorDropdownEdit()" oninput="filterMajorsEdit()" />
+        <div id="edit_major_tags"></div>
+        <div id="edit_major_list" class="dropdown-list"></div>
+      </div>
+      <input type="hidden" id="edit_selected_major_ids" />
 
-<div id="editAlumniModal" class="modal-bg">
-  <div class="modal">
-    <h2>Edit Alumni</h2>
-
-    <label style="color:#70c041">Company Image (optional)</label>
-    <input id="edit_alumni_company_img" type="file" accept="image/*" />
-
-    <label style="color:#70c041">Profile Picture (optional)</label>
-    <input id="edit_alumni_profile_pic" type="file" accept="image/*" />
-
-    <input id="edit_alumni_fullname" type="text" placeholder="Full Name" />
-    <input id="edit_alumni_company" type="text" placeholder="Company" />
-    <input id="edit_alumni_role" type="text" placeholder="Current Role Type" />
-    <input id="edit_alumni_email" type="email" placeholder="Email" />
-    <input id="edit_alumni_linkedin" type="text" placeholder="LinkedIn URL" />
-    <input id="edit_alumni_other" type="text" placeholder="Other Link" />
-    <input id="edit_alumni_tags" type="text" placeholder="Industry Tags (ex: Tech, Aerospace)" />
-    <textarea id="edit_alumni_description" placeholder="Description/Bio" rows="3"></textarea>
-    <!-- NEW: Edit Alumni Major Selector -->
-    <label style="color:#70c041">Major(s)</label>
-    <div class="dropdown-container">
-      <input
-        id="edit_alumni_major_search"
-        type="text"
-        placeholder="Search or select majors..."
-        onclick="toggleAlumniMajorDropdownEdit()"
-        oninput="filterAlumniMajorsEdit()"
-      />
-      <div id="edit_alumni_major_tags"></div>
-      <div id="edit_alumni_major_list" class="dropdown-list"></div>
+      <div class="modal-footer">
+        <button class="save-profile-btn" onclick="saveProfessorUpdate()">Save Changes</button>
+        <button class="btn-cancel" onclick="closeModal('editProfModal')">Cancel</button>
+      </div>
     </div>
+  </div>
 
-    <input type="hidden" id="edit_alumni_selected_major_ids" />
-
-    <label style="color:#70c041">Goal(s)</label>
-    <div class="dropdown-container">
-      <input
-        id="edit_alumni_goal_search"
-        type="text"
-        placeholder="Search or select goals..."
-        onclick="toggleAlumniGoalDropdownEdit()"
-        oninput="filterAlumniGoalsEdit()"
-      />
-      <div id="edit_alumni_goal_tags"></div>
-      <div id="edit_alumni_goal_list" class="dropdown-list"></div>
+  <div id="deleteAlumniModal" class="modal-bg">
+    <div class="modal">
+      <h2>Delete Alumni?</h2>
+      <p>Are you sure you want to delete this alumni?</p>
+      <div class="modal-footer">
+        <button class="save-profile-btn" style="background:#ef4444;" onclick="confirmDeleteAlumni()">Yes, Delete</button>
+        <button class="btn-cancel" onclick="closeModal('deleteAlumniModal')">Cancel</button>
+      </div>
     </div>
-    <input type="hidden" id="edit_alumni_selected_goal_ids" />
-
-    <button class="btn" onclick="saveAlumniUpdate()">Save Changes</button>
-    <button class="btn close-btn" onclick="closeModal('editAlumniModal')">Cancel</button>
   </div>
-</div>
 
-<!-- =============================== -->
-<!--  DELETE ALUMNI CONFIRM MODAL   -->
-<!-- =============================== -->
-
-<div id="deleteAlumniModal" class="modal-bg">
-  <div class="modal">
-    <h2>Delete Alumni?</h2>
-    <p>Are you sure you want to delete this alumni?</p>
-
-    <button class="btn" onclick="confirmDeleteAlumni()">Yes, Delete</button>
-    <button class="btn close-btn" onclick="closeModal('deleteAlumniModal')">Cancel</button>
-  </div>
-</div>
-
-<!-- =============================== -->
-<!--     ADD PROFESSOR MODAL        -->
-<!-- =============================== -->
-
-<div id="profModal" class="modal-bg">
-  <div class="modal">
-    <h2>Add New Professor</h2>
-
-    <label style="color:#70c041">Profile Picture</label>
-    <input id="prof_pic" type="file" accept="image/*" />
-
-    <input id="prof_name" type="text" placeholder="Professor Name" />
-    <input id="prof_email" type="email" placeholder="Email" />
-    <input id="prof_university" type="text" placeholder="University" />
-
-    <textarea id="prof_desc" placeholder="Description/Bio" rows="3"></textarea>
-
-    <label style="color:#70c041">Major(s)</label>
-
-    <div class="dropdown-container">
-      <input 
-        id="major_search"
-        type="text"
-        placeholder="Search or select majors..."
-        onclick="toggleMajorDropdown()"
-        oninput="filterMajors()"
-      />
-
-      <div id="major_tags"></div>
-
-      <div id="major_list" class="dropdown-list"></div>
+  <div id="deleteProfModal" class="modal-bg">
+    <div class="modal">
+      <h2>Delete Professor?</h2>
+      <p>Are you sure you want to delete this professor?</p>
+      <div class="modal-footer">
+        <button class="save-profile-btn" style="background:#ef4444;" onclick="confirmDeleteProfessor()">Yes, Delete</button>
+        <button class="btn-cancel" onclick="closeModal('deleteProfModal')">Cancel</button>
+      </div>
     </div>
-
-    <input type="hidden" id="selected_major_ids" />
-
-    <button class="btn" onclick="saveProfessor()">Save Professor</button>
-    <button class="btn close-btn" onclick="closeModal('profModal')">Cancel</button>
   </div>
-</div>
 
-<!-- =============================== -->
-<!--     EDIT PROFESSOR MODAL       -->
-<!-- =============================== -->
-
-<div id="editProfModal" class="modal-bg">
-  <div class="modal">
-    <h2>Edit Professor</h2>
-
-    <label style="color:#70c041">Profile Picture (optional)</label>
-    <input id="edit_prof_pic" type="file" accept="image/*" />
-
-    <input id="edit_prof_name" type="text" placeholder="Professor Name" />
-    <input id="edit_prof_email" type="email" placeholder="Email" />
-    <input id="edit_prof_university" type="text" placeholder="University" />
-
-    <textarea id="edit_prof_desc" placeholder="Description/Bio" rows="3"></textarea>
-
-    <label style="color:#70c041">Major(s)</label>
-    <div class="dropdown-container">
-      <input
-        id="edit_major_search"
-        type="text"
-        placeholder="Search or select majors..."
-        onclick="toggleMajorDropdownEdit()"
-        oninput="filterMajorsEdit()"
-      />
-
-      <div id="edit_major_tags"></div>
-      <div id="edit_major_list" class="dropdown-list"></div>
-    </div>
-
-    <input type="hidden" id="edit_selected_major_ids" />
-
-    <button class="btn" onclick="saveProfessorUpdate()">Save Changes</button>
-    <button class="btn close-btn" onclick="closeModal('editProfModal')">Cancel</button>
-  </div>
-</div>
-
-<!-- =============================== -->
-<!--  DELETE PROFESSOR CONFIRM MODAL -->
-<!-- =============================== -->
-
-<div id="deleteProfModal" class="modal-bg">
-  <div class="modal">
-    <h2>Delete Professor?</h2>
-    <p>Are you sure you want to delete this professor?</p>
-
-    <button class="btn" onclick="confirmDeleteProfessor()">Yes, Delete</button>
-    <button class="btn close-btn" onclick="closeModal('deleteProfModal')">Cancel</button>
-  </div>
-</div>
-
-
-<script src="admin.js"></script>
-
-
-
+  <script src="admin.js"></script>
 </body>
 </html>
