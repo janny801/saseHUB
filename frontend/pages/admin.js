@@ -84,21 +84,18 @@ async function loadAlumni() {
 }
 
 function renderAlumniTable(data) {
+    const dataSection = document.getElementById("dataSection");
     let html = `
-      <h3 style="color:#4b5320; margin-bottom:15px;"><i class="fa-solid fa-user-graduate"></i> All Alumni</h3>
+      <h3 style="color:#4b5320; margin-bottom:15px;"><i class="fa-solid fa-user-graduate"></i> Alumni Database</h3>
       <table class="admin-table">
       <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Company</th>
-        <th>Role</th>
-        <th>Email</th>
-        <th>Industries</th>
-        <th>Majors</th>
-        <th>Goals</th>
-        <th>Actions</th>
-      </tr>
+        <tr>
+          <th>Pic</th>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
       </thead>
       <tbody>
     `;
@@ -106,16 +103,17 @@ function renderAlumniTable(data) {
     data.forEach(a => {
         html += `
         <tr>
-          <td>${a.id}</td>
+          <td>
+            <img src="${a.profile_pic || '../images/saselogo.webp'}" 
+                 style="width:45px; height:45px; border-radius:50%; object-fit:cover;">
+          </td>
           <td>${a.full_name}</td>
           <td>${a.company}</td>
           <td>${a.role_title}</td>
-          <td>${a.email}</td>
-          <td>${a.industries}</td>
-          <td>${a.majors || "None"}</td>
-          <td>${a.goals || "None"}</td>
           <td style="position:relative;">
-            <button class="kebab-btn" onclick="toggleKebabMenu(event, 'al-${a.id}')"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            <button class="kebab-btn" onclick="toggleKebabMenu(event, 'al-${a.id}')">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
             <div id="kebab-al-${a.id}" class="kebab-menu">
                 <div onclick="openEditAlumni(${a.id}, \`${a.full_name}\`, \`${a.company}\`, \`${a.role_title}\`, \`${a.email}\`, \`${a.linkedin}\`, \`${a.other_link}\`, \`${a.industries}\`, \`${a.description || ""}\`, \`${a.majors || ""}\`, \`${a.goals || ""}\`)">Edit</div>
               <div onclick="openDeleteAlumni(${a.id})" style="color:red;">Delete</div>
@@ -126,9 +124,8 @@ function renderAlumniTable(data) {
     });
 
     html += "</tbody></table>";
-    document.getElementById("dataSection").innerHTML = html;
+    dataSection.innerHTML = html;
 }
-
 /* ========================= */
 /* ADD ALUMNI (POST)     */
 /* ========================= */
@@ -264,18 +261,18 @@ async function loadProfessors() {
 }
 
 function renderProfessorsTable(data) {
+    const dataSection = document.getElementById("dataSection");
     let html = `
-      <h3 style="color:#4b5320; margin-bottom:15px;"><i class="fa-solid fa-flask"></i> All Professors</h3>
+      <h3 style="color:#4b5320; margin-bottom:15px;"><i class="fa-solid fa-flask"></i> Professor Database</h3>
       <table class="admin-table">
       <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Major(s)</th>
-        <th>Email</th>
-        <th>University</th>
-        <th>Actions</th>
-      </tr>
+        <tr>
+          <th>Pic</th>
+          <th>Name</th>
+          <th>Major(s)</th>
+          <th>University</th>
+          <th>Actions</th>
+        </tr>
       </thead>
       <tbody>
     `;
@@ -283,17 +280,19 @@ function renderProfessorsTable(data) {
     data.forEach(p => {
         html += `
         <tr>
-          <td>${p.id}</td>
+          <td>
+            <img src="${p.profile_pic_url || '../images/saselogo.webp'}" 
+                 style="width:50px; height:50px; border-radius:8px; object-fit:cover; border:1px solid #eef5e9;">
+          </td>
           <td>${p.professor_name}</td>
           <td>${p.majors || "None"}</td>
-          <td>${p.email}</td>
           <td>${p.university}</td>
           <td style="position:relative;">
-            <button class="kebab-btn" onclick="toggleKebabMenu(event, 'pr-${p.id}')"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            <button class="kebab-btn" onclick="toggleKebabMenu(event, 'pr-${p.id}')">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
             <div id="kebab-pr-${p.id}" class="kebab-menu">
-              <div onclick="openEditProfessor(${p.id}, \`${p.professor_name}\`, \`${p.majors || ''}\`, \`${p.email}\`, \`${p.university}\`, \`${p.description || ''}\`)">
-                Edit
-              </div>
+              <div onclick="openEditProfessor(${p.id}, \`${p.professor_name}\`, \`${p.majors || ''}\`, \`${p.email}\`, \`${p.university}\`, \`${p.description || ''}\`)">Edit</div>
               <div onclick="openDeleteProfessor(${p.id})" style="color:red;">Delete</div>
             </div>
           </td>
@@ -302,7 +301,7 @@ function renderProfessorsTable(data) {
     });
 
     html += "</tbody></table>";
-    document.getElementById("dataSection").innerHTML = html;
+    dataSection.innerHTML = html;
 }
 
 function toggleKebabMenu(event, id) {
